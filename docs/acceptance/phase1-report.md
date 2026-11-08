@@ -3,7 +3,7 @@
 - 日期：2026-11-08
 - 实现者：本地 coding agent（Phase 1 会话）
 - 验收人：待验收方
-- 分支 / commit：`phase1`（commit 见本报告末行；未合并 main）
+- 分支 / commit：`phase1` @ `ff4d550d9ea0706b808ac4b7532251757c4719e3`（未合并 main）
 - 环境：Windows 11；JDK 21.0.9（`maven.compiler.release=17`）；Maven 3.9.9；Spring Boot 3.5.16；Spring AI 1.1.8；Docker `pgvector/pgvector:pg16`；Ollama `bge-m3:latest`（1024 维）
 - 结论：**待验收（实现方未自行宣布通过）**
 
@@ -356,5 +356,5 @@ GET deleted travel -> HTTP 404 {"code":"ERR-DOC_NOT_FOUND",...}
 | 验收结论 | 待验收方填写 |
 | 验收人 |  |
 | 日期 |  |
-| Commit | `phase1` 分支最新提交（见回报消息） |
+| Commit | `ff4d550d9ea0706b808ac4b7532251757c4719e3`（`phase1`，已推送 `origin/phase1`；本报告随后单独补充） |
 | 备注 | 自动脚本唯一 FAIL 为脚本期望排序错误，非实现缺陷 |
