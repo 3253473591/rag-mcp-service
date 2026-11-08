@@ -140,6 +140,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\perf.ps1 -Roun
 
 - 每策略 10,000 synthetic chunks（fixed 10k + heading 10k，合计 20k，另有 382 真实 chunks）；每轮每策略 50 次，10 次 warm-up 不计入；topK=5、hybrid、真实 bge-m3 query embedding。
 - 原始数据：[phase3-perf.json](phase3-perf.json)。p50/p95/p99 为客户端端到端；`serverP50/P95/P99` 为应用 `tookMs`，两者接近。
+- 说明：`phase3-perf.json` 的 `gitCommit` 字段是运行时的 base `554ca11`；该次运行已包含 commit `c1668c2` 的同一实现（当时尚未提交），跑完后才提交。eval 报告是干净树在 `c1668c2` 上重跑的（dirty=False）。
 
 | round | strategy | p50 | p95 | p99 | server p95 | server p99 | errors | avg results |
 |---:|---|---:|---:|---:|---:|---:|---:|---:|
