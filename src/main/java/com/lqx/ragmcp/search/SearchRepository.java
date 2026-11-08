@@ -13,12 +13,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
  * SQL for the two retrieval routes. Every metadata filter (docIds, version, status,
  * effective interval, chunk strategy) is applied in SQL, never after fetching rows.
+ *
+ * <p><b>Vector route and HNSW.</b> A joined query
+ * {@code kb_chunk JOIN kb_document ... ORDER BY embedding <=> ? LIMIT n} is planned by
+ * PostgreSQL as a nested-loop over {@code kb_chunk_document_id} plus a top-N sort, not as an
+ * HNSW index scan; at 10k+ chunks and 10 concurrent requests that saturated the DB and produced
+ * multi-second p95 values. The vector route therefore first resolves the eligible document ids
+ * with the same SQL filters, then asks HNSW for the top candidates with
+ * {@code document_id IN (...) AND chunk_strategy = ?}. Filters still run in SQL before the
+ * candidate limit; the document metadata is joined only for the selected candidates.</p>
  *
  * <p>HNSW filtering and pgvector &gt;= 0.8 under-return: when filters reduce the number of
  * matches, a plain HNSW scan may stop after ef_search candidates and return fewer than the
@@ -48,6 +59,17 @@ public class SearchRepository {
             d.effective_to AS effective_to
             """;
 
+    private static final String CHUNK_COLUMNS = """
+            c.id AS chunk_id,
+            c.document_id AS document_id,
+            c.chunk_index AS chunk_index,
+            c.chunk_strategy AS chunk_strategy,
+            c.content AS content,
+            c.clause_id AS clause_id,
+            c.clause_path AS clause_path,
+            c.page_no AS page_no
+            """;
+
     private final JdbcTemplate jdbc;
     private final TransactionTemplate transactionTemplate;
     private final SearchProperties properties;
@@ -63,26 +85,55 @@ public class SearchRepository {
 
     public List<SearchCandidate> vectorSearch(SearchQuery query, float[] embedding, int limit) {
         String vectorLiteral = toVectorLiteral(embedding);
-        List<Object> args = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT ")
-                .append(CANDIDATE_COLUMNS)
-                .append(", 1 - (c.embedding <=> ?::vector) AS route_score")
-                .append(" FROM kb_chunk c JOIN kb_document d ON d.id = c.document_id")
-                .append(" WHERE c.chunk_strategy = ?");
-        args.add(vectorLiteral);
-        args.add(query.chunkStrategy().dbValue());
-        appendFilters(sql, args, query);
-        sql.append(" ORDER BY c.embedding <=> ?::vector LIMIT ?");
-        args.add(vectorLiteral);
-        args.add(limit);
-
         List<SearchCandidate> rows = transactionTemplate.execute(status -> {
+            List<UUID> docIds = eligibleDocumentIds(query);
+            if (docIds.isEmpty()) {
+                return List.<SearchCandidate>of();
+            }
             if (properties.isHnswIterativeScan()) {
                 // local=true = SET LOCAL; only affects this read transaction.
                 jdbc.queryForObject(
                         "SELECT set_config('hnsw.iterative_scan', 'relaxed_order', true)", String.class);
             }
-            return jdbc.query(sql.toString(), candidateMapper, args.toArray());
+            Map<UUID, DocumentInfo> documents = loadDocuments(docIds);
+
+            List<Object> args = new ArrayList<>();
+            StringBuilder sql = new StringBuilder("SELECT ")
+                    .append(CHUNK_COLUMNS)
+                    .append(", 1 - (c.embedding <=> ?::vector) AS route_score")
+                    .append(" FROM kb_chunk c")
+                    .append(" WHERE c.chunk_strategy = ?")
+                    .append(" AND c.document_id IN (");
+            args.add(vectorLiteral);
+            args.add(query.chunkStrategy().dbValue());
+            appendUuidPlaceholders(sql, args, docIds);
+            sql.append(") ORDER BY c.embedding <=> ?::vector LIMIT ?");
+            args.add(vectorLiteral);
+            args.add(limit);
+
+            return jdbc.query(sql.toString(), (rs, rowNum) -> {
+                UUID documentId = rs.getObject("document_id", UUID.class);
+                DocumentInfo document = documents.get(documentId);
+                if (document == null) {
+                    return null;
+                }
+                return new SearchCandidate(
+                        rs.getObject("chunk_id", UUID.class),
+                        documentId,
+                        document.docKey(),
+                        document.version(),
+                        document.status(),
+                        document.effectiveFrom(),
+                        document.effectiveTo(),
+                        document.title(),
+                        rs.getString("clause_id"),
+                        rs.getString("clause_path"),
+                        rs.getObject("page_no", Integer.class),
+                        rs.getString("content"),
+                        rs.getString("chunk_strategy"),
+                        rs.getInt("chunk_index"),
+                        rs.getDouble("route_score"));
+            }, args.toArray()).stream().filter(candidate -> candidate != null).toList();
         });
         if (rows == null) {
             throw ApiException.dbUnavailable();
@@ -115,6 +166,37 @@ public class SearchRepository {
         return rows;
     }
 
+    /**
+     * Resolve document ids with the same filters used by the joined routes. Keeping this in SQL
+     * preserves the contract that metadata filters are not applied in Java after retrieval.
+     */
+    private List<UUID> eligibleDocumentIds(SearchQuery query) {
+        List<Object> args = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT d.id FROM kb_document d WHERE 1=1");
+        appendFilters(sql, args, query);
+        return jdbc.queryForList(sql.toString(), UUID.class, args.toArray());
+    }
+
+    private Map<UUID, DocumentInfo> loadDocuments(List<UUID> docIds) {
+        List<Object> args = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+                "SELECT d.id, d.doc_key, d.title, d.version, d.status, d.effective_from, d.effective_to")
+                .append(" FROM kb_document d WHERE d.id IN (");
+        appendUuidPlaceholders(sql, args, docIds);
+        sql.append(')');
+        Map<UUID, DocumentInfo> documents = new HashMap<>();
+        jdbc.query(sql.toString(), rs -> {
+            documents.put(rs.getObject("id", UUID.class), new DocumentInfo(
+                    rs.getString("doc_key"),
+                    rs.getString("title"),
+                    rs.getString("version"),
+                    rs.getString("status"),
+                    rs.getObject("effective_from", LocalDate.class),
+                    rs.getObject("effective_to", LocalDate.class)));
+        }, args.toArray());
+        return documents;
+    }
+
     private void appendFilters(StringBuilder sql, List<Object> args, SearchQuery query) {
         switch (query.versionMode()) {
             case DEFAULT -> sql.append(" AND d.status = 'ACTIVE'");
@@ -138,15 +220,19 @@ public class SearchRepository {
         }
 
         if (!query.docIds().isEmpty()) {
-            sql.append(" AND c.document_id IN (");
-            for (int i = 0; i < query.docIds().size(); i++) {
-                if (i > 0) {
-                    sql.append(", ");
-                }
-                sql.append("?::uuid");
-                args.add(query.docIds().get(i).toString());
-            }
+            sql.append(" AND d.id IN (");
+            appendUuidPlaceholders(sql, args, query.docIds());
             sql.append(')');
+        }
+    }
+
+    private static void appendUuidPlaceholders(StringBuilder sql, List<Object> args, List<UUID> ids) {
+        for (int i = 0; i < ids.size(); i++) {
+            if (i > 0) {
+                sql.append(", ");
+            }
+            sql.append("?::uuid");
+            args.add(ids.get(i).toString());
         }
     }
 
@@ -180,5 +266,14 @@ public class SearchRepository {
         }
         builder.append(']');
         return builder.toString();
+    }
+
+    private record DocumentInfo(
+            String docKey,
+            String title,
+            String version,
+            String status,
+            LocalDate effectiveFrom,
+            LocalDate effectiveTo) {
     }
 }

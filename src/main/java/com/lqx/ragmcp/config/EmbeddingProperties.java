@@ -23,6 +23,13 @@ public class EmbeddingProperties {
     /** Per-batch timeout in seconds (contract: 120s). */
     private int timeoutSeconds = 120;
 
+    /**
+     * Concurrent embedding calls allowed from search/ingest. Search is stateless and docs/05
+     * targets 10 concurrent retrievals; a pool of 2 serialized query embeddings and failed the
+     * 10-concurrency p95 target even though pgvector/HTTP were fast.
+     */
+    private int maxConcurrentCalls = 10;
+
     public String getModel() {
         return model;
     }
@@ -69,5 +76,13 @@ public class EmbeddingProperties {
 
     public void setTimeoutSeconds(int timeoutSeconds) {
         this.timeoutSeconds = timeoutSeconds;
+    }
+
+    public int getMaxConcurrentCalls() {
+        return maxConcurrentCalls;
+    }
+
+    public void setMaxConcurrentCalls(int maxConcurrentCalls) {
+        this.maxConcurrentCalls = maxConcurrentCalls;
     }
 }

@@ -28,6 +28,9 @@ docs/samples/*.pdf
 # Generated acceptance output
 docs/acceptance/phase1-last-run.md
 
+# Local scratch (analysis logs, extracted PDF text, ad-hoc scripts)
+.tmp/
+
 # OS
 .DS_Store
 Thumbs.db

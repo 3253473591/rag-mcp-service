@@ -9,6 +9,10 @@ import org.springframework.ai.embedding.EmbeddingModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -144,6 +148,37 @@ class SpringAiEmbeddingServiceTest {
         assertThatThrownBy(() -> service.embed(List.of("alpha")))
                 .isInstanceOfSatisfying(ApiException.class,
                         ex -> assertThat(ex.errorCode()).isEqualTo(ErrorCode.EMBEDDING_UNAVAILABLE));
+    }
+
+    @Test
+    void tEmbed07_allowsConcurrentEmbeddingCallsForSearch() throws Exception {
+        EmbeddingModel model = mock(EmbeddingModel.class);
+        AtomicInteger active = new AtomicInteger();
+        AtomicInteger maxActive = new AtomicInteger();
+        doAnswer(invocation -> {
+            int now = active.incrementAndGet();
+            maxActive.accumulateAndGet(now, (left, right) -> Math.max(left, right));
+            Thread.sleep(150);
+            active.decrementAndGet();
+            return List.of(FakeEmbeddingService.vectorFor("concurrent"));
+        }).when(model).embed(anyList());
+
+        SpringAiEmbeddingService service = new SpringAiEmbeddingService(() -> model,
+                properties(32, 0, 1, 5));
+        ExecutorService callers = Executors.newFixedThreadPool(4);
+        try {
+            List<Future<List<float[]>>> futures = new ArrayList<>();
+            for (int i = 0; i < 4; i++) {
+                futures.add(callers.submit(() -> service.embed(List.of("alpha"))));
+            }
+            for (Future<List<float[]>> future : futures) {
+                assertThat(future.get(5, TimeUnit.SECONDS)).hasSize(1);
+            }
+        } finally {
+            callers.shutdownNow();
+        }
+        // The old fixed pool of 2 would cap this at 2; search needs 10 concurrent calls.
+        assertThat(maxActive.get()).isGreaterThanOrEqualTo(3);
     }
 
     @Test

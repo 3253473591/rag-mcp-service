@@ -41,7 +41,8 @@ public class SpringAiEmbeddingService implements EmbeddingService {
     public SpringAiEmbeddingService(Supplier<EmbeddingModel> modelSupplier, EmbeddingProperties properties) {
         this.modelSupplier = modelSupplier;
         this.properties = properties;
-        this.executor = Executors.newFixedThreadPool(2, runnable -> {
+        int poolSize = Math.max(1, properties.getMaxConcurrentCalls());
+        this.executor = Executors.newFixedThreadPool(poolSize, runnable -> {
             Thread thread = new Thread(runnable, "embedding-call");
             thread.setDaemon(true);
             return thread;

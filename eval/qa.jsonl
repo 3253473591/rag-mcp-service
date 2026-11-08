@@ -1,0 +1,40 @@
+{"id":"Q01","question":"诊室血压的诊断标准是多少？","answerable":true,"gold":{"docKey":"hypertension-guideline","version":"2025","clauseId":"4.2.1","pageRange":[4,4]}}
+{"id":"Q02","question":"家庭血压的诊断标准是多少？","answerable":true,"gold":{"docKey":"hypertension-guideline","version":"2025","clauseId":"4.2.1","pageRange":[4,4]}}
+{"id":"Q03","question":"动态血压的诊断标准是什么？","answerable":true,"gold":{"docKey":"hypertension-guideline","version":"2025","pageRange":[4,4]}}
+{"id":"Q04","question":"高血压的诊断流程是什么？","answerable":true,"gold":{"docKey":"hypertension-guideline","version":"2025","clauseId":"4.2.2","pageRange":[4,4]}}
+{"id":"Q05","question":"白大衣高血压和隐蔽性高血压是怎么定义的？","answerable":true,"gold":{"docKey":"hypertension-guideline","version":"2025","clauseId":"4.2","pageRange":[4,4]}}
+{"id":"Q06","question":"按血压水平可以把血压分为哪几类？","answerable":true,"gold":{"docKey":"hypertension-guideline","version":"2025","clauseId":"4.2.3","pageRange":[4,4]}}
+{"id":"Q07","question":"高血压治疗的三原则是什么？","answerable":true,"gold":{"docKey":"hypertension-guideline","version":"2025","clauseId":"5.1","pageRange":[5,5]}}
+{"id":"Q08","question":"高血压患者的降压目标是多少？","answerable":true,"gold":{"docKey":"hypertension-guideline","version":"2025","clauseId":"5.2","pageRange":[5,5]}}
+{"id":"Q09","question":"高血压患者的生活方式干预包括哪些内容？","answerable":true,"gold":{"docKey":"hypertension-guideline","version":"2025","clauseId":"5.3","pageRange":[5,5]}}
+{"id":"Q10","question":"高血压患者什么时候启动药物治疗？","answerable":true,"gold":{"docKey":"hypertension-guideline","version":"2025","clauseId":"5.4.1","pageRange":[6,6]}}
+{"id":"Q11","question":"基层常用的五大类降压药物有哪些？","answerable":true,"gold":{"docKey":"hypertension-guideline","version":"2025","clauseId":"5.4.2","pageRange":[6,6]}}
+{"id":"Q12","question":"无合并症的 80 岁以下高血压患者如何选择药物治疗方案？","answerable":true,"gold":{"docKey":"hypertension-guideline","version":"2025","clauseId":"5.4.3.1","pageRange":[8,8]}}
+{"id":"Q13","question":"血压大于等于 180/110 mmHg 且不伴心脑肾急性并发症时应如何紧急处理？","answerable":true,"gold":{"docKey":"hypertension-guideline","version":"2025","clauseId":"5.4.6.1","pageRange":[9,9]}}
+{"id":"Q14","question":"血压达标患者和血压未达标患者的随访频率分别是多少？","answerable":true,"gold":{"docKey":"hypertension-guideline","version":"2025","clauseId":"8.1","pageRange":[13,13]}}
+{"id":"Q15","question":"高血压患者随访时应询问和检查哪些内容？","answerable":true,"gold":{"docKey":"hypertension-guideline","version":"2025","clauseId":"8.2","pageRange":[13,13]}}
+{"id":"Q16","question":"高血压的筛查方式有哪些？","answerable":true,"gold":{"docKey":"hypertension-guideline","version":"2025","clauseId":"9.1","pageRange":[13,13]}}
+{"id":"Q17","question":"基层医疗卫生机构开展健康教育的基本要求是什么？","answerable":true,"gold":{"docKey":"hypertension-guideline","version":"2025","clauseId":"10.1","pageRange":[13,13]}}
+{"id":"Q18","question":"企业内部控制的目标是什么？","answerable":true,"gold":{"docKey":"enterprise-internal-control","version":"2026","pageRange":[2,2]}}
+{"id":"Q19","question":"企业建立与实施内部控制应当遵循哪些原则？","answerable":true,"gold":{"docKey":"enterprise-internal-control","version":"2026","pageRange":[2,2]}}
+{"id":"Q20","question":"企业建立与实施有效的内部控制应当包括哪些要素？","answerable":true,"gold":{"docKey":"enterprise-internal-control","version":"2026","pageRange":[2,2]}}
+{"id":"Q21","question":"企业应当如何开展风险评估？","answerable":true,"gold":{"docKey":"enterprise-internal-control","version":"2026","pageRange":[4,4]}}
+{"id":"Q22","question":"企业识别内部风险应当关注哪些因素？","answerable":true,"gold":{"docKey":"enterprise-internal-control","version":"2026","pageRange":[4,4]}}
+{"id":"Q23","question":"企业识别外部风险应当关注哪些因素？","answerable":true,"gold":{"docKey":"enterprise-internal-control","version":"2026","pageRange":[4,4]}}
+{"id":"Q24","question":"内部控制措施一般包括哪些？","answerable":true,"gold":{"docKey":"enterprise-internal-control","version":"2026","pageRange":[5,5]}}
+{"id":"Q25","question":"授权审批控制的要求是什么？","answerable":true,"gold":{"docKey":"enterprise-internal-control","version":"2026","pageRange":[6,6]}}
+{"id":"Q26","question":"预算控制的要求是什么？","answerable":true,"gold":{"docKey":"enterprise-internal-control","version":"2026","pageRange":[6,6]}}
+{"id":"Q27","question":"内部监督分为哪两类？","answerable":true,"gold":{"docKey":"enterprise-internal-control","version":"2026","pageRange":[7,7]}}
+{"id":"Q28","question":"内部控制缺陷包括哪两类？","answerable":true,"gold":{"docKey":"enterprise-internal-control","version":"2026","pageRange":[8,8]}}
+{"id":"Q29","question":"2024 版指南中诊室血压的诊断标准是多少？","answerable":true,"asOf":"2024-06-01","gold":{"docKey":"hypertension-guideline","version":"2024","clauseId":"4.2.1","pageRange":[1,1]}}
+{"id":"Q30","question":"2024 版指南中家庭血压的诊断标准是多少？","answerable":true,"asOf":"2024-06-01","gold":{"docKey":"hypertension-guideline","version":"2024","clauseId":"4.2.1","pageRange":[1,1]}}
+{"id":"Q31","question":"2024 版指南中动态血压的诊断标准是什么？","answerable":true,"asOf":"2024-06-01","gold":{"docKey":"hypertension-guideline","version":"2024","clauseId":"4.2.1","pageRange":[1,1]}}
+{"id":"Q32","question":"2024 版指南中高血压的诊断流程是什么？","answerable":true,"asOf":"2024-06-01","gold":{"docKey":"hypertension-guideline","version":"2024","clauseId":"4.2.2","pageRange":[1,1]}}
+{"id":"Q33","question":"2024 版指南中的降压目标是多少？","answerable":true,"asOf":"2024-06-01","gold":{"docKey":"hypertension-guideline","version":"2024","clauseId":"5.2","pageRange":[2,2]}}
+{"id":"Q34","question":"2024 版指南中的随访频率是多少？","answerable":true,"asOf":"2024-06-01","gold":{"docKey":"hypertension-guideline","version":"2024","clauseId":"8.1","pageRange":[2,2]}}
+{"id":"Q35","question":"2024 版指南中白大衣高血压和隐蔽性高血压是怎么定义的？","answerable":true,"asOf":"2024-06-01","gold":{"docKey":"hypertension-guideline","version":"2024","clauseId":"4.2.2","pageRange":[1,1]}}
+{"id":"N01","question":"公司年假有多少天？","answerable":false}
+{"id":"N02","question":"Kubernetes 集群如何部署？","answerable":false}
+{"id":"N03","question":"患者张三最近的血压记录是多少？","answerable":false}
+{"id":"N04","question":"员工出差住宿标准是多少？","answerable":false}
+{"id":"N05","question":"2026 年高血压指南新增了哪些降压药物？","answerable":false}

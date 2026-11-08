@@ -57,6 +57,8 @@ app:
     retries: 2
     retry-backoff-ms: 500
     timeout-seconds: 120
+    # Concurrent query/ingest embedding calls; docs/05 targets 10 concurrent retrievals.
+    max-concurrent-calls: ${EMBEDDING_MAX_CONCURRENT_CALLS:10}
   search:
     # Both routes return top 30 before RRF (docs/11-retrieval-and-eval-spec.md 3.3).
     candidate-limit: 30
