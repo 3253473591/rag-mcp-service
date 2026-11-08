@@ -86,6 +86,30 @@ class VersionIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void supersedesKeepsEarlierOldEffectiveTo() throws Exception {
+        Map<String, String> oldParams = metadata("shrinking", "2024", "2024-01-01", "fixed,heading");
+        oldParams.put("effectiveTo", "2024-03-31");
+        JsonNode oldDoc = upload(file("shrinking-2024.md", markdown("旧版有效期到 2024-03-31。")),
+                oldParams, 201);
+        String oldId = oldDoc.get("docId").asText();
+
+        upload(file("shrinking-2025.md", markdown("新版从 2025-01-01 生效。")),
+                metadataWithSupersedes("shrinking", "2025", "2025-01-01", oldId), 201);
+
+        // docs/03-data-model.md 4.1.1: an earlier old effective_to must NOT be extended to
+        // newEffectiveFrom - 1 (2024-12-31); it stays at 2024-03-31.
+        assertThat(jdbc.queryForObject(
+                "SELECT status FROM kb_document WHERE id = ?::uuid", String.class, oldId))
+                .isEqualTo("SUPERSEDED");
+        assertThat(jdbc.queryForObject(
+                "SELECT effective_to FROM kb_document WHERE id = ?::uuid", LocalDate.class, oldId))
+                .isEqualTo(LocalDate.of(2024, 3, 31));
+        assertThat(jdbc.queryForObject(
+                "SELECT effective_from FROM kb_document WHERE id = ?::uuid", LocalDate.class, oldId))
+                .isEqualTo(LocalDate.of(2024, 1, 1));
+    }
+
+    @Test
     void tVersion05_overlappingActiveIntervalWithoutSupersedesReturns400() throws Exception {
         upload(file("old.txt", "旧版内容：生效区间从二零二四年开始，长期有效。".getBytes(StandardCharsets.UTF_8)),
                 metadata("overlap", "2024", "2024-01-01", "heading"), 201);

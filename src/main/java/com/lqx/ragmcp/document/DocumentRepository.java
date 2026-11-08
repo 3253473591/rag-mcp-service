@@ -172,12 +172,16 @@ public class DocumentRepository {
     }
 
     public int markSuperseded(UUID id, LocalDate effectiveTo) {
+        // docs/03-data-model.md 4.1.1: only converge the old effective_to when it is NULL or
+        // later than newEffectiveFrom - 1; an earlier old value must be preserved.
         return jdbc.update("""
                         UPDATE kb_document
-                        SET status = 'SUPERSEDED', effective_to = ?::date, updated_at = now()
+                        SET status = 'SUPERSEDED',
+                            effective_to = LEAST(COALESCE(effective_to, ?::date), ?::date),
+                            updated_at = now()
                         WHERE id = ?::uuid
                         """,
-                effectiveTo.toString(), id.toString());
+                effectiveTo.toString(), effectiveTo.toString(), id.toString());
     }
 
     public int delete(UUID id) {

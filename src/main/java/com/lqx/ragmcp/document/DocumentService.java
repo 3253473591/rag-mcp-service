@@ -77,6 +77,10 @@ public class DocumentService {
         SourceType sourceType = SourceType.fromFilename(basename)
                 .orElseThrow(() -> ApiException.unsupportedType(FileNames.extension(basename)));
 
+        if (file.getSize() > uploadProperties.getMaxFileSizeBytes()) {
+            // Check the declared size before reading the body into memory.
+            throw ApiException.fileTooLarge();
+        }
         byte[] content;
         try {
             content = file.getBytes();

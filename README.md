@@ -34,6 +34,7 @@ mvn -v                             # Maven 3.9+
 RAG_DB_URL / RAG_DB_USER / RAG_DB_PASSWORD
 OLLAMA_BASE_URL (默认 http://localhost:11434)
 OLLAMA_EMBEDDING_MODEL (默认 bge-m3)
+SERVER_ADDRESS (默认 127.0.0.1，仅监听本机回环)
 SERVER_PORT (默认 8080)
 ```
 
@@ -47,6 +48,13 @@ curl.exe -s http://localhost:8080/actuator/health
 ```
 
 `/actuator/health` 的 `components.embedding` 会检查 Ollama 是否可达且已拉取 `bge-m3`；服务不会因为 Ollama 未就绪而启动失败，但上传会返回 503/504。
+
+HTTP 默认只监听本机回环（`server.address=${SERVER_ADDRESS:127.0.0.1}`），与 `docs/02-api-contract.md` / `docs/12-mcp-implementation.md` 一致；如确需暴露到其他网卡，显式设置 `SERVER_ADDRESS=0.0.0.0` 并自行加访问控制。启动后可这样确认：
+
+```powershell
+Get-NetTCPConnection -LocalPort 8080 -State Listen | Select-Object LocalAddress,LocalPort
+# 预期 LocalAddress = 127.0.0.1
+```
 
 ## API（Phase 1）
 
@@ -119,7 +127,7 @@ Phase 1 实现的错误码：`ERR-VALIDATION(400)`、`ERR-FILE_TOO_LARGE(413)`�
 ## 版本语义（Phase 1 部分）
 
 - 幂等键是文件内容 SHA-256；同内容始终返回已有文档。
-- 带 `supersedesDocId` 时：旧版置 `SUPERSEDED`，旧版 `effective_to = 新版 effective_from - 1 天`（右闭）；旧 chunk 不删除；新版 `ACTIVE`。
+- 带 `supersedesDocId` 时：旧版置 `SUPERSEDED`；**仅当旧版 `effective_to` 为空或晚于“新版 `effective_from` - 1 天”时，才收敛到该日期**；旧值更早则保留原值（右闭，最后有效日含当天）。旧 chunk 不删除；新版 `ACTIVE`。该边界由 `VersionIntegrationTest.supersedesKeepsEarlierOldEffectiveTo` 回归覆盖。
 - 同一 `docKey + scope` 的 ACTIVE 版本生效区间（`COALESCE(scope,'')` 比较）不允许重叠；无 `supersedesDocId` 的重叠返回 400 `ERR-VALIDATION`。
 - `UNIQUE NULLS NOT DISTINCT (doc_key, version)`：同一 docKey 下 NULL version 也不能重复。
 - 删除是硬删除；版本替代不是删除。
@@ -131,7 +139,7 @@ mvn test          # 单元 + Testcontainers 集成；默认不跑真实 Ollama
 ```
 
 - 集成测试用 Testcontainers `pgvector/pgvector:pg16` + `@TestConfiguration` fake `EmbeddingService`，不依赖本机 Ollama。
-- PDF/DOCX fixture 在测试运行时用 PDFBox/POI 生成，不提交 PDF。
+- 格式 fixture 位于 `src/test/resources/fixtures/`（验收 kit 提供，`FormatFixturesTest` 守护，可直接用于 Gate 2 上传）；集成测试的 PDF/DOCX 仍在运行时用 PDFBox/POI 生成，`docs/samples/*.pdf` 不提交。
 - 真实 Ollama smoke（手动，条件执行，默认跳过）：
 
 ```powershell
@@ -145,7 +153,7 @@ mvn test -Dtest=OllamaEmbeddingSmokeTest
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\accept-phase1.ps1
 ```
 
-> 已知脚本缺陷：`scripts/accept-phase1.ps1` 的 “six tables” 检查把期望值写成 `...mcp_audit_log,mandate...`，而 PostgreSQL `ORDER BY tablename` 实际返回 `...mandate,mcp_audit_log...`，因此该条会误报 FAIL。库中六张表均存在，证据见 `docs/acceptance/phase1-report.md`。未改动验收脚本本身。
+> `scripts/accept-phase1.ps1` 的 “six tables” 期望顺序已在验收方提交 `ffa9368` 中修复；修复后 Gate 0/1/2 全部 PASS。最新证据见 `docs/acceptance/phase1-report.md` 第 2 节。
 
 ## 已知限制与文档冲突
 

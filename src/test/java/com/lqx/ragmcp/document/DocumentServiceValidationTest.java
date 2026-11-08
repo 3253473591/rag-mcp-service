@@ -83,6 +83,23 @@ class DocumentServiceValidationTest {
     }
 
     @Test
+    void oversizedFileReturns413BeforeReadingContent() {
+        UploadProperties smallLimit = new UploadProperties();
+        smallLimit.setMaxFileSizeBytes(4);
+        DocumentService smallLimitService = new DocumentService(repository,
+                mock(DocumentParserRegistry.class), mock(ChunkingService.class),
+                mock(EmbeddingService.class), smallLimit, mock(TransactionTemplate.class),
+                new ObjectMapper());
+        MockMultipartFile file = new MockMultipartFile("file", "big.txt", "text/plain",
+                "12345".getBytes());
+
+        assertThatThrownBy(() -> smallLimitService.upload(file, metadata(null, null)))
+                .isInstanceOfSatisfying(ApiException.class,
+                        ex -> assertThat(ex.errorCode()).isEqualTo(ErrorCode.FILE_TOO_LARGE));
+        Mockito.verifyNoInteractions(repository);
+    }
+
+    @Test
     void emptyFileReturns422() {
         MockMultipartFile file = new MockMultipartFile("file", "empty.txt", "text/plain", new byte[0]);
 

@@ -1,4 +1,6 @@
 server:
+  # docs/02-api-contract.md / docs/12-mcp-implementation.md: bind loopback by default.
+  address: ${SERVER_ADDRESS:127.0.0.1}
   port: ${SERVER_PORT:8080}
 
 spring:

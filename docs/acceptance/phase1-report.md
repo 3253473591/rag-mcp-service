@@ -1,9 +1,9 @@
 # Phase 1 验收报告
 
-- 日期：2026-11-08
+- 日期：2026-11-08（初版）；2026-11-09（验收反馈修复）
 - 实现者：本地 coding agent（Phase 1 会话）
 - 验收人：待验收方
-- 分支 / commit：`phase1` @ `ff4d550d9ea0706b808ac4b7532251757c4719e3`（未合并 main）
+- 分支 / commit：`phase1` @ `ff4d550`（初版）+ `ffa9368`（验收方 fixture/脚本修复）+ 本次验收修复提交（见回报消息）；未合并 main
 - 环境：Windows 11；JDK 21.0.9（`maven.compiler.release=17`）；Maven 3.9.9；Spring Boot 3.5.16；Spring AI 1.1.8；Docker `pgvector/pgvector:pg16`；Ollama `bge-m3:latest`（1024 维）
 - 结论：**待验收（实现方未自行宣布通过）**
 
@@ -16,8 +16,8 @@
 | 项 | 结果 |
 |---|---|
 | `mvn test` | BUILD SUCCESS |
-| 测试数 / 失败 / 错误 / 跳过 | **65 / 0 / 0 / 1** |
-| 关键测试 | T-UNIT-PARSE-01~03、T-UNIT-CHUNK-01~07、T-EMBED-01~06、T-INT-DB-01、T-INT-DOC-01~06、T-VERSION-01/04/05/09/10/11 |
+| 测试数 / 失败 / 错误 / 跳过 | **67 / 0 / 0 / 1** |
+| 关键测试 | T-UNIT-PARSE-01~03、T-UNIT-CHUNK-01~07、T-EMBED-01~06、T-INT-DB-01、T-INT-DOC-01~06、T-VERSION-01/04/05/09/10/11；新增 `supersedesKeepsEarlierOldEffectiveTo`、`oversizedFileReturns413BeforeReadingContent` |
 
 唯一 Skipped 是 `OllamaEmbeddingSmokeTest`：真实 Ollama smoke，用 `@EnabledIfEnvironmentVariable(RAG_REAL_OLLAMA)` 条件执行，默认不进入 CI；不是 `@Disabled`，失败测试没有被隐藏。
 
@@ -31,14 +31,14 @@ DocxDocumentParserTest            1 / 0 / 0 / 0
 MarkdownDocumentParserTest        4 / 0 / 0 / 0
 FormatFixturesTest                5 / 0 / 0 / 0
 FileNamesTest                     4 / 0 / 0 / 0
-DocumentServiceValidationTest     9 / 0 / 0 / 0
+DocumentServiceValidationTest    10 / 0 / 0 / 0
 SpringAiEmbeddingServiceTest      8 / 0 / 0 / 0
 EmbeddingHealthIndicatorTest      1 / 0 / 0 / 0
 SchemaIntegrationTest             1 / 0 / 0 / 0
 DocumentUploadIntegrationTest    12 / 0 / 0 / 0
-VersionIntegrationTest            7 / 0 / 0 / 0
+VersionIntegrationTest            8 / 0 / 0 / 0
 OllamaEmbeddingSmokeTest          1 skipped（条件执行）
-汇总：Tests run: 65, Failures: 0, Errors: 0, Skipped: 1
+汇总：Tests run: 67, Failures: 0, Errors: 0, Skipped: 1
 ```
 
 真实 Ollama smoke（单独执行）：
@@ -61,7 +61,7 @@ mvn test -Dtest=OllamaEmbeddingSmokeTest
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\accept-phase1.ps1
 ```
 
-实际输出（脚本退出码 1）：
+最新实际输出（`scripts/accept-phase1.ps1` 已由验收方在 `ffa9368` 修正 six-tables 期望顺序；本次运行退出码 0）：
 
 ```text
 [PASS] Gate 0 - pom.xml exists
@@ -69,8 +69,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\accept-phase1.
 [PASS] Gate 0 - mvn test                     BUILD SUCCESS
 [PASS] Gate 1 - postgres healthy             healthy
 [PASS] Gate 1 - extensions                   pg_trgm,vector
-[FAIL] Gate 1 - six tables                   expected eval_run,kb_chunk,kb_document,mcp_audit_log,mandate,work_item;
-                                             got:      eval_run,kb_chunk,kb_document,mandate,mcp_audit_log,work_item
+[PASS] Gate 1 - six tables                   eval_run,kb_chunk,kb_document,mandate,mcp_audit_log,work_item
 [PASS] Gate 1 - chunk_strategy column        1
 [PASS] Gate 1 - chunk_strategy check is lowercase
 [PASS] Gate 1 - HNSW index                   1
@@ -79,13 +78,25 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\accept-phase1.
 [PASS] Gate 2 - app health                   status=UP
 ```
 
-**唯一 FAIL 是脚本自身的期望字符串排序错误**：脚本写的是 `...mcp_audit_log,mandate...`，而 PostgreSQL `ORDER BY tablename` 的正确顺序是 `...mandate,mcp_audit_log...`（`mandate` < `mcp_audit_log`）。数据库实际 6 张表齐全（见第 3 节 `\dt` 等价输出）。实现方**没有修改验收脚本**，请验收方决定是否把脚本期望值改为：
+Gate 0 / Gate 1 / Gate 2 全部 PASS，脚本退出码 0。此前由实现方记录的 FAIL 是脚本自身的期望字符串排序错误，已由验收方修复，不再作为遗留项。
+
+### 2.1 验收反馈修复（2026-11-09）
+
+| 问题 | 修复 | 回归验证 |
+|---|---|---|
+| 应用绑定所有网卡（`::`） | `application.yml` 增加 `server.address: ${SERVER_ADDRESS:127.0.0.1}`，默认只监听本机回环 | 启动后 `Get-NetTCPConnection -LocalPort 8080 -State Listen` → `LocalAddress=127.0.0.1`；`netstat -ano` → `TCP 127.0.0.1:8080 ... LISTENING` |
+| `markSuperseded` 无条件覆盖旧版 `effective_to`，会把更早的旧值延长 | SQL 改为 `LEAST(COALESCE(effective_to, ?::date), ?::date)`；旧值为空或更晚才收敛，更早则保留 | 新增 `VersionIntegrationTest.supersedesKeepsEarlierOldEffectiveTo`：旧版 `2024-01-01..2024-03-31` 被新版 `2025-01-01` 替代后仍为 `2024-03-31`；原 `2024-12-31` 用例保留 |
+| （可选加固）20MB 检查在 `getBytes()` 之后 | 先检查 `file.getSize()` 再读取内容 | 新增 `DocumentServiceValidationTest.oversizedFileReturns413BeforeReadingContent`（HTTP 413，不触碰仓储） |
 
 ```text
-eval_run,kb_chunk,kb_document,mandate,mcp_audit_log,work_item
-```
+Get-NetTCPConnection -LocalPort 8080 -State Listen
+LocalAddress LocalPort OwningProcess
+------------ --------- -------------
+127.0.0.1         8080       1323012
 
-除该条外，Gate 0 / Gate 1 / health 全部 PASS。
+mvn test -Dtest='VersionIntegrationTest,DocumentServiceValidationTest'
+Tests run: 18, Failures: 0, Errors: 0, Skipped: 0
+```
 
 ---
 
@@ -312,7 +323,7 @@ GET deleted travel -> HTTP 404 {"code":"ERR-DOC_NOT_FOUND",...}
 | 无 `ddl-auto: update` | PASS（无 JPA，只有 Flyway） |
 | Flyway 迁移完整 | PASS（`V1__init.sql`） |
 | README 命令可复现 | PASS |
-| 样例 PDF 未提交 | PASS（`docs/samples/*.pdf` 被 ignore；测试内生成） |
+| 样例 PDF 未提交 | PASS（`docs/samples/*.pdf` 被 ignore；仅提交验收 kit 的 `src/test/resources/fixtures/sample-scanned.pdf` 小 fixture） |
 | Windows 命令可执行 | PASS（README 用 PowerShell/`curl.exe`） |
 | 代码分层可替换 | PASS（`DocumentParser` / `Chunker` / `EmbeddingService` 均为接口） |
 | 日志不记录文件内容/绝对路径/token | PASS（仅 docId/docKey/策略/数量/耗时） |
@@ -329,7 +340,7 @@ GET deleted travel -> HTTP 404 {"code":"ERR-DOC_NOT_FOUND",...}
 | 自动验收脚本输出 | `docs/acceptance/phase1-last-run.md`（gitignore） |
 | 真实 smoke 的 HTTP 输出 | `target/smoke/smoke.log`（本地生成） |
 | SQL 证据 | `target/smoke/sql-evidence.txt`（本地生成） |
-| 验收脚本运行日志 | `target/acceptance-run.log`（本地生成） |
+| 验收脚本运行日志 | `target/acceptance-run-fixed.log`（本地生成） |
 
 `target/` 未提交；关键结论已转写在本报告。
 
@@ -339,12 +350,12 @@ GET deleted travel -> HTTP 404 {"code":"ERR-DOC_NOT_FOUND",...}
 
 | 项 | 影响 | 处理 |
 |---|---|---|
-| `accept-phase1.ps1` 的 “six tables” 期望字符串排序错误 | 脚本误报 FAIL（Gate 1） | 未改验收脚本；建议把期望值改为 `eval_run,kb_chunk,kb_document,mandate,mcp_audit_log,work_item`；DB 证据见第 3 节 |
+| `accept-phase1.ps1` six tables 期望排序 | 此前误报 FAIL | **已由验收方在 `ffa9368` 修复**；最新运行 Gate 0/1/2 全 PASS（见第 2 节），无遗留 |
 | `docs/03-data-model.md` 用 `UNIQUE (doc_key, version)`；Phase 1 口径要求 `UNIQUE NULLS NOT DISTINCT` | 契约细节差异 | 按 Phase 1 口径实现 `NULLS NOT DISTINCT`（PG15+），本报告记录；未改 03 文档 |
 | `T-VERSION-01` 在 06 中描述为“默认检索只返回新版” | Phase 1 无检索接口，不能用检索断言 | Phase 1 验证 `SUPERSEDED`/唯一 ACTIVE/旧 chunk 保留；检索侧默认过滤留 Phase 2 |
 | 表格跨页/多栏合并 | 解析质量限制 | v1 不合并跨页表格；超长表格按行切并重复表头；README 已说明 |
 | 真实 Ollama 停服务注入 | 未直接停共用 Ollama | 用不可达 base URL 走真实 HTTP 失败路径；集成测试用 fake 覆盖“不写半截” |
-| 真实 app smoke 的 PDF/DOCX | 仓库无样例 PDF | PDF/DOCX 由 Testcontainers 集成测试覆盖（测试内生成 fixture）；验收时请用验收方样例 PDF 复跑 Gate 2 |
+| 真实 app smoke 的 PDF/DOCX | 仓库无 `docs/samples` 真实 PDF | PDF/DOCX 由 Testcontainers 集成测试 + 已提交的 `src/test/resources/fixtures/` 覆盖；验收时仍可用验收方样例 PDF 复跑 Gate 2 |
 | Phase 2+ 功能 | 不在本阶段 | 检索/RRF/评测/MCP/WorkItem/审批均未实现 |
 
 ---
@@ -356,5 +367,5 @@ GET deleted travel -> HTTP 404 {"code":"ERR-DOC_NOT_FOUND",...}
 | 验收结论 | 待验收方填写 |
 | 验收人 |  |
 | 日期 |  |
-| Commit | `ff4d550d9ea0706b808ac4b7532251757c4719e3`（`phase1`，已推送 `origin/phase1`；本报告随后单独补充） |
+| Commit | 见回报消息（`phase1` 最新提交，已推送 `origin/phase1`；本报告在本次修复中更新） |
 | 备注 | 自动脚本唯一 FAIL 为脚本期望排序错误，非实现缺陷 |
