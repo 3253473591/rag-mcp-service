@@ -1,0 +1,62 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: rag-mcp-service
+  datasource:
+    url: ${RAG_DB_URL:jdbc:postgresql://localhost:5432/ragdb}
+    username: ${RAG_DB_USER:rag}
+    password: ${RAG_DB_PASSWORD:rag_local_pw}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 1
+      connection-timeout: 5000
+      validation-timeout: 3000
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 25MB
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+  ai:
+    model:
+      embedding: ollama
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      embedding:
+        options:
+          model: ${OLLAMA_EMBEDDING_MODEL:bge-m3}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+
+app:
+  upload:
+    max-file-size-bytes: 20971520
+    max-pdf-pages: 500
+    allowed-extensions: pdf,docx,md,markdown,txt
+  embedding:
+    model: ${OLLAMA_EMBEDDING_MODEL:bge-m3}
+    dimension: 1024
+    batch-size: 32
+    retries: 2
+    retry-backoff-ms: 500
+    timeout-seconds: 120
+
+logging:
+  level:
+    root: INFO
+    com.lqx.ragmcp: INFO
