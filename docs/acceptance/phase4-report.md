@@ -1,11 +1,11 @@
 # Phase 4 验收报告：治理 API（WorkItem → Approval → Mandate）
 
 - 日期：2026-11-09
-- 分支：`phase4`（基于 `main` @ `7781dac`）
-- Commit：`phase4` 分支 head（`git log -1 --format=%H`；本报告与实现同一提交）
+- 分支：`phase4`（基于 `main` @ `7781dac`；验收后合并 `main`）
+- 实现 commit：`35556ce3157ee0f0c63abd5be5a55ed062abefe4`；验收方签收提交另见末尾
 - 结论：P0 已实现；`mvn test` **167 tests / 0 failures / 0 errors / 1 skipped**（skip 为手动真实 Ollama smoke，非禁用失败测试）。
 - 范围：WorkItem create/get、admin approve/deny、Mandate 生成、管理员鉴权、错误码/配置、测试。
-- 非目标（留 Phase 5）：生产 `/mcp`、mandate 强制校验/过期拒绝、`mcp_audit_log` 写入、MCP Inspector、审计、前端/审批 UI、多租户/角色体系。未合并 `main`。
+- 非目标（留 Phase 5）：生产 `/mcp`、mandate 强制校验/过期拒绝、`mcp_audit_log` 写入、MCP Inspector、审计、前端/审批 UI、多租户/角色体系。验收后合并 `main`。
 
 ---
 
@@ -412,7 +412,7 @@ $ docker exec rag-postgres psql -U rag -d ragdb -c "SELECT count(*) FROM mcp_aud
 
 ## 9. 取舍、已知缺口与风险
 
-1. **`docs/02-api-contract.md` 2.5 的旧措辞与 Phase 4 任务书冲突**：2.5 写“`requestedDocIds` 为空/不传表示申请全部文档”，而任务书和 `docs/03-data-model.md` 明确 `NULL=全部，[]=无`。本实现按后者，并只把前者记录为文档冲突；未擅自修改契约文件，留给验收方决定是否同步文字。
+1. **`docs/02-api-contract.md` 2.5 的旧措辞与 Phase 4 任务书冲突**：2.5 原写“`requestedDocIds` 为空/不传表示申请全部文档”，而任务书和 `docs/03-data-model.md` 明确 `NULL=全部，[]=无`。本实现按后者；**验收方已把 docs/02 2.5 同步为 `null=全部、[]=无`**。
 2. **`allowedTools=[]` 允许**：这是严格单调缩小，不扩大权限；mandate 实际不可用。若验收方希望“至少保留一个工具”，需要契约明确后改为 400。
 3. **`reason`/`requester` 没有长度上限**：契约只写了 `purpose ≤500`；为避免擅自改变接口语义，本阶段只做 `purpose` 上限。若担心资源耗尽，可在后续统一加 TEXT 长度约束。
 4. **过期不写回**：Phase 4 只写 `ACTIVE` 与 `expiresAt`；`EXPIRED` 由 Phase 5 查询时按 `now() >= expires_at` 判断，避免定时任务。
@@ -451,4 +451,23 @@ docker exec rag-postgres psql -U rag -d ragdb -c "SELECT * FROM mandate;"
 - P0 功能：**通过**（create/get/approve/deny、mandate、缩小、显式 null、409/401/404、事务）。
 - P0 工程：**通过**（`mvn test` 167/0/0/1；无真实 token/PII 提交；无 `ddl-auto`；无 `@Disabled`）。
 - Phase 5：**未做**（按要求）。
-- 待验收方确认：`docs/02` 2.5 文字是否同步为 `null=全部，[]=无`；`allowedTools=[]` 是否需要禁止。
+- 验收方确认：`docs/02` 2.5 已同步为 `null=全部，[]=无`；`allowedTools=[]` 保留（严格单调缩小，mandate 不可用但不扩大权限）。
+
+---
+
+## 12. 验收方独立复核（2026-11-09）
+
+| 项 | 结果 |
+|---|---|
+| `mvn test` | **167 / 0 / 0 / 1**，BUILD SUCCESS；1 skipped 为条件真实 Ollama smoke |
+| 创建/查看 | 201/PENDING；GET 200；mandate 字段完整；404/非法 UUID 由测试覆盖 |
+| 显式 `allowedDocIds` | 申请全部 + 字段缺失 → **400**；显式 `null` → 200，DB `allowed_doc_ids IS NULL` |
+| 空申请 | `requestedDocIds=[]` → approve 默认 200，DB `allowed_doc_ids=[]`；显式 null/其它文档 → **400** |
+| 缩小限制 | 未申请工具/文档、`maxTopK=6 > requested=5`、`ttl=30` → **400** |
+| 状态机 | approve 后重复 approve → **409**；deny 后 approve → **409**；approve 后 deny → **409** |
+| 鉴权 | 无 token → **401 `ERR-ADMIN_UNAUTHORIZED`**；错 token/未配置由测试覆盖 |
+| 事务 | 预插 mandate 后 approve → 409，`work_item` 仍 PENDING（测试覆盖） |
+| SQL 对照 | `requested_doc_ids` 与 `allowed_doc_ids` 的 NULL/[] 区分正确；mandate ACTIVE；`mcp_audit_log=0` |
+| 结论 | **P0 通过**；Phase 5 未做，符合范围 |
+
+实现方 curl 证据还包含 `allowedTools=[]`、工具/topK 放大 400、deny 200 等；验收方独立跑了上面同一组关键分支。`docs/02` 2.5 的文字冲突已修正。

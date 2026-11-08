@@ -253,7 +253,7 @@
 说明：
 
 - `requester` 是调用方标识（字符串），v1 不做身份校验；审批是权限闸门。
-- `requestedDocIds` 为空/不传表示“申请全部文档”，但最终以管理员批准的 `allowedDocIds` 为准。
+- `requestedDocIds` 不传或为 `null` 表示“申请全部文档”；`[]` 表示“不申请任何文档”。最终以管理员批准的 `allowedDocIds` 为准（`null`=全部，`[]`=无）。
 - `requestedTopK` 默认 5，最大 20。
 
 ---
