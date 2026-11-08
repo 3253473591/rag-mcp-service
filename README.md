@@ -2,7 +2,7 @@
 
 企业知识库 RAG 检索服务（Java/Spring Boot + PostgreSQL/pgvector + MCP + 治理层）。
 
-- 当前状态：**Phase 1（骨架 + 入库）已实现，等待验收**。检索 / RRF / 评测 / MCP / WorkItem 审批 / 前端 / 聊天 / agent 编排**尚未开始**（Phase 2+）。
+- 当前状态：**Phase 1（骨架 + 入库）已验收通过（2026-11-09）**。检索 / RRF / 评测 / MCP / WorkItem 审批 / 前端 / 聊天 / agent 编排**尚未开始**（Phase 2+）。验收报告：[docs/acceptance/phase1-report.md](docs/acceptance/phase1-report.md)。
 - 文档入口：[docs/README.md](docs/README.md)；主设计：[docs/00-design.md](docs/00-design.md)。
 - Phase 1 交付：Flyway V1 六张表、PDF/DOCX/Markdown/TXT 解析 + Block 模型、FixedWindow/HeadingAware 两套切分、Ollama bge-m3 1024 维 embedding（批量、重试）、文档上传/列表/详情/删除 API、SHA-256 幂等与版本治理字段。
 - 本阶段**不引入** MCP starter；不做检索接口、评测、WorkItem/Mandate/审批。

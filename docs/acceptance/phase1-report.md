@@ -362,10 +362,23 @@ GET deleted travel -> HTTP 404 {"code":"ERR-DOC_NOT_FOUND",...}
 
 ## 12. 签收
 
+### 12.1 验收方独立复核（2026-11-09）
+
+| 项 | 结果 |
+|---|---|
+| `mvn test` | 67 / 0 / 0 / 1；BUILD SUCCESS |
+| `accept-phase1.ps1` | 退出码 0；Gate 0/1/2 全 PASS |
+| 绑定地址 | `127.0.0.1:8080`（不是 `::`） |
+| 版本边界 | 旧版 `2024-01-01..2024-03-31` 被 2025 新版替代后仍为 `2024-03-31`；原 NULL→`2024-12-31` 用例通过 |
+| 真实 4 格式 smoke | PDF/DOCX/MD/TXT 201；PDF 309 chunks（fixed 78 / heading 231）；GB18030 1 chunk；扫描件 422 |
+| Embedding | 所有上传 chunk `embedding IS NULL=0`、非 1024 维=0；`embedding_model=bge-m3` |
+| 幂等/删除 | 重复上传 200 `duplicate=true` 且 chunk 数不变；删除 204、重复删除 404、chunk 级联 0 |
+| 证据 | `target/surefire-reports/`、`docs/acceptance/phase1-last-run.md`（gitignore）、`target/accept-tmp/`（本地） |
+
 | 项 | 内容 |
 |---|---|
-| 验收结论 | 待验收方填写 |
-| 验收人 |  |
-| 日期 |  |
-| Commit | 见回报消息（`phase1` 最新提交，已推送 `origin/phase1`；本报告在本次修复中更新） |
-| 备注 | 自动脚本唯一 FAIL 为脚本期望排序错误，非实现缺陷 |
+| 验收结论 | **通过** |
+| 验收人 | 辅助验收 agent |
+| 日期 | 2026-11-09 |
+| Commit | `97d4f4d0de63f18e01234ba6d4c5b83bb96d2084`（`phase1`，已推送 `origin/phase1`） |
+| 备注 | 独立复跑测试、脚本、真实 bge-m3 上传与版本边界；无未关闭的阻塞项 |

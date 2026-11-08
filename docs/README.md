@@ -22,6 +22,7 @@
 | — | [acceptance/phase1-brief.md](acceptance/phase1-brief.md) | Phase 1 交接说明、开场提示词、回报要求 |
 | — | [acceptance/phase1-readiness.md](acceptance/phase1-readiness.md) | Phase 1 环境就绪检查（Maven/Docker/Ollama） |
 | — | [acceptance/phase1-checklist.md](acceptance/phase1-checklist.md) | Phase 1 验收 gate、命令、证据 |
+| — | [acceptance/phase1-report.md](acceptance/phase1-report.md) | Phase 1 验收报告（已通过，含独立复核证据） |
 | — | [acceptance/phase1-report-template.md](acceptance/phase1-report-template.md) | Phase 1 验收报告模板 |
 
 阅读顺序：**00 → 01 → 08 → 10 → 02/03 → 04/05 → 06 → 07 → 09 → 11/12/13**。

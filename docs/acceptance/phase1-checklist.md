@@ -100,7 +100,7 @@ DOCX / MD / TXT 用已提交的格式 fixture（`src/test/resources/fixtures/`�
 | MD | `sample.md` | ATX `#/##/###`、嵌套层级、表格、长节 |
 | TXT | `sample.txt` | 无标题，heading 策略回退 fixed |
 | GB18030 TXT（可选） | `sample-gb18030.txt` | UTF-8 解码失败后回退 GB18030 |
-| 扫描件 PDF（可选） | `sample-scanned.pdf` | 1 页纯图片，返回 422 `ERR-PARSE-FAILED` |
+| 扫描件 PDF（可选） | `sample-scanned.pdf` | 1 页纯图片，返回 422 `ERR-PARSE_FAILED` |
 
 ```powershell
 curl.exe -s -w "`n%{http_code}`n" -X POST http://localhost:8080/api/v1/documents `
