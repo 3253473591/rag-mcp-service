@@ -95,7 +95,7 @@ Test-Step 'Gate 1' 'extensions' {
 
 Test-Step 'Gate 1' 'six tables' {
     $v = Invoke-Psql "SELECT string_agg(tablename, ',' ORDER BY tablename) FROM pg_tables WHERE schemaname='public' AND tablename IN ('kb_document','kb_chunk','work_item','mandate','mcp_audit_log','eval_run');"
-    $expected = 'eval_run,kb_chunk,kb_document,mcp_audit_log,mandate,work_item'
+    $expected = 'eval_run,kb_chunk,kb_document,mandate,mcp_audit_log,work_item'
     if ($v -ne $expected) { throw "expected $expected; got: $v" }
     $v
 }

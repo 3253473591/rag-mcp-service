@@ -92,7 +92,26 @@ curl.exe -s -w "`n%{http_code}`n" -X POST http://localhost:8080/api/v1/documents
   -F "chunkStrategies=fixed,heading"
 ```
 
-DOCX / MD / TXT 用同结构；没有样例时用临时小文件，但 PDF 必须是文本型。
+DOCX / MD / TXT 用已提交的格式 fixture（`src/test/resources/fixtures/`，只验证解析/切分，不是评测语料）：
+
+| 格式 | fixture | 期望 |
+|---|---|---|
+| DOCX | `sample.docx` | Heading1~3 + 2×3 表格 + >900 token 长节（heading 策略递归切分） |
+| MD | `sample.md` | ATX `#/##/###`、嵌套层级、表格、长节 |
+| TXT | `sample.txt` | 无标题，heading 策略回退 fixed |
+| GB18030 TXT（可选） | `sample-gb18030.txt` | UTF-8 解码失败后回退 GB18030 |
+| 扫描件 PDF（可选） | `sample-scanned.pdf` | 1 页纯图片，返回 422 `ERR-PARSE-FAILED` |
+
+```powershell
+curl.exe -s -w "`n%{http_code}`n" -X POST http://localhost:8080/api/v1/documents `
+  -F "file=@src/test/resources/fixtures/sample.docx" `
+  -F "docKey=fixture-docx" `
+  -F "version=2026" `
+  -F "effectiveFrom=2026-01-01" `
+  -F "chunkStrategies=fixed,heading"
+```
+
+MD / TXT 把 `file`、`docKey` 换成 `sample.md`/`fixture-md`、`sample.txt`/`fixture-txt` 即可；PDF 仍用 `docs/samples/hypertension-2025.pdf`。
 
 通过标准：
 
@@ -117,7 +136,7 @@ SELECT count(*) FROM kb_chunk WHERE document_id = '<docId>' AND clause_path IS N
 SELECT count(*) FROM kb_chunk WHERE document_id = '<docId>' AND token_count <= 0;
 ```
 
-证据：curl 响应、上述 SQL 结果。
+证据：curl 响应、上述 SQL 结果；fixtures 结构由 `FormatFixturesTest` 守护（`mvn -q -Dtest=FormatFixturesTest test`）。
 
 ---
 

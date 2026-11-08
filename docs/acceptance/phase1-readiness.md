@@ -2,7 +2,7 @@
 
 - 日期：2026-11-08
 - 检查人：辅助验收 agent
-- 结论：**接近就绪**；Maven、Docker 已解决，bge-m3 拉取中，样例 PDF 待准备。
+- 结论：**接近就绪**；Maven、Docker 已解决，bge-m3 拉取中，样例 PDF 与格式 fixture 已准备。
 
 | 项 | 状态 | 证据 | 处理 |
 |---|---|---|---|
@@ -10,9 +10,10 @@
 | Maven | PASS（3.9.9） | `mvn -v` 正常；安装目录 `D:\AAA_Code_Project\tools\apache-maven-3.9.9`；PATH shim `C:\Users\Administrator\.local\bin\mvn.cmd` | 已可用；新开的 shell 也能找到 `mvn` |
 | Docker CLI | PASS | `docker version` server 29.8.2；`docker run --rm hello-world` 成功；`docker compose` 可用 | 当前会话已切完整权限；验收时保持完整权限 |
 | Ollama | **PULLING** | `ollama pull bge-m3` 后台任务 `pwsh-304312343cd2489c` 正在下载（约 1.2GB） | 完成后 `ollama list` 确认；未完成前 Gate 3 不能开始 |
-| 样例 PDF | **FAIL** | `docs/samples/hypertension-2025.pdf` 不存在 | 按 [samples/README.md](../samples/README.md) 准备 3 篇公开文本型 PDF；不提交 |
-| 代码骨架 | N/A | 无 `pom.xml`、无 `src/` | Phase 1 实现者创建 |
-| Git 仓库 | N/A | 当前目录没有 `.git` | 可选；没有 git 就用文件清单回报 |
+| 样例 PDF | PASS | `docs/samples/` 下 4 个文本型 PDF：2025 版 15 页、2024 摘编 2 页、企业内控 8 页，另有 2020 版参考 35 页；SHA-256 见 [samples/SOURCES.md](../samples/SOURCES.md) | 按 [samples/README.md](../samples/README.md) 准备；PDF 不提交 |
+| 格式 fixture | PASS | `src/test/resources/fixtures/` 下 DOCX/MD/TXT/GB18030/扫描件 5 个文件；`FormatFixturesTest` 5/5 通过 | Gate 2 直接上传；不进入评测语料 |
+| 代码骨架 | PASS（存在） | `pom.xml`、`src/main`、`src/test` 已存在；`mvn -q -Dtest=FormatFixturesTest test` 通过 | 按 [phase1-checklist.md](phase1-checklist.md) 继续跑 Gate |
+| Git 仓库 | PASS | 当前目录有 `.git`（部分文件尚未提交） | 提交时遵循 `.gitignore`；PDF/`.tmp` 不提交 |
 
 ---
 
@@ -43,7 +44,7 @@ ollama list
 ## 2. 不阻断但要注意
 
 - **JDK 21 vs 文档 JDK 17**：Spring Boot 3.5 支持 21；`pom.xml` 用 `maven.compiler.release=17` 即可。验收不强制装 JDK 17，但报告里要写实际 JDK 版本。
-- **样例 PDF**：没有 PDF 时不要用扫描件；用公开文本型 PDF。第三篇可以用公开企业制度模板/产品手册。
+- **样例 PDF**：已准备 3 篇验收用 + 1 篇参考（2020 版），全部为公开文本型 PDF；不要用扫描件替换。来源与校验见 [samples/SOURCES.md](../samples/SOURCES.md)。
 - **没有 git**：验收报告里的“分支/commit”可改成“文件清单 + 时间”；如果实现者初始化 git，再补 commit。
 - **Phase 1 会话需要完整权限**：Maven 写 `~/.m2`、Docker 写自己的日志目录、Ollama 写模型目录，都在 workspace 外；`workspace-write` 会重演权限拒绝。当前会话已切完整权限；新对话也要用完整权限，或把 Maven 本地仓库指到 workspace 内并单独处理 Docker/Ollama。
 - **Docker 需要完整权限**：当前会话已切完整权限；如果换会话，先确认 `docker run --rm hello-world` 可用，不要反复重装 Docker。

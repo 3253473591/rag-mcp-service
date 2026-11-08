@@ -54,6 +54,10 @@
 | sample.docx | DOCX |  |  |  |  |  |
 | sample.md | MD |  |  |  |  |  |
 | sample.txt | TXT |  |  |  |  |  |
+| sample-gb18030.txt | TXT (GB18030) |  |  |  |  | 可选，编码回退 |
+| sample-scanned.pdf | PDF (扫描件) |  |  |  |  | 可选，期望 422 |
+
+> 格式 fixture 位于 `src/test/resources/fixtures/`；它们只验证解析/切分，不是评测语料。
 
 SQL 证据：
 

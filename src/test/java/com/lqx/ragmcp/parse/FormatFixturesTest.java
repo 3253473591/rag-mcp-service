@@ -56,9 +56,17 @@ class FormatFixturesTest {
                 .as("the long section must exceed the 900-token recursion threshold")
                 .isGreaterThan(HeadingAwareChunker.MAX_SECTION_TOKENS);
         List<ChunkDraft> chunks = new HeadingAwareChunker(counter).chunk(blocks);
-        assertThat(chunks.stream().filter(chunk -> "3.1".equals(chunk.clauseId())).count())
+        String longSectionPath = "员工培训管理办法（测试样例） > 3 长文本与递归切分 > 3.1 培训记录与评估条款汇编";
+        List<ChunkDraft> longSectionChunks = chunks.stream()
+                .filter(chunk -> longSectionPath.equals(chunk.clausePath()))
+                .toList();
+        assertThat(longSectionChunks)
                 .as("a >900-token section must be split into several chunks")
-                .isGreaterThan(1);
+                .hasSizeGreaterThan(1);
+        assertThat(longSectionChunks).allSatisfy(chunk -> {
+            assertThat(chunk.clauseId()).isEqualTo("3.1");
+            assertThat(chunk.clausePath()).isEqualTo(longSectionPath);
+        });
     }
 
     @Test

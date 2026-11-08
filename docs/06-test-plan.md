@@ -56,7 +56,11 @@ mvn spring-boot:run
 - 3 篇公开文档（与 `docs/samples/README.md` 一致）：
   - `hypertension-2025.pdf`：国家基层高血压防治管理指南 2025（当前版本）
   - `hypertension-2024.pdf`：同一指南的 2024 版/公开摘编（旧版本，用于版本治理）
-  - `enterprise-policy-2026.pdf`：公开企业制度模板或产品手册（第三篇，用于跨文档/关键词测试）
+  - `enterprise-policy-2026.pdf`：公开企业制度文本，本仓库采用《企业内部控制基本规范》（第三篇，用于跨文档/关键词测试）
+  - 来源、页数与 SHA-256 见 `docs/samples/SOURCES.md`；`hypertension-2024.pdf` 为测试用摘编，不是官方 2024 版
+- 格式 fixture（Gate 2 解析/切分，不进入 `eval/qa.jsonl`）：`src/test/resources/fixtures/` 下的
+  `sample.docx`、`sample.md`、`sample.txt`、`sample-gb18030.txt`、`sample-scanned.pdf`；
+  由 `FormatFixturesTest` 校验，手动验收时直接上传。
 - `eval/qa.jsonl` 40 条（35 条可回答 + 5 条无答案），覆盖 3 篇文档。
 - 性能测试用 10k 条合成 chunk（固定随机种子，不提交大文件）。
 - 禁止真实患者/公司数据。
