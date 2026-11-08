@@ -2,7 +2,7 @@
 
 企业知识库 RAG 检索服务（Java/Spring Boot + PostgreSQL/pgvector + MCP + 治理层）。
 
-- 当前状态：**Phase 3（正式评测 + 性能补测）已实现，等待验收**；分支 `phase3`，不合并 `main`。Phase 1/2 已验收。
+- 当前状态：**Phase 3（正式评测 + 性能补测）已验收（P0；10 并发 p95 residual）**，已合并 `main`。Phase 1/2 已验收。
 - Phase 3 交付：`eval/qa.jsonl` 40 条（35 可回答 + 5 不可回答，覆盖 v2025/v2024/enterprise）、fixed/heading 正式评测、gold 结构校验脚本、T-INT-EVAL-01、10k/策略 3 轮性能、10 并发 60s 脚本。heading hit@5=0.8857、MRR=0.6905；fixed hit@5=0.3429（如实报告，不改 gold）。
 - Phase 2 交付保持不变：`POST /api/v1/search`（vector/keyword/hybrid + RRF）、版本三模式过滤、SQL 层 docIds/version/chunkStrategy 过滤、citation、Windows `scripts/eval.ps1`、MCP 低层注册 spike。
 - 验收证据：[docs/acceptance/phase3-report.md](docs/acceptance/phase3-report.md)、[phase2-report](docs/acceptance/phase2-report.md)、[检索 smoke](docs/acceptance/phase2-smoke.md)、[MCP spike](docs/acceptance/phase2-mcp-spike.md)、[eval report](eval/report.md)、[perf](docs/acceptance/phase3-perf.json)、[concurrency](docs/acceptance/phase3-concurrency.json)。
@@ -241,7 +241,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\perf-concurren
 - 10k/策略（fixed 10k + heading 10k = 20k，另 382 真实 chunks），每轮每策略 50 次，10 次 warm-up，topK=5，hybrid，真实 bge-m3 embedding；插入前后 `VACUUM (ANALYZE)` 避免 autovacuum 干扰。
 - 2026-11-09 最终 3 轮 p95/p99：fixed 42.72/97.19、64.62/91.87、120.88/136.88ms；heading 33.28/39.51、121.71/131.54、88.21/93.50ms；全部 <250ms/<800ms/<1500ms，0 errors。详见 [phase3-perf.json](docs/acceptance/phase3-perf.json)。
 - **关键修复**：原先 `kb_chunk JOIN kb_document ORDER BY embedding <=> ?` 被 PostgreSQL 规划成 nested loop + 全量 top-N sort，HNSW 实际没被使用；10k 时串行尚可、10 并发会打满 DB。现在先在 SQL 层解析 eligible docIds，再在 `kb_chunk` 上走 HNSW（`document_id IN (...) AND chunk_strategy=?`），最后只为候选取文档元数据；`EXPLAIN` 走 `idx_kb_chunk_embedding`。embedding 并发池也从固定 2 改为可配置 `app.embedding.max-concurrent-calls=10`。
-- 10 并发 60s 实测三次：requests 2076/2851/1803，errors 0（错误率 0%），p50 157/136/130ms，p95 **808.59 / 552.07 / 1129.14ms**，p99 1233.82/991.34/4679.77ms。**错误率达标，p95 未稳定 <800ms**；长尾与直接对 Ollama `/api/embed` 做 10 并发的 p99≈3.0s 同量级，GC 最大 pause 45ms、Hikari 无失败，判定为 embedding 排队/长尾而非 SQL/GC。详见 [phase3-concurrency.json](docs/acceptance/phase3-concurrency.json) 与 [phase3-report.md](docs/acceptance/phase3-report.md) 第 5 节。
+- 10 并发 60s 实测四次：requests 2076/2851/1803/2166，errors 0（错误率 0%），p50 157/136/130/119ms，p95 **808.59 / 552.07 / 1129.14 / 826.31ms**，p99 1233.82/991.34/4679.77/2118.88ms。**错误率达标，p95 未稳定 <800ms**；长尾与直接对 Ollama `/api/embed` 做 10 并发的 p99≈3.0s 同量级，GC 最大 pause 45ms、Hikari 无失败，判定为 embedding 排队/长尾而非 SQL/GC。详见 [phase3-concurrency.json](docs/acceptance/phase3-concurrency.json) 与 [phase3-report.md](docs/acceptance/phase3-report.md) 第 5 节。
 - `hnsw-iterative-scan=false` 实测没有收益（heading p95=473ms、p99=1032ms，默认 true 为 33~122/39~137ms），且存在 under-return 风险，保持默认 true。
 - 口径：10k 是**每套策略**，两套合计 20k；入库 30s 是**每套策略**，两套合计 <60s。详见 [docs/05-non-functional.md](docs/05-non-functional.md) 2.1/2.2。
 - synthetic chunks 从真实 chunk 向量池循环取样，只衡量 SQL/HTTP/RRF/embedding 延迟，不代表检索质量；本机数字不承诺跨机复现。

@@ -26,6 +26,7 @@
 | — | [acceptance/phase2-report.md](acceptance/phase2-report.md) | Phase 2 验收报告（P0 通过；含独立复核、p99/并发 residual） |
 | — | [acceptance/phase2-smoke.md](acceptance/phase2-smoke.md) | Phase 2 真实 app smoke 结果与 citation |
 | — | [acceptance/phase2-mcp-spike.md](acceptance/phase2-mcp-spike.md) | MCP 低层注册 spike 结论（Phase 5 参考） |
+| — | [acceptance/phase3-report.md](acceptance/phase3-report.md) | Phase 3 验收报告（P0 通过；含 40 QA、fixed/heading、10 并发 residual） |
 | — | [acceptance/phase1-report-template.md](acceptance/phase1-report-template.md) | Phase 1 验收报告模板 |
 
 阅读顺序：**00 → 01 → 08 → 10 → 02/03 → 04/05 → 06 → 07 → 09 → 11/12/13**。

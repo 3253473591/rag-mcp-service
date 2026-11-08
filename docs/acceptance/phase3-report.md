@@ -1,10 +1,10 @@
 # Phase 3 验收报告：正式评测 + 性能补测
 
 - 日期：2026-11-09
-- 分支：`phase3`（从 `main` @ `554ca11` 创建，未合并 main）
+- 分支：`phase3`（从 `main` @ `554ca11` 创建；验收后合并 `main`）
 - 实现 commit：`c1668c2890022e97c3593c3cb2061e5b53f040f5`
 - 证据 commit：本报告所在 commit（追加报告/README/docs；`perf-concurrency.ps1` 仅把 warm-up 从 10 提到 50，不改变实现语义）
-- 结论：**P0 评测通过**（heading hit@5=0.8857、MRR=0.6905；fixed 如实报告为 0.3429/0.3214，不改 gold）；**P1 性能部分通过**：10k/策略 p50/p95/p99 全面达标，10 并发错误率 0%，但 10 并发 p95 在三次 60s 测量中为 552 / 808 / 1129ms，**未稳定低于 800ms**，作为残余风险报告。
+- 结论：**P0 评测通过**（heading hit@5=0.8857、MRR=0.6905；fixed 如实报告为 0.3429/0.3214，不改 gold）；**P1 性能部分通过**：10k/策略 p50/p95/p99 全面达标，10 并发错误率 0%，但 10 并发 p95 在四次 60s 测量中为 552 / 808 / 1129 / 826ms，**未稳定低于 800ms**，作为残余风险报告。
 
 ---
 
@@ -163,16 +163,17 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\perf-concurren
 ```
 
 - 10 个 PowerShell `Start-Job` 进程，每个复用 `HttpClient`；60s；heading + hybrid；10k/策略；50 次 warm-up 不计入；错误率按非 2xx/异常计。
-- `phase3-concurrency.json` 保存的是最近一次（run C）。三次连续测量的实际值：
+- `phase3-concurrency.json` 保存的是最近一次（run D，验收方独立复跑）。四次连续测量的实际值：
 
 | run | requests | errors | errorRate | p50 | p95 | p99 | max | 备注 |
 |---|---:|---:|---:|---:|---:|---:|---:|---|
 | A | 2,076 | 0 | 0 | 157.35 | **808.59** | 1233.82 | 8056.88 | 冷启动后第一轮，p95 略超 800 |
 | B | 2,851 | 0 | 0 | 135.97 | **552.07** | 991.34 | 1217.65 | 同一代码/数据，warm 后 |
 | C | 1,803 | 0 | 0 | 129.95 | **1129.14** | 4679.77 | 5848.26 | 50 次 warm-up 后仍有长尾 |
+| D | 2,166 | 0 | 0 | 119.07 | **826.31** | 2118.88 | 8884.96 | 验收方独立复跑，仍略超 |
 
-- **错误率 0%**，满足 <1%；**p95 未稳定 <800ms**：B 通过，A 超 1.1%，C 明显超。不能把 B 当作“稳定达标”；本报告把 A/B/C 都列出。
-- 服务端 `tookMs` 与客户端几乎一致（A 801 / B 547 / C 1097），说明延迟在应用内部，不是 PowerShell 客户端。
+- **错误率 0%**，满足 <1%；**p95 未稳定 <800ms**：B 通过，A/C/D 超。不能把 B 当作“稳定达标”；本报告把 A/B/C/D 都列出。
+- 服务端 `tookMs` 与客户端几乎一致（A 801 / B 547 / C 1097 / D 819），说明延迟在应用内部，不是 PowerShell 客户端。
 - 长尾定位：
   - keyword-only 10 并发 60s：31,952 请求，p95 29.6ms、错误 0 → pg_trgm/SQL 不是瓶颈。
   - 直接对 Ollama `/api/embed` 做 10 并发 30s：1,336 请求，p50 97ms、p95 686.6ms、p99 3,003ms、max 4,083ms → **Ollama embedding 自身有秒级长尾**，与 app 10 并发 p99 4.3s 同量级。
@@ -224,7 +225,7 @@ Phase 3 第一次 3 轮 perf 出现：round 1 fixed p50=102ms，之后 heading p
 
 ## 7. 残余风险与取舍
 
-1. **10 并发 p95 未稳定达标**：A/B/C 三次为 808.59/552.07/1129.14ms；错误率 0%。根因主要是 Ollama bge-m3 embedding 的排队/长尾（直接 10 并发 p99=3.0s），不是 GC/Hikari/SQL。需要缓存/限流/专用推理服务才能硬保证，本轮不做。
+1. **10 并发 p95 未稳定达标**：A/B/C/D 四次为 808.59/552.07/1129.14/826.31ms；错误率 0%。根因主要是 Ollama bge-m3 embedding 的排队/长尾（直接 10 并发 p99=3.0s），不是 GC/Hikari/SQL。需要缓存/限流/专用推理服务才能硬保证，本轮不做。
 2. **fixed 指标低**（hit@5=0.3429、MRR=0.3214）：fixed 无 clause 元数据、窗口页号是起始页、企业文档 fixed 全部从第 1 页起；这是 Phase 1 切分语义的真实结果。未改 gold、未为达标改切分。
 3. **2025 双栏 clausePath 噪声**：heading 的 clausePath 常出现 `90 mmHg` 等碎片；gold 优先使用稳定的 `clauseId`，page-only 题（Q03）显式只用 pageRange。citation 的章节段可能噪声，但页码/文档/版本正确。
 4. **企业内控 heading 的 clause_id 为 NULL**：11 条题只能按 pageRange 匹配，粒度较粗；匹配口径见 docs/11，不是 gold 放宽。
@@ -261,3 +262,26 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\perf.ps1 -Roun
 # 7) 10 并发 60s
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\perf-concurrency.ps1 -DurationSeconds 60
 ```
+
+---
+
+## 9. 验收方独立复核（2026-11-09）
+
+| 项 | 结果 |
+|---|---|
+| `mvn test` | **134 / 0 / 0 / 1**，BUILD SUCCESS；1 skipped 为条件真实 Ollama smoke |
+| QA 数量 | 40 条 = 35 可回答 + 5 不可回答；id 唯一；24 条 hypertension（17 v2025 + 7 v2024）、11 条 enterprise、5 条不可回答 |
+| gold 校验 | `validate-gold.ps1` 对真实 DB 跑出 **35/35 存在**；23 条 clause 锚定、12 条 page-only |
+| 正式 eval | fixed hit@5=0.3429 / MRR=0.3214；heading hit@5=0.8857 / MRR=0.6905；与实现方报告一致；0 errors |
+| 10k/策略串行 | 独立 1 轮：fixed p95=29.39ms、heading p95=93.48ms；0 errors；p95/p99 达标 |
+| 10 并发 60s | 独立 run D：requests=2166，errors=0，p50=119.07ms，p95=**826.31ms**，p99=2118.88ms；p95 仍略超 800ms |
+| MCP/Phase 边界 | Phase 3 未引入生产 MCP/WorkItem/Approval；MCP spike 仍只 test scope |
+| 结论 | **P0 评测通过**；P1 的 10k 串行性能通过，10 并发 p95 作为 residual 保留；可合并 main，Phase 4/5 继续 |
+
+### 9.1 残余风险（不阻塞 Phase 3 P0）
+
+1. **10 并发 p95 不稳定**：A/B/C/D = 808.59/552.07/1129.14/826.31ms；错误率 0%。根因判断为 Ollama bge-m3 embedding 排队/长尾；需要缓存/限流/专用推理服务才能硬保证 p95<800ms。
+2. **fixed 指标低**（hit@5=0.3429）：fixed 无 clause 元数据、窗口页号是起始页、企业文档 fixed 全从第 1 页起；是真实结果，未改 gold。
+3. **2025 双栏 clausePath 噪声**、**企业 heading 无 clause_id**：citation/匹配粒度受限；Phase 3 未回改解析器。
+4. **不可回答题 falsePositiveRate=1.0**：hybrid 总返回 topK，当前无相关性阈值；docs/05 只要求记录，不设硬门槛。
+5. 未做 Phase 4/5（WorkItem/Approval/Mandate、生产 MCP、审计、前端）。

@@ -49,7 +49,7 @@
 > p99=97.19/91.87/136.88ms、39.51/131.54/93.50ms，全部 <800ms/<1500ms，0 errors。
 > 关键修复：原 JOIN 查询被规划成 nested loop + 全量 top-N sort，HNSW 未生效；现改为 SQL 层解析 eligible docIds 后
 > 在 `kb_chunk` 上走 HNSW，详见 `docs/acceptance/phase3-report.md` 5.3。
-> 10 并发 60s 三次：错误率 0%，p50≈130~157ms，p95=808.59/552.07/1129.14ms —— **错误率达标，p95 未稳定 <800ms**；
+> 10 并发 60s 四次：错误率 0%，p50≈119~157ms，p95=808.59/552.07/1129.14/826.31ms —— **错误率达标，p95 未稳定 <800ms**；
 > 长尾与 Ollama embedding 直接 10 并发的 p99≈3.0s 同量级，属残余风险。
 
 延迟预算（p95）：
@@ -288,7 +288,7 @@ heading 达到 hit@5≥0.85、MRR≥0.65；fixed 低是固定窗口无 clause �
 - AC-13：p95 检索 < 800ms（10k chunks）。Phase 3 实测 3 轮均 <121.71ms，通过。
 - AC-14：Ollama 停止时入库/检索返回 503/504，不写脏数据。
 - AC-15：DB 停止时健康检查 DOWN，请求 503。
-- AC-16：10 并发检索错误率 < 1%。Phase 3 三次 60s 均 0 errors；p95 目标见 2.1 的 Phase 3 残余说明（未稳定 <800ms）。
+- AC-16：10 并发检索错误率 < 1%。Phase 3 四次 60s 均 0 errors；p95 目标见 2.1 的 Phase 3 残余说明（未稳定 <800ms）。
 - AC-17：WorkItem 创建/查看。
 - AC-18：批准生成 Mandate；拒绝/重复审批正确。
 - AC-19：无/过期/越权 mandate 100% 拒绝；合法 mandate 可检索。
