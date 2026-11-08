@@ -1,10 +1,10 @@
 # Phase 2 验收报告：检索 + 搜索 API
 
 - 日期：2026-11-09
-- 分支：`phase2`（从 `main` @ `080adfb` 创建，**未合并 main**）
-- 最终 commit：**见本轮 `git rev-parse phase2` / 报告末尾**
+- 分支：`phase2`（从 `main` @ `080adfb` 创建；验收后合并 `main`）
+- 最终 commit：`31056a32bdd12d961f5c9ed7a257deda57b51a6d`（实现 + 证据提交；验收方签收提交另见末尾）
 - 验收范围：P0 检索接口、RRF、版本过滤、citation、测试、真实 smoke；P1 性能口径、Windows eval、chunkStrategies 校验、MCP spike
-- 结论：**P0 通过，P1 完成**；已知缺口见第 9 节
+- 结论：**P0 通过；P1 完成，带 residual**（p99 方差、10 并发/T-PERF-02、完整 40 QA 留 Phase 3；见第 11 节）
 
 ---
 
@@ -240,5 +240,28 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\perf.ps1
 
 - 分支：`phase2`
 - base：`main` @ `080adfb`
-- 最终 commit：检索代码 commit `ab4c65e71d1f37f8a020f2b5710c75095472b705`；最终分支 HEAD 以 `git rev-parse phase2` 为准（可能包含测量脚本/文档的后续 commit）。
-- `main` 未被修改/合并；验收方可独立复核 `git diff main..phase2`。
+- 实现 + 证据 HEAD：`31056a32bdd12d961f5c9ed7a257deda57b51a6d`
+- 验收后已合并 `main`；验收方独立复核见第 11 节。
+
+## 11. 验收方独立复核（2026-11-09）
+
+| 项 | 结果 |
+|---|---|
+| `mvn test` | **110 / 0 / 0 / 1**，BUILD SUCCESS；唯一 skipped 为条件真实 Ollama smoke |
+| 3 篇样例入库 | 2024：10 chunks（5869ms）；2025：309 chunks（10318ms）；enterprise：63 chunks（3025ms）；合计 382，两套策略 |
+| 真实 smoke checks | `defaultOnlyActive=true`、`historicalReturnsSuperseded=true`、`includeSupersededReturnsBoth=true`、`noEmptyCurrentResults=true` |
+| 5 条 query / citation | 通过；默认只 ACTIVE，`asOf=2024-06-01` 旧版，`includeSuperseded=true` 新旧同现；fixed/heading 都可检 |
+| eval smoke | fixed hit@5=0.1667/MRR=0.1667；heading hit@5=1.0/MRR=0.7222；0 errors；8 条，不是 40 条正式评测 |
+| 10k/策略 perf（三次） | fixed p95 = 178.01 / 307.00 / 229.78ms；heading p95 = 138.58 / 180.23 / 324.88ms；全部 <800ms |
+| p99 方差 | fixed p99 = 4803.69 / 1539.37 / 454.95ms；heading p99 = 142.67 / 204.74 / 521.25ms；第三次全部 <1500ms，但 p99 不稳定，不能宣称稳定达标 |
+| 并发 | 本轮是 50 次/策略串行 API 端到端，不是 10 并发 60s；`T-PERF-02` 仍待补 |
+| MCP spike | 通过；`List<SyncToolSpecification>` 单 bean 注册两个 tool，`listTools()` 恰好两个；生产 `/mcp` 未做 |
+| 结论 | **P0 通过**；P1 的 eval/Windows 脚本/chunkStrategies/MCP 风险已处理；p99 方差与 10 并发压测留 Phase 3/后续 |
+
+### 11.1 仍然存在的风险
+
+1. p99 在三次独立复测中有一次 4.8s、一次 1.54s，p95 稳定；若面试/验收需要 p99，需继续查 HNSW 过滤扫描或 JVM/DB 抖动，不能只引用实现方首次的 222ms。
+2. `T-PERF-02`（10 并发 60s）未跑；Phase 2 的性能结论是串行基线。
+3. 完整 40 条 QA 未做，8 条 smoke 只验证脚本和链路；fixed hit@5 低是真实结果，Phase 3 再调切分/匹配口径。
+4. fixed chunk 无 clauseId，citation 只到页码；2025 双栏 PDF 的 clausePath 有噪声；Phase 2 未回改解析器。
+5. `detectConflicts` 只接受参数并返回 `[]`；生产 MCP/WorkItem/Approval/Mandate 未做。

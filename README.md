@@ -2,7 +2,7 @@
 
 企业知识库 RAG 检索服务（Java/Spring Boot + PostgreSQL/pgvector + MCP + 治理层）。
 
-- 当前状态：**Phase 2（检索 + 搜索 API）已实现，位于 `phase2` 分支，等待验收；未合并 `main`**（Phase 1 已验收）。
+- 当前状态：**Phase 2（检索 + 搜索 API）已验收通过（P0；p99/并发 residual 见报告）**，已合并 `main`；Phase 1 已验收。
 - Phase 2 交付：`POST /api/v1/search`（vector/keyword/hybrid + RRF）、版本三模式过滤、SQL 层 docIds/version/chunkStrategy 过滤、citation、8 条 smoke QA、Windows `scripts/eval.ps1`、10k/策略性能脚本、MCP 低层注册 spike。Phase 3 的完整 40 条 QA 尚未开始。
 - 验收证据：[docs/acceptance/phase2-report.md](docs/acceptance/phase2-report.md)、[检索 smoke](docs/acceptance/phase2-smoke.md)、[MCP spike](docs/acceptance/phase2-mcp-spike.md)、[eval report](eval/report.md)。
 - Phase 1 交付保持不变：Flyway V1 六张表、PDF/DOCX/Markdown/TXT 解析 + Block 模型、FixedWindow/HeadingAware 两套切分、Ollama bge-m3 1024 维 embedding（批量、重试）、文档上传/列表/详情/删除 API、SHA-256 幂等与版本治理字段。

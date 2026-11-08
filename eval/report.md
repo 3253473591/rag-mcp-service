@@ -1,14 +1,14 @@
 ﻿# RAG Eval Report (Phase 2 smoke)
 
 - dataset: `eval/qa.smoke.jsonl` (sha256=bcfda68329001167abebc96a42038a28b34ecd56a59f4332d265577e9e6b2eea)
-- git commit: `ab4c65e71d1f37f8a020f2b5710c75095472b705`
+- git commit: `31056a32bdd12d961f5c9ed7a257deda57b51a6d`
 - embedding: bge-m3; topK=5; asOf=2026-11-09; QA=8 (6 answerable + 2 unanswerable)
 - NOTE: this is a smoke set for Phase 2. The full 40-question Phase 3 dataset is not fabricated here.
 
 | chunkStrategy | hit@1 | hit@3 | hit@5 | MRR | p50 | p95 | errors |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| fixed | 0.1667 | 0.1667 | 0.1667 | 0.1667 | 139.07 | 207.31 | 0 |
-| heading | 0.5 | 1 | 1 | 0.7222 | 152.81 | 191.21 | 0 |
+| fixed | 0.1667 | 0.1667 | 0.1667 | 0.1667 | 49.93 | 75.33 | 0 |
+| heading | 0.5 | 1 | 1 | 0.7222 | 69.05 | 80.96 | 0 |
 
 Unanswerable (reported separately, not mixed into hit@k):
 

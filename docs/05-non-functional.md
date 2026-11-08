@@ -43,6 +43,7 @@
 > 两套策略合计基准为 20k chunks；验收报告必须写明实际测试的每策略数量与总数。
 > Phase 2 实测：fixed 10k + heading 10k（合计 20k），50 次/策略 API 端到端
 > （含真实 bge-m3 query embedding），p50/p95 见 `docs/acceptance/phase2-report.md`。
+> **注意**：Phase 2 是串行 50 次/策略的基线；p95 稳定达标，p99 有环境方差，10 并发/60s（T-PERF-02）留 Phase 3。
 
 延迟预算（p95）：
 
