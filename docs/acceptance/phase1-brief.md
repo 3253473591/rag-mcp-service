@@ -11,6 +11,7 @@
 
 ```text
 你在 D:\AAA_Code_Project\rag-mcp-service 实现 Phase 1（骨架 + 入库），只做 Phase 1，不要做检索/RRF/评测/MCP/WorkItem/审批。
+仓库：https://github.com/3253473591/rag-mcp-service（private，main）。完成后 commit + push，回报 commit hash。
 
 开工前先跑 docs/acceptance/phase1-readiness.md 的检查：
 - 本会话需要完整权限（Maven 写 ~/.m2、Docker 写日志、Ollama 写模型目录都在 workspace 外；workspace-write 会权限失败）；
