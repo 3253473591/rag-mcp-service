@@ -41,6 +41,7 @@ if ($embeddingHealth -ne 'UP') { throw "embedding is not UP: $embeddingHealth" }
 
 $vectorVersion = Invoke-Psql "SELECT extversion FROM pg_extension WHERE extname='vector';"
 $existing = [int](Invoke-Psql "SELECT count(*) FROM kb_chunk;")
+if ($existing -lt 1) { throw "no existing chunks; ingest docs/samples first (or use a seed corpus)" }
 Write-Host "pgvector=$vectorVersion existingChunks=$existing"
 
 Invoke-Psql "DELETE FROM kb_document WHERE doc_key='perf-synthetic';" | Out-Null
@@ -58,27 +59,30 @@ VALUES
 "@ | Out-Null
 
 try {
-    $seedSubquery = @"
-COALESCE(
-  (SELECT embedding FROM kb_chunk WHERE embedding IS NOT NULL LIMIT 1),
-  array_prepend(1.0::real, array_fill(0.0::real, ARRAY[1023]))::vector
-)
-"@
     foreach ($strategy in @('fixed', 'heading')) {
         $started = Get-Date
         Invoke-Psql @"
+WITH seeds AS (
+  SELECT embedding,
+         (row_number() OVER (ORDER BY id)) - 1 AS rn,
+         count(*) OVER () AS n
+  FROM kb_chunk
+  WHERE embedding IS NOT NULL
+)
 INSERT INTO kb_chunk
   (id, document_id, chunk_index, chunk_strategy, content, token_count,
    clause_id, clause_path, page_no, metadata, embedding)
-SELECT gen_random_uuid(), '$docId'::uuid, i, '$strategy',
-       'perf synthetic chunk ' || i || ' hypertension internal-control retrieval-latency',
-       20, NULL, 'perf > section ' || (i + 1), (i % 500) + 1, '{}'::jsonb,
-       $seedSubquery
-FROM generate_series(0, $($ChunksPerStrategy - 1)) AS s(i);
+SELECT gen_random_uuid(), '$docId'::uuid, g.i, '$strategy',
+       'perf synthetic chunk ' || g.i || ' hypertension internal-control retrieval-latency',
+       20, NULL, 'perf > section ' || (g.i + 1), (g.i % 500) + 1, '{}'::jsonb,
+       seeds.embedding
+FROM generate_series(0, $($ChunksPerStrategy - 1)) AS g(i)
+JOIN seeds ON seeds.rn = (g.i % seeds.n);
 "@ | Out-Null
         Write-Host ("inserted {0} chunks strategy={1} in {2:N1}s" -f
             $ChunksPerStrategy, $strategy, ((Get-Date) - $started).TotalSeconds)
     }
+    Invoke-Psql "ANALYZE kb_chunk;" | Out-Null
 
     $counts = Invoke-Psql @"
 SELECT chunk_strategy || '=' || count(*) FROM kb_chunk
@@ -91,8 +95,8 @@ WHERE document_id = '$docId'::uuid GROUP BY chunk_strategy ORDER BY chunk_strate
 
     $runs = @()
     foreach ($strategy in @('fixed', 'heading')) {
-        # Warm-up, not measured.
-        for ($i = 0; $i -lt 5; $i++) {
+        # Warm-up, not measured. Includes index page cache / HNSW graph warm-up.
+        for ($i = 0; $i -lt 10; $i++) {
             $body = (@{ query = 'perf retrieval latency'; topK = 5; chunkStrategy = $strategy; strategy = 'hybrid'; asOf = $today } | ConvertTo-Json -Compress)
             Invoke-RestMethod -Uri "$BaseUrl/api/v1/search" -Method Post `
                 -ContentType 'application/json; charset=utf-8' `
@@ -148,7 +152,7 @@ WHERE document_id = '$docId'::uuid GROUP BY chunk_strategy ORDER BY chunk_strate
         strategy = 'hybrid'
         embedding = 'bge-m3'
         runs = $runs
-        note = 'Numbers are measured on the local machine; perf is not part of CI. Synthetic vectors reuse one existing embedding, so this measures SQL/HTTP/RRF latency, not retrieval quality.'
+        note = 'Numbers are measured on the local machine; perf is not part of CI. Synthetic vectors are cycled from the existing real chunk embedding pool, so this measures SQL/HTTP/RRF latency, not retrieval quality. Each strategy has 10 unmeasured warm-up requests.'
     }
     $dir = Split-Path -Parent $ReportJson
     if ($dir -and -not (Test-Path $dir)) { New-Item -ItemType Directory -Force $dir | Out-Null }

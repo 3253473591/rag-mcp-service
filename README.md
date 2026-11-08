@@ -220,6 +220,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\eval.ps1
 - 匹配口径：`docKey` 相同；gold 有 `clauseId` 且结果也有 `clauseId` 时按 clause 匹配；结果没有 `clauseId` 时回退到 `pageRange`（fixed chunk 不携带 clause_id）。
 - 脚本用 `powershell.exe`（Windows PowerShell 5.1）可执行；执行策略用 `-ExecutionPolicy Bypass`。请求体显式 UTF-8，响应按原始字节 UTF-8 解码，避免中文乱码。
 - 当前 smoke：heading hit@5=1.0、MRR=0.7222；fixed hit@5=0.1667。fixed 明显差于 heading，是真实结果，不调 gold 改数字；Phase 3 再扩到 40 条并分析切分。
+- 2026-11-09 最后一次 smoke 延迟：fixed p50=139.07ms/p95=207.31ms；heading p50=152.81ms/p95=191.21ms；errors=0。
 - 退出码：有 HTTP/检索错误返回 1；指标阈值只报告，不因 smoke 指标未达标而伪造通过。
 
 ## 性能
@@ -230,9 +231,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\perf.ps1
 
 - 默认每套策略 10,000 chunks（fixed 10k + heading 10k = 20k），每策略 50 次 API 端到端请求（含真实 bge-m3 query embedding），topK=5，hybrid。
 - 结果写 `docs/acceptance/phase2-perf.json`；脚本结束删除 synthetic 数据，不污染演示库。
-- 2026-11-09 实测：fixed p50=146.87ms / p95=220.47ms；heading p50=92.97ms / p95=131.72ms；0 errors。p50/p95 均低于 docs/05 的 250ms/800ms 目标。
+- 2026-11-09 实测（重复两次，均达标；取最后一次）：fixed p50=106.93ms / p95=210.84ms；heading p50=232.04ms / p95=300.50ms；0 errors。p50/p95 均低于 docs/05 的 250ms/800ms 目标。
 - 口径：10k 是**每套策略**，两套合计 20k；入库 30s 是**每套策略**，两套合计 <60s。详见 [docs/05-non-functional.md](docs/05-non-functional.md) 2.1/2.2。
-- 注意：synthetic chunks 复用同一向量，性能数字衡量 SQL/HTTP/RRF 延迟，不代表检索质量。
+- 注意：synthetic chunks 从现有真实 chunk 的向量池循环取样，性能数字衡量 SQL/HTTP/RRF 延迟，不代表检索质量；重复测量有波动，报告记录两次结果。
 
 ## MCP 低层 Spike
 

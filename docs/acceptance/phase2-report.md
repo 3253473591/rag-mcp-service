@@ -115,8 +115,8 @@ T-VERSION 映射：T-VERSION-02/03/06/07/11 在 `SearchIntegrationTest.tVersion0
 
 | chunkStrategy | hit@1 | hit@3 | hit@5 | MRR | p50 | p95 | errors |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| fixed | 0.1667 | 0.1667 | 0.1667 | 0.1667 | 71.69ms | 94.13ms | 0 |
-| heading | 0.5000 | 1.0000 | 1.0000 | 0.7222 | 86.85ms | 159.20ms | 0 |
+| fixed | 0.1667 | 0.1667 | 0.1667 | 0.1667 | 139.07ms | 207.31ms | 0 |
+| heading | 0.5000 | 1.0000 | 1.0000 | 0.7222 | 152.81ms | 191.21ms | 0 |
 
 不可回答题（单独统计，不混入 hit@k）：
 
@@ -142,16 +142,18 @@ T-VERSION 映射：T-VERSION-02/03/06/07/11 在 `SearchIntegrationTest.tVersion0
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\perf.ps1
 ```
 
-- 数据：每套策略插入 10,000 条 synthetic chunks（fixed 10k + heading 10k，合计 20k），测试前 DB 另有 382 条真实样例 chunks。
-- 请求：每策略 50 次 API 端到端（含真实 bge-m3 query embedding），topK=5，hybrid；5 次 warm-up 不计入。
+- 数据：每套策略插入 10,000 条 synthetic chunks（fixed 10k + heading 10k，合计 20k），测试前 DB 另有 382 条真实样例 chunks。synthetic 向量从这 382 条真实 chunk 的向量池循环取样，避免“所有行同一向量”导致 HNSW 退化。
+- 请求：每策略 50 次 API 端到端（含真实 bge-m3 query embedding），topK=5，hybrid；10 次 warm-up 不计入；插入后执行 `ANALYZE kb_chunk`。
 - 原始数据：[phase2-perf.json](phase2-perf.json)
 
 | chunkStrategy | chunks | requests | p50 | p95 | p99 | errors |
 |---|---:|---:|---:|---:|---:|---:|
-| fixed | 10,000 | 50 | 146.87ms | 220.47ms | 242.08ms | 0 |
-| heading | 10,000 | 50 | 92.97ms | 131.72ms | 154.03ms | 0 |
+| fixed | 10,000 | 50 | 106.93ms | 210.84ms | 222.06ms | 0 |
+| heading | 10,000 | 50 | 232.04ms | 300.50ms | 366.43ms | 0 |
 
-结论：p50/p95/p99 均低于 docs/05 的 250ms / 800ms / 1500ms 目标；0 errors。**不编造**：这是本机 Docker + Ollama 的实测，synthetic vectors 复用同一向量，只衡量 SQL/HTTP/RRF 延迟，不代表检索质量，也不承诺其它机器复现同一数字。
+重复测量（同一脚本、同一环境，第一次）：fixed p50=94.29ms/p95=171.11ms；heading p50=165.03ms/p95=243.79ms。两次均低于目标，说明数字有波动但 p95 仍在 800ms 内。
+
+结论：p50/p95/p99 均低于 docs/05 的 250ms / 800ms / 1500ms 目标；0 errors。**不编造**：这是本机 Docker + Ollama 的实测，synthetic vectors 来自真实向量池，只衡量 SQL/HTTP/RRF 延迟，不代表检索质量，也不承诺其它机器复现同一数字。
 
 ### 5.1 30s / 10k 口径（已写入 docs/05 + README）
 
@@ -238,5 +240,5 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\perf.ps1
 
 - 分支：`phase2`
 - base：`main` @ `080adfb`
-- 最终 commit：**待 push 后由 `git rev-parse HEAD` 填入**
+- 最终 commit：检索代码 commit `ab4c65e71d1f37f8a020f2b5710c75095472b705`；最终分支 HEAD 以 `git rev-parse phase2` 为准（可能包含测量脚本/文档的后续 commit）。
 - `main` 未被修改/合并；验收方可独立复核 `git diff main..phase2`。

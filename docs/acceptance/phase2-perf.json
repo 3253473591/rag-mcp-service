@@ -1,11 +1,13 @@
-﻿{
-    "timestamp":  "2026-11-09T01:02:21.7172889+08:00",
+{
+    "timestamp":  "2026-11-09T01:21:08.1845136+08:00",
     "baseUrl":  "http://127.0.0.1:8080",
     "pgvectorVersion":  "0.8.7",
-    "gitCommit":  "080adfbd7b185294ac245d4d596b71f38fe3fb0c",
+    "gitCommit":  "ab4c65e71d1f37f8a020f2b5710c75095472b705",
     "chunksPerStrategy":  10000,
     "totalSyntheticChunks":  20000,
+    "existingChunksBeforeTest":  382,
     "requestsPerStrategy":  50,
+    "warmupRequestsPerStrategy":  10,
     "topK":  5,
     "strategy":  "hybrid",
     "embedding":  "bge-m3",
@@ -16,11 +18,11 @@
                      "requests":  50,
                      "errors":  0,
                      "errorRate":  0,
-                     "p50Ms":  146.87,
-                     "p95Ms":  220.47,
-                     "p99Ms":  242.08,
-                     "minMs":  86.35,
-                     "maxMs":  242.08,
+                     "p50Ms":  106.93,
+                     "p95Ms":  210.84,
+                     "p99Ms":  222.06,
+                     "minMs":  81.47,
+                     "maxMs":  222.06,
                      "avgResults":  5
                  },
                  {
@@ -29,13 +31,13 @@
                      "requests":  50,
                      "errors":  0,
                      "errorRate":  0,
-                     "p50Ms":  92.97,
-                     "p95Ms":  131.72,
-                     "p99Ms":  154.03,
-                     "minMs":  80.05,
-                     "maxMs":  154.03,
+                     "p50Ms":  232.04,
+                     "p95Ms":  300.5,
+                     "p99Ms":  366.43,
+                     "minMs":  93.15,
+                     "maxMs":  366.43,
                      "avgResults":  5
                  }
              ],
-    "note":  "Numbers are measured on the local machine; perf is not part of CI. Synthetic vectors reuse one existing embedding, so this measures SQL/HTTP/RRF latency, not retrieval quality."
+    "note":  "Numbers are measured on the local machine; perf is not part of CI. Synthetic vectors are cycled from the existing real chunk embedding pool, so this measures SQL/HTTP/RRF latency, not retrieval quality. Each strategy has 10 unmeasured warm-up requests."
 }

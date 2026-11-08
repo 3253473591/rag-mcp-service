@@ -71,6 +71,17 @@ function Find-Rank {
 
 $strategyReports = @()
 $allDetails = @()
+
+# Warm up the Ollama model / JIT outside the measured window. Without this, the first
+# request after a fresh app start can include multi-second model load and pollute p95.
+for ($warm = 0; $warm -lt 2; $warm++) {
+    $warmBody = (@{ query = $qaRows[0].question; topK = $TopK; chunkStrategy = 'heading';
+                    strategy = 'hybrid'; asOf = $AsOf } | ConvertTo-Json -Compress)
+    Invoke-RestMethod -Uri "$BaseUrl/api/v1/search" -Method Post `
+        -ContentType 'application/json; charset=utf-8' `
+        -Body ([Text.Encoding]::UTF8.GetBytes($warmBody)) -TimeoutSec 60 | Out-Null
+}
+
 foreach ($strategy in $ChunkStrategies) {
     $latencies = New-Object System.Collections.Generic.List[double]
     $errors = 0
