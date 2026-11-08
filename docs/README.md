@@ -28,6 +28,7 @@
 | — | [acceptance/phase2-mcp-spike.md](acceptance/phase2-mcp-spike.md) | MCP 低层注册 spike 结论（Phase 5 参考） |
 | — | [acceptance/phase3-report.md](acceptance/phase3-report.md) | Phase 3 验收报告（P0 通过；含 40 QA、fixed/heading、10 并发 residual） |
 | — | [acceptance/phase4-report.md](acceptance/phase4-report.md) | Phase 4 验收报告（P0 通过；WorkItem/approve/deny/mandate、显式 allowedDocIds） |
+| — | [acceptance/risk-ledger.md](acceptance/risk-ledger.md) | 跨 Phase 风险台账（已闭环/部分改善/待修） |
 | — | [acceptance/phase1-report-template.md](acceptance/phase1-report-template.md) | Phase 1 验收报告模板 |
 
 阅读顺序：**00 → 01 → 08 → 10 → 02/03 → 04/05 → 06 → 07 → 09 → 11/12/13**。
