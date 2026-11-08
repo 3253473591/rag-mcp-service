@@ -2,9 +2,10 @@
 
 企业知识库 RAG 检索服务（Java/Spring Boot + PostgreSQL/pgvector + MCP + 治理层）。
 
-- 当前状态：**Phase 2（检索 + 搜索 API）已验收通过（P0；p99/并发 residual 见报告）**，已合并 `main`；Phase 1 已验收。
-- Phase 2 交付：`POST /api/v1/search`（vector/keyword/hybrid + RRF）、版本三模式过滤、SQL 层 docIds/version/chunkStrategy 过滤、citation、8 条 smoke QA、Windows `scripts/eval.ps1`、10k/策略性能脚本、MCP 低层注册 spike。Phase 3 的完整 40 条 QA 尚未开始。
-- 验收证据：[docs/acceptance/phase2-report.md](docs/acceptance/phase2-report.md)、[检索 smoke](docs/acceptance/phase2-smoke.md)、[MCP spike](docs/acceptance/phase2-mcp-spike.md)、[eval report](eval/report.md)。
+- 当前状态：**Phase 3（正式评测 + 性能补测）已实现，等待验收**；分支 `phase3`，不合并 `main`。Phase 1/2 已验收。
+- Phase 3 交付：`eval/qa.jsonl` 40 条（35 可回答 + 5 不可回答，覆盖 v2025/v2024/enterprise）、fixed/heading 正式评测、gold 结构校验脚本、T-INT-EVAL-01、10k/策略 3 轮性能、10 并发 60s 脚本。heading hit@5=0.8857、MRR=0.6905；fixed hit@5=0.3429（如实报告，不改 gold）。
+- Phase 2 交付保持不变：`POST /api/v1/search`（vector/keyword/hybrid + RRF）、版本三模式过滤、SQL 层 docIds/version/chunkStrategy 过滤、citation、Windows `scripts/eval.ps1`、MCP 低层注册 spike。
+- 验收证据：[docs/acceptance/phase3-report.md](docs/acceptance/phase3-report.md)、[phase2-report](docs/acceptance/phase2-report.md)、[检索 smoke](docs/acceptance/phase2-smoke.md)、[MCP spike](docs/acceptance/phase2-mcp-spike.md)、[eval report](eval/report.md)、[perf](docs/acceptance/phase3-perf.json)、[concurrency](docs/acceptance/phase3-concurrency.json)。
 - Phase 1 交付保持不变：Flyway V1 六张表、PDF/DOCX/Markdown/TXT 解析 + Block 模型、FixedWindow/HeadingAware 两套切分、Ollama bge-m3 1024 维 embedding（批量、重试）、文档上传/列表/详情/删除 API、SHA-256 幂等与版本治理字段。
 
 ## 技术栈
@@ -205,35 +206,45 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\accept-phase1.
 
 > `scripts/accept-phase1.ps1` 的 “six tables” 期望顺序已在验收方提交 `ffa9368` 中修复；修复后 Gate 0/1/2 全部 PASS。最新证据见 `docs/acceptance/phase1-report.md` 第 2 节。
 
-## 评测（Phase 2 smoke）
+## 评测（Phase 3：40 条正式 QA）
 
-Phase 2 只做 8 条 smoke QA（`eval/qa.smoke.jsonl`），完整 40 条 QA 属 Phase 3，未编造 gold。
+`eval/qa.jsonl` 共 40 条：35 条可回答 + 5 条不可回答，覆盖 `hypertension-guideline` v2025（17）、`enterprise-internal-control` v2026（11）、`hypertension-guideline` v2024 历史（7，逐题 `asOf=2024-06-01`）。`eval/qa.smoke.jsonl` 保留为 8 条 smoke。
 
 前置：3 篇 `docs/samples/*.pdf` 已用 `chunkStrategies=fixed,heading` 入库，应用与 Ollama 已启动。
 
 ```powershell
+# gold 结构校验：逐题确认 clauseId/pageRange 在真实 DB 中存在
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\validate-gold.ps1
+
+# 正式评测：默认读 eval/qa.jsonl；-QaPath eval/qa.smoke.jsonl 可跑 smoke
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\eval.ps1
 ```
 
-- 分别跑 `fixed` / `heading`，输出 hit@1/3/5、MRR、p50/p95、errors，写 `eval/report.md` + `eval/report.json`。
-- 不可回答题单独统计 `falsePositiveRate` / `noAnswerAccuracy`，不混入 hit@k。
-- 匹配口径：`docKey` 相同；gold 有 `clauseId` 且结果也有 `clauseId` 时按 clause 匹配；结果没有 `clauseId` 时回退到 `pageRange`（fixed chunk 不携带 clause_id）。
-- 脚本用 `powershell.exe`（Windows PowerShell 5.1）可执行；执行策略用 `-ExecutionPolicy Bypass`。请求体显式 UTF-8，响应按原始字节 UTF-8 解码，避免中文乱码。
-- 当前 smoke：heading hit@5=1.0、MRR=0.7222；fixed hit@5=0.1667。fixed 明显差于 heading，是真实结果，不调 gold 改数字；Phase 3 再扩到 40 条并分析切分。
-- 2026-11-09 最后一次 smoke 延迟：fixed p50=139.07ms/p95=207.31ms；heading p50=152.81ms/p95=191.21ms；errors=0。
-- 退出码：有 HTTP/检索错误返回 1；指标阈值只报告，不因 smoke 指标未达标而伪造通过。
+- 分别跑 `fixed` / `heading`，输出 hit@1/3/5、MRR、p50/p95、errors，写 `eval/report.md` + `eval/report.json`（含 dataset sha256、git commit、embedding、chunk strategies、topK、逐题 rank/citation）。
+- 不可回答题单独统计 `falsePositiveRate` / `noAnswerAccuracy`，不混入 hit@k；errors 单独计数且不进 hit@k/MRR 分母。
+- 匹配口径：`docKey` 相同；gold 有 `clauseId` 且结果也有 `clauseId` 时按 clause 匹配；结果没有 `clauseId` 时回退 `pageRange`（fixed chunk 和部分企业 heading chunk 无 clause_id）。
+- 逐题可选 `asOf` / `includeSuperseded` 覆盖全局 `-AsOf`；2024 历史题即用此能力。
+- 脚本兼容 Windows PowerShell 5.1；请求用 `HttpClient` + 原始字节 UTF-8 解码（`Invoke-WebRequest` 曾在实测中出现 19.8s 客户端假延迟）。p50/p95 采用应用 `tookMs`，客户端 p95 在 JSON 的 `clientP95Ms`。
+- 2026-11-09 实测（40 条，382 chunks）：heading hit@1=0.5429、hit@3=0.8286、hit@5=0.8857、MRR=0.6905、p50=58ms、p95=141ms；fixed hit@5=0.3429、MRR=0.3214、p50=51ms、p95=106ms；errors=0。没有修改 gold 让指标达标。
+- 退出码：有 HTTP/检索错误返回 1；指标阈值只报告，不因 fixed 未达标而伪造通过。
 
 ## 性能
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\perf.ps1
+# 10k/策略，3 轮；写 docs/acceptance/phase3-perf.json
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\perf.ps1 -Rounds 3
+
+# 10 并发 60s；写 docs/acceptance/phase3-concurrency.json
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\perf-concurrency.ps1 -DurationSeconds 60
 ```
 
-- 默认每套策略 10,000 chunks（fixed 10k + heading 10k = 20k），每策略 50 次 API 端到端请求（含真实 bge-m3 query embedding），topK=5，hybrid。
-- 结果写 `docs/acceptance/phase2-perf.json`；脚本结束删除 synthetic 数据，不污染演示库。
-- 2026-11-09 实测（重复两次，均达标；取最后一次）：fixed p50=106.93ms / p95=210.84ms；heading p50=232.04ms / p95=300.50ms；0 errors。p50/p95 均低于 docs/05 的 250ms/800ms 目标。
+- 10k/策略（fixed 10k + heading 10k = 20k，另 382 真实 chunks），每轮每策略 50 次，10 次 warm-up，topK=5，hybrid，真实 bge-m3 embedding；插入前后 `VACUUM (ANALYZE)` 避免 autovacuum 干扰。
+- 2026-11-09 最终 3 轮 p95/p99：fixed 42.72/97.19、64.62/91.87、120.88/136.88ms；heading 33.28/39.51、121.71/131.54、88.21/93.50ms；全部 <250ms/<800ms/<1500ms，0 errors。详见 [phase3-perf.json](docs/acceptance/phase3-perf.json)。
+- **关键修复**：原先 `kb_chunk JOIN kb_document ORDER BY embedding <=> ?` 被 PostgreSQL 规划成 nested loop + 全量 top-N sort，HNSW 实际没被使用；10k 时串行尚可、10 并发会打满 DB。现在先在 SQL 层解析 eligible docIds，再在 `kb_chunk` 上走 HNSW（`document_id IN (...) AND chunk_strategy=?`），最后只为候选取文档元数据；`EXPLAIN` 走 `idx_kb_chunk_embedding`。embedding 并发池也从固定 2 改为可配置 `app.embedding.max-concurrent-calls=10`。
+- 10 并发 60s 实测三次：requests 2076/2851/1803，errors 0（错误率 0%），p50 157/136/130ms，p95 **808.59 / 552.07 / 1129.14ms**，p99 1233.82/991.34/4679.77ms。**错误率达标，p95 未稳定 <800ms**；长尾与直接对 Ollama `/api/embed` 做 10 并发的 p99≈3.0s 同量级，GC 最大 pause 45ms、Hikari 无失败，判定为 embedding 排队/长尾而非 SQL/GC。详见 [phase3-concurrency.json](docs/acceptance/phase3-concurrency.json) 与 [phase3-report.md](docs/acceptance/phase3-report.md) 第 5 节。
+- `hnsw-iterative-scan=false` 实测没有收益（heading p95=473ms、p99=1032ms，默认 true 为 33~122/39~137ms），且存在 under-return 风险，保持默认 true。
 - 口径：10k 是**每套策略**，两套合计 20k；入库 30s 是**每套策略**，两套合计 <60s。详见 [docs/05-non-functional.md](docs/05-non-functional.md) 2.1/2.2。
-- 注意：synthetic chunks 从现有真实 chunk 的向量池循环取样，性能数字衡量 SQL/HTTP/RRF 延迟，不代表检索质量；重复测量有波动，报告记录两次结果。
+- synthetic chunks 从真实 chunk 向量池循环取样，只衡量 SQL/HTTP/RRF/embedding 延迟，不代表检索质量；本机数字不承诺跨机复现。
 
 ## MCP 低层 Spike
 
@@ -249,10 +260,12 @@ Phase 2 只在 test scope 验证 Spring AI 1.1.8 的低层 `SyncToolSpecificatio
 2. **T-VERSION-01 属检索断言**：`docs/06-test-plan.md` 把它描述为“默认检索只返回新版”；Phase 2 已用 `SearchIntegrationTest` 覆盖默认 ACTIVE/历史 asOf/includeSuperseded。
 3. **表格跨页**：v1 不合并跨页/多栏表格；超长表格按行切并重复表头；这是已知降级，不对指标做承诺。
 4. **`@Disabled`**：没有长期禁用测试；`OllamaEmbeddingSmokeTest` 用 `@EnabledIfEnvironmentVariable` 条件跳过，属于手动真实模型 smoke，不是被禁用的失败测试。
-5. **fixed chunk 无 clause_id**：Phase 1 的 FixedWindowChunker 不写 `clause_id`/`clause_path`，所以 fixed 检索结果 citation 省略章节段；heading 有章节。评测的 fixed/heading 对比要按这个口径看。
-6. **PDF 双栏标题噪声**：2025 版 PDF 是双栏排版，Phase 1 的标题识别会把一些数值/页眉误识别成 `clausePath`（例如 “90 mmHg”）。检索忠实使用落库的 `clausePath`，Phase 2 不改 Phase 1 解析器；Phase 3 可再评估标题解析。
-7. **Phase 2 范围**：没有 WorkItem/Approval/Mandate、生产 MCP、前端、聊天、agent 编排、评测 UI；完整 40 条 QA 与 `@Tag("perf")` CI job 留 Phase 3/后续。
-8. **性能口径**：10k/策略是本地 Docker + Ollama 实测；不承诺在其它机器复现同一数字，但脚本可复现测量方法。
+5. **fixed chunk 无 clause_id**：Phase 1 的 FixedWindowChunker 不写 `clause_id`/`clause_path`，所以 fixed 检索结果 citation 省略章节段；heading 有章节。fixed 的 600-token 窗口以起始页为 `page_no`，答案页可能在窗口内部，eval 的 pageRange 回退会 miss；因此 fixed hit@5=0.3429 是真实结果，未改 gold。
+6. **PDF 双栏标题噪声**：2025 版 PDF 是双栏排版，Phase 1 的标题识别会把一些数值/页眉误识别成 `clausePath`（例如 “90 mmHg”）。检索忠实使用落库的 `clausePath`；gold 优先用稳定 `clauseId`，Q03 这类 clause 不稳定的题只用 `pageRange`。citation 抽查见 [phase3-report.md](docs/acceptance/phase3-report.md) 第 4 节。
+7. **企业内控 heading 无 clause_id**：该文档 11 条题只能按 `pageRange` 匹配，粒度比 clause 粗；这是数据/解析事实，不是 gold 放宽。
+8. **10 并发 p95 未稳定达标**：错误率 0%，p50≈130-157ms，但三次 60s 的 p95 为 808/552/1129ms。根因主要是 Ollama embedding 长尾（直接 10 并发 p99≈3.0s），GC 最大 pause 45ms、Hikari 无失败。要硬保证需缓存/限流/专用推理，本轮不做。
+9. **性能口径**：10k/策略是本地 Docker + Ollama 实测；不承诺在其它机器复现同一数字，但脚本可复现测量方法。p99 受 PostgreSQL checkpoint/autovacuum 与 Ollama 影响，报告已记录。
+10. **Phase 3 范围**：没有 WorkItem/Approval/Mandate、生产 MCP、前端、聊天、agent 编排、评测 UI；未合并 main。
 
 ## 目录
 
@@ -265,10 +278,14 @@ src/main/java/com/lqx/ragmcp/
   embedding/    # EmbeddingService + Spring AI Ollama 实现 + health indicator
   parse/        # Block 模型、PDF/DOCX/MD/TXT 解析
   config/       # 配置属性
+  eval/         # QA dataset/gold matcher/scorer/eval service
 src/main/resources/db/migration/V1__init.sql
 src/test/java/  # 单元 + Testcontainers 集成 + 条件真实 Ollama smoke + MCP spike
-scripts/        # accept-phase1.ps1 / eval.ps1 / perf.ps1 / smoke-phase2.ps1
-eval/           # qa.smoke.jsonl + report.md/json
+scripts/        # accept-phase1.ps1 / eval.ps1 / validate-gold.ps1 / perf.ps1 / perf-concurrency.ps1 / smoke-phase2.ps1
+eval/           # qa.jsonl + qa.smoke.jsonl + report.md/json
 docs/acceptance/phase2-report.md
+docs/acceptance/phase3-report.md
+docs/acceptance/phase3-perf.json
+docs/acceptance/phase3-concurrency.json
 ```
 

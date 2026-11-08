@@ -44,6 +44,13 @@
 > Phase 2 实测：fixed 10k + heading 10k（合计 20k），50 次/策略 API 端到端
 > （含真实 bge-m3 query embedding），p50/p95 见 `docs/acceptance/phase2-report.md`。
 > **注意**：Phase 2 是串行 50 次/策略的基线；p95 稳定达标，p99 有环境方差，10 并发/60s（T-PERF-02）留 Phase 3。
+>
+> **Phase 3 更新（2026-11-09）**：10k/策略 3 轮实测 p95=42.72/64.62/120.88ms（fixed）、33.28/121.71/88.21ms（heading），
+> p99=97.19/91.87/136.88ms、39.51/131.54/93.50ms，全部 <800ms/<1500ms，0 errors。
+> 关键修复：原 JOIN 查询被规划成 nested loop + 全量 top-N sort，HNSW 未生效；现改为 SQL 层解析 eligible docIds 后
+> 在 `kb_chunk` 上走 HNSW，详见 `docs/acceptance/phase3-report.md` 5.3。
+> 10 并发 60s 三次：错误率 0%，p50≈130~157ms，p95=808.59/552.07/1129.14ms —— **错误率达标，p95 未稳定 <800ms**；
+> 长尾与 Ollama embedding 直接 10 并发的 p99≈3.0s 同量级，属残余风险。
 
 延迟预算（p95）：
 
@@ -100,6 +107,17 @@
 | 无答案误报率 | 记录，不设硬门槛 | 5 条不可回答题单独统计 |
 | 失败/超时 | 单独计数 | 不能当 miss/丢弃 |
 
+Phase 3 实测（`eval/qa.jsonl` 40 条，382 chunks，2026-11-09）：
+
+| chunkStrategy | hit@1 | hit@3 | hit@5 | MRR | errors |
+|---|---:|---:|---:|---:|---:|
+| fixed | 0.3143 | 0.3143 | 0.3429 | 0.3214 | 0 |
+| heading | 0.5429 | 0.8286 | **0.8857** | **0.6905** | 0 |
+
+heading 达到 hit@5≥0.85、MRR≥0.65；fixed 低是固定窗口无 clause 元数据、page_no 为窗口起始页的真实结果，
+未修改 gold。不可回答题两策略均 `falsePositiveRate=1.0`（hybrid 总返回 topK），按约定只记录、不设硬门槛。
+详见 [docs/acceptance/phase3-report.md](acceptance/phase3-report.md) 第 3 节。
+
 公式、QA schema、gold 匹配口径见 [11-retrieval-and-eval-spec.md](11-retrieval-and-eval-spec.md)。
 
 ---
@@ -123,8 +141,9 @@
 - Tomcat 默认线程池即可；不额外造线程池。
 - HikariCP：`maximumPoolSize=10`，`connectionTimeout=5s`。
 - Ollama HTTP 客户端：连接超时 5s，读超时 120s。
+- Embedding 执行池：`app.embedding.max-concurrent-calls`（默认 10；Phase 3 从固定 2 调整）。10 并发检索不再被 2 个线程串行化。
 - 同步入库：同一文档串行；不同文档可并行，但 v1 不追求。
-- 检索：无状态，可并行。
+- 检索：无状态，可并行。向量路先解析 eligible docIds 再走 HNSW（避免 JOIN 导致全量排序），详见 Phase 3 报告 5.3。
 
 ### 4.2 内存
 
@@ -266,10 +285,10 @@
 
 性能/容错验收项：
 
-- AC-13：p95 检索 < 800ms（10k chunks）。
+- AC-13：p95 检索 < 800ms（10k chunks）。Phase 3 实测 3 轮均 <121.71ms，通过。
 - AC-14：Ollama 停止时入库/检索返回 503/504，不写脏数据。
 - AC-15：DB 停止时健康检查 DOWN，请求 503。
-- AC-16：10 并发检索错误率 < 1%。
+- AC-16：10 并发检索错误率 < 1%。Phase 3 三次 60s 均 0 errors；p95 目标见 2.1 的 Phase 3 残余说明（未稳定 <800ms）。
 - AC-17：WorkItem 创建/查看。
 - AC-18：批准生成 Mandate；拒绝/重复审批正确。
 - AC-19：无/过期/越权 mandate 100% 拒绝；合法 mandate 可检索。

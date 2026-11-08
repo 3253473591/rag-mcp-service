@@ -1,126 +1,127 @@
 {
-    "timestamp":  "2026-11-09T02:43:29.3301337+08:00",
-    "gitCommit":  "554ca11f16b1aca33d407d516f5015394dc4a900",
+    "timestamp":  "2026-11-09T02:51:43.6916311+08:00",
+    "gitCommit":  "c1668c2890022e97c3593c3cb2061e5b53f040f5",
     "pgvectorVersion":  "0.8.7",
     "baseUrl":  "http://127.0.0.1:8080",
     "concurrency":  10,
     "durationSeconds":  60,
     "chunkStrategy":  "heading",
     "searchStrategy":  "hybrid",
+    "warmupRequests":  50,
     "chunksPerStrategy":  10000,
     "totalSyntheticChunks":  20000,
-    "requests":  2851,
-    "successes":  2851,
+    "requests":  1803,
+    "successes":  1803,
     "errors":  0,
     "errorRate":  0,
-    "clientP50Ms":  135.97,
-    "clientP95Ms":  552.07,
-    "clientP99Ms":  991.34,
-    "clientMaxMs":  1217.65,
-    "serverP50Ms":  132,
-    "serverP95Ms":  547,
-    "serverP99Ms":  989,
-    "serverMaxMs":  1216,
+    "clientP50Ms":  129.95,
+    "clientP95Ms":  1129.14,
+    "clientP99Ms":  4679.77,
+    "clientMaxMs":  5848.26,
+    "serverP50Ms":  127,
+    "serverP95Ms":  1097,
+    "serverP99Ms":  4315,
+    "serverMaxMs":  5843,
     "avgResults":  5,
     "minResults":  5,
     "maxResults":  5,
     "workers":  [
                     {
                         "worker":  1,
-                        "requests":  280,
+                        "requests":  195,
                         "errors":  0,
-                        "clientP95Ms":  552.07,
-                        "serverP95Ms":  547,
+                        "clientP95Ms":  1085.71,
+                        "serverP95Ms":  1083,
                         "messages":  [
 
                                      ]
                     },
                     {
                         "worker":  10,
-                        "requests":  313,
+                        "requests":  190,
                         "errors":  0,
-                        "clientP95Ms":  539.32,
-                        "serverP95Ms":  528,
+                        "clientP95Ms":  942.21,
+                        "serverP95Ms":  931,
                         "messages":  [
 
                                      ]
                     },
                     {
                         "worker":  2,
-                        "requests":  280,
+                        "requests":  188,
                         "errors":  0,
-                        "clientP95Ms":  528.21,
-                        "serverP95Ms":  515,
+                        "clientP95Ms":  1189.57,
+                        "serverP95Ms":  1184,
                         "messages":  [
 
                                      ]
                     },
                     {
                         "worker":  3,
-                        "requests":  278,
+                        "requests":  179,
                         "errors":  0,
-                        "clientP95Ms":  592.75,
-                        "serverP95Ms":  590,
+                        "clientP95Ms":  1138,
+                        "serverP95Ms":  1132,
                         "messages":  [
 
                                      ]
                     },
                     {
                         "worker":  4,
-                        "requests":  268,
+                        "requests":  170,
                         "errors":  0,
-                        "clientP95Ms":  549.82,
-                        "serverP95Ms":  543,
+                        "clientP95Ms":  1136.69,
+                        "serverP95Ms":  1129,
                         "messages":  [
 
                                      ]
                     },
                     {
                         "worker":  5,
-                        "requests":  274,
+                        "requests":  164,
                         "errors":  0,
-                        "clientP95Ms":  578.92,
-                        "serverP95Ms":  575,
+                        "clientP95Ms":  1170.35,
+                        "serverP95Ms":  1163,
                         "messages":  [
 
                                      ]
                     },
                     {
                         "worker":  6,
-                        "requests":  272,
+                        "requests":  163,
                         "errors":  0,
-                        "clientP95Ms":  575.61,
-                        "serverP95Ms":  572,
+                        "clientP95Ms":  1255.39,
+                        "serverP95Ms":  1225,
                         "messages":  [
 
                                      ]
                     },
                     {
                         "worker":  7,
-                        "requests":  273,
+                        "requests":  173,
                         "errors":  0,
-                        "clientP95Ms":  593.49,
-                        "serverP95Ms":  591,
+                        "clientP95Ms":  1129.14,
+                        "serverP95Ms":  1123,
                         "messages":  [
 
                                      ]
                     },
                     {
                         "worker":  8,
-                        "requests":  284,
+                        "requests":  187,
                         "errors":  0,
-                        "clientP95Ms":  568.84,
-                        "serverP95Ms":  557,
+                        "clientP95Ms":  1058.38,
+                        "serverP95Ms":  1052,
                         "messages":  [
 
                                      ]
                     },
                     {
                         "worker":  9,
-                        "requests":  329,
+                        "requests":  194,
                         "errors":  0,
-                        "clientP95Ms":  543.48,
-                        "serverP95Ms":  534,
+                        "clientP95Ms":  1152.75,
+                        "serverP95Ms":  956,
                         "messages":  [
 
                                      ]

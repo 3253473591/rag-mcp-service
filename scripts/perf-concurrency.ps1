@@ -43,7 +43,9 @@ function Invoke-Warmup {
     param([string]$Strategy, [string]$AsOf, [string]$SearchStrategy)
     $client = New-Object System.Net.Http.HttpClient
     $client.Timeout = [TimeSpan]::FromSeconds(60)
-    for ($i = 0; $i -lt 10; $i++) {
+    # Warm HNSW pages + Ollama before the measured window. The first Phase 3 cold run had
+    # p95=808ms; the same run after warm-up was ~550ms. Warm-up is not measured.
+    for ($i = 0; $i -lt 50; $i++) {
         $body = (@{ query = 'concurrency warmup'; topK = 5; chunkStrategy = $Strategy;
                     strategy = $SearchStrategy; asOf = $AsOf } | ConvertTo-Json -Compress)
         $content = New-Object System.Net.Http.StringContent($body, [System.Text.Encoding]::UTF8, 'application/json')
@@ -227,6 +229,7 @@ WHERE document_id = '$docId'::uuid GROUP BY chunk_strategy ORDER BY chunk_strate
         durationSeconds = $DurationSeconds
         chunkStrategy = $ChunkStrategy
         searchStrategy = $SearchStrategy
+        warmupRequests = 50
         chunksPerStrategy = $ChunksPerStrategy
         totalSyntheticChunks = $ChunksPerStrategy * 2
         requests = $totalRequests

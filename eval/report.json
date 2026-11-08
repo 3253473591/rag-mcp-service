@@ -1,26 +1,42 @@
-﻿{
-    "timestamp":  "2026-11-09T01:31:47.1952944+08:00",
-    "dataset":  "eval/qa.smoke.jsonl",
-    "datasetSha256":  "bcfda68329001167abebc96a42038a28b34ecd56a59f4332d265577e9e6b2eea",
-    "gitCommit":  "31056a32bdd12d961f5c9ed7a257deda57b51a6d",
+{
+    "timestamp":  "2026-11-09T02:49:25.4848486+08:00",
+    "dataset":  "eval/qa.jsonl",
+    "datasetSha256":  "1487e261b728debd22a876d31016f376efeb40932d8888d45d2d15b91a15af4c",
+    "gitCommit":  "c1668c2890022e97c3593c3cb2061e5b53f040f5",
+    "gitDirty":  false,
     "embedding":  "bge-m3",
+    "embeddingDimension":  1024,
     "topK":  5,
     "asOf":  "2026-11-09",
-    "qaCount":  8,
-    "answerable":  6,
-    "unanswerable":  2,
+    "includeSuperseded":  false,
+    "chunkStrategies":  [
+                            "fixed",
+                            "heading"
+                        ],
+    "qaCount":  40,
+    "answerable":  35,
+    "unanswerable":  5,
     "strategies":  [
                        {
                            "chunkStrategy":  "fixed",
-                           "hitAt1":  0.1667,
-                           "hitAt3":  0.1667,
-                           "hitAt5":  0.1667,
-                           "mrr":  0.1667,
-                           "p50Ms":  49.93,
-                           "p95Ms":  75.33,
+                           "answered":  35,
+                           "answerableErrors":  0,
+                           "unanswerableAnswered":  5,
+                           "unanswerableErrors":  0,
+                           "hit1":  11,
+                           "hit3":  11,
+                           "hit5":  12,
+                           "hitAt1":  0.3143,
+                           "hitAt3":  0.3143,
+                           "hitAt5":  0.3429,
+                           "mrr":  0.3214,
+                           "p50Ms":  51,
+                           "p95Ms":  106,
+                           "clientP50Ms":  62.47,
+                           "clientP95Ms":  120.31,
                            "errors":  0,
-                           "answered":  6,
-                           "unanswered":  2,
+                           "answeredCount":  35,
+                           "unansweredCount":  5,
                            "falsePositiveRate":  1,
                            "noAnswerAccuracy":  0,
                            "hit5ThresholdMet":  false,
@@ -28,15 +44,24 @@
                        },
                        {
                            "chunkStrategy":  "heading",
-                           "hitAt1":  0.5,
-                           "hitAt3":  1,
-                           "hitAt5":  1,
-                           "mrr":  0.7222,
-                           "p50Ms":  69.05,
-                           "p95Ms":  80.96,
+                           "answered":  35,
+                           "answerableErrors":  0,
+                           "unanswerableAnswered":  5,
+                           "unanswerableErrors":  0,
+                           "hit1":  19,
+                           "hit3":  29,
+                           "hit5":  31,
+                           "hitAt1":  0.5429,
+                           "hitAt3":  0.8286,
+                           "hitAt5":  0.8857,
+                           "mrr":  0.6905,
+                           "p50Ms":  58,
+                           "p95Ms":  141,
+                           "clientP50Ms":  62.48,
+                           "clientP95Ms":  154.2,
                            "errors":  0,
-                           "answered":  6,
-                           "unanswered":  2,
+                           "answeredCount":  35,
+                           "unansweredCount":  5,
                            "falsePositiveRate":  1,
                            "noAnswerAccuracy":  0,
                            "hit5ThresholdMet":  true,
@@ -46,51 +71,1298 @@
     "details":  [
                     {
                         "chunkStrategy":  "fixed",
-                        "id":  "S01",
+                        "id":  "Q01",
                         "answerable":  true,
                         "rank":  0,
                         "results":  5,
-                        "error":  false
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  158.63,
+                        "serverMs":  144,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页"
+                                           }
+                                       ]
                     },
                     {
                         "chunkStrategy":  "fixed",
-                        "id":  "S02",
+                        "id":  "Q02",
                         "answerable":  true,
                         "rank":  0,
                         "results":  5,
-                        "error":  false
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  120.31,
+                        "serverMs":  113,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页"
+                                           }
+                                       ]
                     },
                     {
                         "chunkStrategy":  "fixed",
-                        "id":  "S03",
+                        "id":  "Q03",
                         "answerable":  true,
                         "rank":  0,
                         "results":  5,
-                        "error":  false
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  50.84,
+                        "serverMs":  45,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页"
+                                           }
+                                       ]
                     },
                     {
                         "chunkStrategy":  "fixed",
-                        "id":  "S04",
+                        "id":  "Q04",
                         "answerable":  true,
                         "rank":  0,
                         "results":  5,
-                        "error":  false
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  56.98,
+                        "serverMs":  51,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第2页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  2,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第2页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  2,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第2页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页"
+                                           }
+                                       ]
                     },
                     {
                         "chunkStrategy":  "fixed",
-                        "id":  "S05",
+                        "id":  "Q05",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  53.02,
+                        "serverMs":  47,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q06",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  50.52,
+                        "serverMs":  44,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  10,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第10页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q07",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  48.35,
+                        "serverMs":  43,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第2页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  2,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第2页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  2,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第2页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q08",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  72.96,
+                        "serverMs":  67,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q09",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  44.56,
+                        "serverMs":  38,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  13,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第13页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q10",
                         "answerable":  true,
                         "rank":  1,
                         "results":  5,
-                        "error":  false
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  101.97,
+                        "serverMs":  96,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第6页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  6,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第6页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  2,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第2页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  9,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第9页"
+                                           }
+                                       ]
                     },
                     {
                         "chunkStrategy":  "fixed",
-                        "id":  "S06",
+                        "id":  "Q11",
+                        "answerable":  true,
+                        "rank":  4,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  82.93,
+                        "serverMs":  77,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第2页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  2,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第2页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  10,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第10页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  10,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第10页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q12",
                         "answerable":  true,
                         "rank":  0,
                         "results":  5,
-                        "error":  false
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  82.1,
+                        "serverMs":  76,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第6页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  6,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第6页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  9,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第9页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  6,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第6页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q13",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  112.34,
+                        "serverMs":  106,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第9页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  9,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第9页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  13,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第13页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  9,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第9页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q14",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  95.66,
+                        "serverMs":  89,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第13页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  13,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第13页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  13,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第13页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q15",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  58.38,
+                        "serverMs":  48,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第13页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  13,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第13页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  13,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第13页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  2,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第2页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q16",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  48.24,
+                        "serverMs":  39,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第13页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  13,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第13页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第3页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  2,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第2页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q17",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  120.44,
+                        "serverMs":  101,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第13页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  13,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第13页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  2,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第2页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  2,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第2页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q18",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  70.63,
+                        "serverMs":  60,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q19",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  50.21,
+                        "serverMs":  44,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q20",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  40.21,
+                        "serverMs":  35,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q21",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  41.38,
+                        "serverMs":  35,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q22",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  45.51,
+                        "serverMs":  38,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q23",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  87.01,
+                        "serverMs":  75,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q24",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  117.38,
+                        "serverMs":  100,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q25",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  101.17,
+                        "serverMs":  95,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q26",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  94.7,
+                        "serverMs":  84,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q27",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  62.47,
+                        "serverMs":  51,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q28",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  43.46,
+                        "serverMs":  37,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q29",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  4,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  49.02,
+                        "serverMs":  43,
+                        "asOf":  "2024-06-01",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q30",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  4,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  53.21,
+                        "serverMs":  47,
+                        "asOf":  "2024-06-01",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q31",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  4,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  69.94,
+                        "serverMs":  59,
+                        "asOf":  "2024-06-01",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q32",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  4,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  38.93,
+                        "serverMs":  34,
+                        "asOf":  "2024-06-01",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q33",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  4,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  44.16,
+                        "serverMs":  37,
+                        "asOf":  "2024-06-01",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q34",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  4,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  85.74,
+                        "serverMs":  78,
+                        "asOf":  "2024-06-01",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "Q35",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  4,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  65.04,
+                        "serverMs":  59,
+                        "asOf":  "2024-06-01",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 第1页"
+                                           }
+                                       ]
                     },
                     {
                         "chunkStrategy":  "fixed",
@@ -98,7 +1370,36 @@
                         "answerable":  false,
                         "rank":  0,
                         "results":  5,
-                        "error":  false
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  39.16,
+                        "serverMs":  32,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           }
+                                       ]
                     },
                     {
                         "chunkStrategy":  "fixed",
@@ -106,55 +1407,1442 @@
                         "answerable":  false,
                         "rank":  0,
                         "results":  5,
-                        "error":  false
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  39.01,
+                        "serverMs":  32,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "N03",
+                        "answerable":  false,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  72.47,
+                        "serverMs":  66,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第13页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  13,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第13页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  13,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第13页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "N04",
+                        "answerable":  false,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  91.97,
+                        "serverMs":  81,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "N05",
+                        "answerable":  false,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  107,
+                        "serverMs":  99,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第2页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  2,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第2页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  15,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第15页"
+                                           }
+                                       ]
                     },
                     {
                         "chunkStrategy":  "heading",
-                        "id":  "S01",
+                        "id":  "Q01",
                         "answerable":  true,
                         "rank":  2,
                         "results":  5,
-                        "error":  false
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  96.94,
+                        "serverMs":  85,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 90 mmHg \u003e 第4页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "90",
+                                               "pageNo":  4,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 90 mmHg \u003e 第4页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "4.2.1",
+                                               "pageNo":  4,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 180 mmHg \u003e 4.2  高血压诊断标准 \u003e 4.2.1  诊断标准 \u003e 第4页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "30",
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 30 min \u003e 第3页"
+                                           }
+                                       ]
                     },
                     {
                         "chunkStrategy":  "heading",
-                        "id":  "S02",
+                        "id":  "Q02",
+                        "answerable":  true,
+                        "rank":  2,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  46.35,
+                        "serverMs":  40,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 180 mmHg \u003e 4.2  高血压诊断标准 \u003e 4.2.3  血压分类 \u003e 第4页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "4.2.3",
+                                               "pageNo":  4,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 180 mmHg \u003e 4.2  高血压诊断标准 \u003e 4.2.3  血压分类 \u003e 第4页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "4.2.1",
+                                               "pageNo":  4,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 180 mmHg \u003e 4.2  高血压诊断标准 \u003e 4.2.1  诊断标准 \u003e 第4页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "90",
+                                               "pageNo":  4,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 90 mmHg \u003e 第4页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q03",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  44.47,
+                        "serverMs":  39,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 90 mmHg \u003e 第4页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "90",
+                                               "pageNo":  4,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 90 mmHg \u003e 第4页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "1",
+                                               "pageNo":  4,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 1 min，取两次的平 \u003e 第4页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "3",
+                                               "pageNo":  4,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 3 d、至少 \u003e 第4页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q04",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  31.31,
+                        "serverMs":  26,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 2  基层高血压诊疗管理流程 \u003e 第2页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "2",
+                                               "pageNo":  2,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 2  基层高血压诊疗管理流程 \u003e 第2页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "4.2.1",
+                                               "pageNo":  4,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 180 mmHg \u003e 4.2  高血压诊断标准 \u003e 4.2.1  诊断标准 \u003e 第4页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "5.3",
+                                               "pageNo":  5,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 85 mmHg \u003e 5.3  生活方式干预 \u003e 第5页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q05",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  52.22,
+                        "serverMs":  46,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 180 mmHg \u003e 4.2  高血压诊断标准 \u003e 第4页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "4.2",
+                                               "pageNo":  4,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 180 mmHg \u003e 4.2  高血压诊断标准 \u003e 第4页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "5.4.7",
+                                               "pageNo":  9,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 25 mg，口服，1 h \u003e 5.4.7  特殊情况的处理 \u003e 第9页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "5.4.6.1",
+                                               "pageNo":  9,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 25 mg，口服，1 h \u003e 5.4.6  血压≥ \u003e 5.4.6.1  血压≥ \u003e 第9页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q06",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  38.87,
+                        "serverMs":  32,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 180 mmHg \u003e 4.2  高血压诊断标准 \u003e 4.2.3  血压分类 \u003e 第4页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "4.2.3",
+                                               "pageNo":  4,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 180 mmHg \u003e 4.2  高血压诊断标准 \u003e 4.2.3  血压分类 \u003e 第4页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "3",
+                                               "pageNo":  4,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 3 d、至少 \u003e 第4页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "90",
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 90 mmHg。△：“和（或）”的意义同 \u003e 第3页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q07",
+                        "answerable":  true,
+                        "rank":  2,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  43.64,
+                        "serverMs":  38,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 3  诊疗关键点 \u003e 1.1  组建管理团队 \u003e 第2页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "1.1",
+                                               "pageNo":  2,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 3  诊疗关键点 \u003e 1.1  组建管理团队 \u003e 第2页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "5.1",
+                                               "pageNo":  5,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 5  高血压治疗 \u003e 5.1  治疗原则 \u003e 第5页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "7",
+                                               "pageNo":  14,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 7  健康教育内容 \u003e 第14页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q08",
                         "answerable":  true,
                         "rank":  3,
                         "results":  5,
-                        "error":  false
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  47.88,
+                        "serverMs":  39,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 90 mmHg。△：“和（或）”的意义同 \u003e 第3页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "90",
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 90 mmHg。△：“和（或）”的意义同 \u003e 第3页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "5.2",
+                                               "pageNo":  5,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 85 mmHg \u003e 5.2  降压目标 \u003e 第5页"
+                                           }
+                                       ]
                     },
                     {
                         "chunkStrategy":  "heading",
-                        "id":  "S03",
-                        "answerable":  true,
-                        "rank":  1,
-                        "results":  5,
-                        "error":  false
-                    },
-                    {
-                        "chunkStrategy":  "heading",
-                        "id":  "S04",
-                        "answerable":  true,
-                        "rank":  1,
-                        "results":  5,
-                        "error":  false
-                    },
-                    {
-                        "chunkStrategy":  "heading",
-                        "id":  "S05",
+                        "id":  "Q09",
                         "answerable":  true,
                         "rank":  2,
                         "results":  5,
-                        "error":  false
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  43.48,
+                        "serverMs":  37,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 5  高血压治疗 \u003e 5.1  治疗原则 \u003e 第5页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "5.1",
+                                               "pageNo":  5,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 5  高血压治疗 \u003e 5.1  治疗原则 \u003e 第5页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "5.3",
+                                               "pageNo":  5,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 85 mmHg \u003e 5.3  生活方式干预 \u003e 第5页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "3",
+                                               "pageNo":  5,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 3  生活方式干预目标及降压效果 \u003e 第5页"
+                                           }
+                                       ]
                     },
                     {
                         "chunkStrategy":  "heading",
-                        "id":  "S06",
+                        "id":  "Q10",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  72.32,
+                        "serverMs":  67,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 20 mg/ \u003e 12.5 mg) \u003e 5.4.3.1  \u003c80 \u003e 第8页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "5.4.3.1",
+                                               "pageNo":  8,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 20 mg/ \u003e 12.5 mg) \u003e 5.4.3.1  \u003c80 \u003e 第8页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "12.5",
+                                               "pageNo":  8,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 20 mg/ \u003e 12.5 mg) \u003e 第8页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "5",
+                                               "pageNo":  9,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 5  有合并症 \u003e 第9页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q11",
+                        "answerable":  true,
+                        "rank":  3,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  98.22,
+                        "serverMs":  88,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 5 mmHg，死亡风险降低 \u003e 1.3  保障基本药物 \u003e 第2页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "1.3",
+                                               "pageNo":  2,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 5 mmHg，死亡风险降低 \u003e 1.3  保障基本药物 \u003e 第2页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "5.4.3.2",
+                                               "pageNo":  8,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 90 mmHg；▲：B \u003e 5.4.3.2  有合并症的高血压药物治疗方案（表 \u003e 第8页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "5.4.2",
+                                               "pageNo":  6,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 28 kg/m2 \u003e 5.4  降压药物治疗 \u003e 5.4.2  降压药物选择 \u003e 第6页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q12",
                         "answerable":  true,
                         "rank":  1,
                         "results":  5,
-                        "error":  false
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  132.97,
+                        "serverMs":  117,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 20 mg/ \u003e 12.5 mg) \u003e 5.4.3.1  \u003c80 \u003e 第8页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "5.4.3.1",
+                                               "pageNo":  8,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 20 mg/ \u003e 12.5 mg) \u003e 5.4.3.1  \u003c80 \u003e 第8页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "5",
+                                               "pageNo":  9,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 5  有合并症 \u003e 第9页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "90",
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 90 mmHg。△：“和（或）”的意义同 \u003e 第3页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q13",
+                        "answerable":  true,
+                        "rank":  2,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  113.9,
+                        "serverMs":  102,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 25 mg，口服，1 h \u003e 5.4.5  已用药患者的治疗方案调整建议 \u003e 5.4.6.2  血压≥ \u003e 第9页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "5.4.6.2",
+                                               "pageNo":  9,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 25 mg，口服，1 h \u003e 5.4.5  已用药患者的治疗方案调整建议 \u003e 5.4.6.2  血压≥ \u003e 第9页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "5.4.6.1",
+                                               "pageNo":  9,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 25 mg，口服，1 h \u003e 5.4.6  血压≥ \u003e 5.4.6.1  血压≥ \u003e 第9页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "5.4.6",
+                                               "pageNo":  9,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 25 mg，口服，1 h \u003e 5.4.6  血压≥ \u003e 第9页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q14",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  148.53,
+                        "serverMs":  139,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 8  高血压长期随访管理 \u003e 8.1  随访频率 \u003e 第13页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "8.1",
+                                               "pageNo":  13,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 8  高血压长期随访管理 \u003e 8.1  随访频率 \u003e 第13页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "6.3.7",
+                                               "pageNo":  12,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 20 g、川牛膝 \u003e 6.3.7  中药代茶饮 \u003e 第12页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "110",
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 110 mmHg \u003e 第3页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q15",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  166.41,
+                        "serverMs":  152,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 2  基层高血压诊疗管理流程 \u003e 第2页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "2",
+                                               "pageNo":  2,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 2  基层高血压诊疗管理流程 \u003e 第2页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "10.1",
+                                               "pageNo":  13,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 10  健康教育 \u003e 10.1  基本要求 \u003e 第13页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "6.3.7",
+                                               "pageNo":  12,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 20 g、川牛膝 \u003e 6.3.7  中药代茶饮 \u003e 第12页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q16",
+                        "answerable":  true,
+                        "rank":  2,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  118.8,
+                        "serverMs":  112,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 85 mmHg \u003e 5.3  生活方式干预 \u003e 第5页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "5.3",
+                                               "pageNo":  5,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 85 mmHg \u003e 5.3  生活方式干预 \u003e 第5页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "9.1",
+                                               "pageNo":  13,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 9  筛查与预防 \u003e 9.1  筛查方式 \u003e 第13页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "4.2",
+                                               "pageNo":  4,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 180 mmHg \u003e 4.2  高血压诊断标准 \u003e 第4页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q17",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  109.27,
+                        "serverMs":  104,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 3  诊疗关键点 \u003e 1.1  组建管理团队 \u003e 第2页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "1.1",
+                                               "pageNo":  2,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 3  诊疗关键点 \u003e 1.1  组建管理团队 \u003e 第2页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "2",
+                                               "pageNo":  2,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 2  基层高血压诊疗管理流程 \u003e 第2页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "5",
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 5 mmHg，死亡风险降低 \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q18",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  77.86,
+                        "serverMs":  72,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第三条 本规范所称内部控制，是由企业董事会、监事会、经理层和全体员工实施的、旨在实现控制目 \u003e 第2页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  2,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第三条 本规范所称内部控制，是由企业董事会、监事会、经理层和全体员工实施的、旨在实现控制目 \u003e 第2页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  2,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四条 企业建立与实施内部控制，应当遵循下列原则： \u003e 第2页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  2,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第五条 企业建立与实施有效的内部控制，应当包括下列要素： \u003e 第2页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q19",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  154.2,
+                        "serverMs":  141,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四条 企业建立与实施内部控制，应当遵循下列原则： \u003e 第2页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  2,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四条 企业建立与实施内部控制，应当遵循下列原则： \u003e 第2页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  2,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第五条 企业建立与实施有效的内部控制，应当包括下列要素： \u003e 第2页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  8,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四十七条 企业应当以书面或者其他适当的形式，妥善保存内部控制建立与实施过程中的相关记录或 \u003e 第8页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q20",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  197.97,
+                        "serverMs":  146,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第五条 企业建立与实施有效的内部控制，应当包括下列要素： \u003e 第2页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  2,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第五条 企业建立与实施有效的内部控制，应当包括下列要素： \u003e 第2页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  2,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四条 企业建立与实施内部控制，应当遵循下列原则： \u003e 第2页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  8,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四十七条 企业应当以书面或者其他适当的形式，妥善保存内部控制建立与实施过程中的相关记录或 \u003e 第8页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q21",
+                        "answerable":  true,
+                        "rank":  4,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  135.18,
+                        "serverMs":  119,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第二十四条 企业应当采用定性与定量相结合的方法，按照风险发生的可能性及其影响程度等，对识别 \u003e 第5页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  5,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第二十四条 企业应当采用定性与定量相结合的方法，按照风险发生的可能性及其影响程度等，对识别 \u003e 第5页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  5,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第二十七条 企业应当结合不同发展阶段和业务拓展情况，持续收集与风险变化相关的信息，进行风险 \u003e 第5页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  5,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第二十六条 企业应当综合运用风险规避、风险降低、风险分担和风险承受等风险应对策略，实现对风 \u003e 第5页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q22",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  109.22,
+                        "serverMs":  101,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第二十二条 企业识别内部风险，应当关注下列因素： \u003e 第4页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  4,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第二十二条 企业识别内部风险，应当关注下列因素： \u003e 第4页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  2,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四条 企业建立与实施内部控制，应当遵循下列原则： \u003e 第2页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  2,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第五条 企业建立与实施有效的内部控制，应当包括下列要素： \u003e 第2页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q23",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  74.12,
+                        "serverMs":  69,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第二十二条 企业识别内部风险，应当关注下列因素： \u003e 第4页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  4,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第二十二条 企业识别内部风险，应当关注下列因素： \u003e 第4页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  5,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第二十七条 企业应当结合不同发展阶段和业务拓展情况，持续收集与风险变化相关的信息，进行风险 \u003e 第5页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  4,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第二十三条 企业识别外部风险，应当关注下列因素： \u003e 第4页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q24",
+                        "answerable":  true,
+                        "rank":  4,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  62.48,
+                        "serverMs":  58,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第五条 企业建立与实施有效的内部控制，应当包括下列要素： \u003e 第2页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  2,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第五条 企业建立与实施有效的内部控制，应当包括下列要素： \u003e 第2页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  2,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四条 企业建立与实施内部控制，应当遵循下列原则： \u003e 第2页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  8,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四十七条 企业应当以书面或者其他适当的形式，妥善保存内部控制建立与实施过程中的相关记录或 \u003e 第8页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q25",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  61.63,
+                        "serverMs":  57,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第三十条 授权审批控制要求企业根据常规授权和特别授权的规定，明确各岗位办理业务和事项的权限 \u003e 第6页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  6,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第三十条 授权审批控制要求企业根据常规授权和特别授权的规定，明确各岗位办理业务和事项的权限 \u003e 第6页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  8,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四十七条 企业应当以书面或者其他适当的形式，妥善保存内部控制建立与实施过程中的相关记录或 \u003e 第8页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  6,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第三十六条 企业应当根据内部控制目标，结合风险应对策略，综合运用控制措施，对各种业务和事项 \u003e 第6页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q26",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  63.52,
+                        "serverMs":  59,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第三十三条 预算控制要求企业实施全面预算管理制度，明确各责任单位在预算管理中的职责权限，规 \u003e 第6页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  6,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第三十三条 预算控制要求企业实施全面预算管理制度，明确各责任单位在预算管理中的职责权限，规 \u003e 第6页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  6,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第三十六条 企业应当根据内部控制目标，结合风险应对策略，综合运用控制措施，对各种业务和事项 \u003e 第6页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  5,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第二十八条 企业应当结合风险评估结果，通过手工控制与自动控制、预防性控制与发现性控制相结合 \u003e 第5页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q27",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  61.27,
+                        "serverMs":  57,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四十四条 企业应当根据本规范及其配套办法，制定内部控制监督制度，明确内部审计机构（或经授 \u003e 第7页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  7,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四十四条 企业应当根据本规范及其配套办法，制定内部控制监督制度，明确内部审计机构（或经授 \u003e 第7页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  8,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四十六条 企业应当结合内部监督情况，定期对内部控制的有效性进行自我评价，出具内部控制自我 \u003e 第8页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  2,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四条 企业建立与实施内部控制，应当遵循下列原则： \u003e 第2页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q28",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  62.56,
+                        "serverMs":  58,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四十五条 企业应当制定内部控制缺陷认定标准，对监督过程中发现的内部控制缺陷，应当分析缺陷 \u003e 第8页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  8,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四十五条 企业应当制定内部控制缺陷认定标准，对监督过程中发现的内部控制缺陷，应当分析缺陷 \u003e 第8页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  7,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四十四条 企业应当根据本规范及其配套办法，制定内部控制监督制度，明确内部审计机构（或经授 \u003e 第7页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  2,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四条 企业建立与实施内部控制，应当遵循下列原则： \u003e 第2页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q29",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  34.74,
+                        "serverMs":  30,
+                        "asOf":  "2024-06-01",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  "4.2.1",
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 4.2 高血压诊断标准 \u003e 4.2.1 诊断标准 \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  "4.2.2",
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 4.2 高血压诊断标准 \u003e 4.2.2 诊断流程 \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q30",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  34.67,
+                        "serverMs":  30,
+                        "asOf":  "2024-06-01",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  "4.2.1",
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 4.2 高血压诊断标准 \u003e 4.2.1 诊断标准 \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  "5.2",
+                                               "pageNo":  2,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 5.2 降压目标 \u003e 第2页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q31",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  31.65,
+                        "serverMs":  27,
+                        "asOf":  "2024-06-01",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  "4.2.1",
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 4.2 高血压诊断标准 \u003e 4.2.1 诊断标准 \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  "8.1",
+                                               "pageNo":  2,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 8.1 随访频率 \u003e 第2页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q32",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  31.56,
+                        "serverMs":  26,
+                        "asOf":  "2024-06-01",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  "4.2.1",
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 4.2 高血压诊断标准 \u003e 4.2.1 诊断标准 \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  "4.2.2",
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 4.2 高血压诊断标准 \u003e 4.2.2 诊断流程 \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q33",
+                        "answerable":  true,
+                        "rank":  2,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  30.2,
+                        "serverMs":  25,
+                        "asOf":  "2024-06-01",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  "5.2",
+                                               "pageNo":  2,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 5.2 降压目标 \u003e 第2页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  "4.2.1",
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 4.2 高血压诊断标准 \u003e 4.2.1 诊断标准 \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q34",
+                        "answerable":  true,
+                        "rank":  2,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  29.94,
+                        "serverMs":  25,
+                        "asOf":  "2024-06-01",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  "8.1",
+                                               "pageNo":  2,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 8.1 随访频率 \u003e 第2页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  "4.2.1",
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 4.2 高血压诊断标准 \u003e 4.2.1 诊断标准 \u003e 第1页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "Q35",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  37.04,
+                        "serverMs":  32,
+                        "asOf":  "2024-06-01",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 4.2 高血压诊断标准 \u003e 4.2.2 诊断流程 \u003e 第1页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  "4.2.2",
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 4.2 高血压诊断标准 \u003e 4.2.2 诊断流程 \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2024",
+                                               "clauseId":  "5.2",
+                                               "pageNo":  2,
+                                               "citation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 5.2 降压目标 \u003e 第2页"
+                                           }
+                                       ]
                     },
                     {
                         "chunkStrategy":  "heading",
@@ -162,7 +2850,36 @@
                         "answerable":  false,
                         "rank":  0,
                         "results":  5,
-                        "error":  false
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  64.31,
+                        "serverMs":  59,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第十六条 企业应当制定和实施有利于企业可持续发展的人力资源政策。人力资源政策应当包括下列内 \u003e 第3页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  3,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第十六条 企业应当制定和实施有利于企业可持续发展的人力资源政策。人力资源政策应当包括下列内 \u003e 第3页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  6,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第三十五条 绩效考评控制要求企业建立和实施绩效考评制度，科学设置考核指标体系，对企业内部各 \u003e 第6页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  4,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第十七条 企业应当将职业道德修养和专业胜任能力作为选拔和聘用员工的重要标准，切实加强员工培 \u003e 第4页"
+                                           }
+                                       ]
                     },
                     {
                         "chunkStrategy":  "heading",
@@ -170,7 +2887,147 @@
                         "answerable":  false,
                         "rank":  0,
                         "results":  5,
-                        "error":  false
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  64.5,
+                        "serverMs":  60,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第三十六条 企业应当根据内部控制目标，结合风险应对策略，综合运用控制措施，对各种业务和事项 \u003e 第6页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  6,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第三十六条 企业应当根据内部控制目标，结合风险应对策略，综合运用控制措施，对各种业务和事项 \u003e 第6页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  8,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四十七条 企业应当以书面或者其他适当的形式，妥善保存内部控制建立与实施过程中的相关记录或 \u003e 第8页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  5,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第二十九条 不相容职务分离控制要求企业全面系统地分析、梳理业务流程中所涉及的不相容职务，实 \u003e 第5页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "N03",
+                        "answerable":  false,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  60.54,
+                        "serverMs":  56,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 180 mmHg \u003e 4.1.2  诊室外血压监测 \u003e 第4页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "4.1.2",
+                                               "pageNo":  4,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 180 mmHg \u003e 4.1.2  诊室外血压监测 \u003e 第4页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "30",
+                                               "pageNo":  3,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 30 min \u003e 第3页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "7",
+                                               "pageNo":  14,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 7  健康教育内容 \u003e 第14页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "N04",
+                        "answerable":  false,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  60.84,
+                        "serverMs":  56,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第三十五条 绩效考评控制要求企业建立和实施绩效考评制度，科学设置考核指标体系，对企业内部各 \u003e 第6页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  6,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第三十五条 绩效考评控制要求企业建立和实施绩效考评制度，科学设置考核指标体系，对企业内部各 \u003e 第6页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  3,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第十六条 企业应当制定和实施有利于企业可持续发展的人力资源政策。人力资源政策应当包括下列内 \u003e 第3页"
+                                           },
+                                           {
+                                               "docKey":  "enterprise-internal-control",
+                                               "docVersion":  "2026",
+                                               "clauseId":  null,
+                                               "pageNo":  4,
+                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第十七条 企业应当将职业道德修养和专业胜任能力作为选拔和聘用员工的重要标准，切实加强员工培 \u003e 第4页"
+                                           }
+                                       ]
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "N05",
+                        "answerable":  false,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false,
+                        "errorMessage":  "",
+                        "latencyMs":  64.78,
+                        "serverMs":  60,
+                        "asOf":  "2026-11-09",
+                        "includeSuperseded":  false,
+                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 5 mmHg，死亡风险降低 \u003e 1.3  保障基本药物 \u003e 第2页",
+                        "topResults":  [
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "1.3",
+                                               "pageNo":  2,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 5 mmHg，死亡风险降低 \u003e 1.3  保障基本药物 \u003e 第2页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  null,
+                                               "pageNo":  1,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第1页"
+                                           },
+                                           {
+                                               "docKey":  "hypertension-guideline",
+                                               "docVersion":  "2025",
+                                               "clauseId":  "1",
+                                               "pageNo":  15,
+                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 1 g could prevent almost 9 million cardiovascular events by 2030: \u003e 第15页"
+                                           }
+                                       ]
                     }
                 ]
 }
