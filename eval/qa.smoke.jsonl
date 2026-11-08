@@ -1,0 +1,8 @@
+{"id":"S01","question":"高血压的诊断标准是什么？","answerable":true,"gold":{"docKey":"hypertension-guideline","version":"2025","clauseId":"4.2.1","pageRange":[4,4]}}
+{"id":"S02","question":"诊室血压的诊断阈值是多少？","answerable":true,"gold":{"docKey":"hypertension-guideline","version":"2025","clauseId":"4.2.1","pageRange":[4,4]}}
+{"id":"S03","question":"企业内部控制中的风险评估包括哪些内容？","answerable":true,"gold":{"docKey":"enterprise-internal-control","version":"2026","clauseId":null,"pageRange":[2,2]}}
+{"id":"S04","question":"内部控制要素有哪些？","answerable":true,"gold":{"docKey":"enterprise-internal-control","version":"2026","clauseId":null,"pageRange":[2,2]}}
+{"id":"S05","question":"高血压患者随访频率如何安排？","answerable":true,"gold":{"docKey":"hypertension-guideline","version":"2025","clauseId":"8.1","pageRange":[13,13]}}
+{"id":"S06","question":"内部控制的目标是什么？","answerable":true,"gold":{"docKey":"enterprise-internal-control","version":"2026","clauseId":null,"pageRange":[2,2]}}
+{"id":"N01","question":"公司年假有多少天？","answerable":false}
+{"id":"N02","question":"员工出差住宿标准是多少？","answerable":false}

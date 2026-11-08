@@ -57,6 +57,13 @@ app:
     retries: 2
     retry-backoff-ms: 500
     timeout-seconds: 120
+  search:
+    # Both routes return top 30 before RRF (docs/11-retrieval-and-eval-spec.md 3.3).
+    candidate-limit: 30
+    # Keyword branch uses at most the first 200 chars for ILIKE/similarity.
+    keyword-max-chars: 200
+    # pgvector >= 0.8: mitigate HNSW under-return when metadata filters are present.
+    hnsw-iterative-scan: true
 
 logging:
   level:

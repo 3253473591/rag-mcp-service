@@ -290,7 +290,7 @@ public class DocumentService {
         }
         List<ChunkStrategy> strategies = source.chunkStrategies() == null || source.chunkStrategies().isEmpty()
                 ? List.of(ChunkStrategy.HEADING)
-                : List.copyOf(source.chunkStrategies());
+                : List.copyOf(new java.util.LinkedHashSet<>(source.chunkStrategies()));
         if (strategies.size() > 2) {
             throw ApiException.validation("chunkStrategies 最多 2 个");
         }

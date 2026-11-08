@@ -15,7 +15,7 @@
     <artifactId>rag-mcp-service</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <name>rag-mcp-service</name>
-    <description>Enterprise knowledge base RAG service (Phase 1: skeleton + ingestion)</description>
+    <description>Enterprise knowledge base RAG service (Phase 2: retrieval + search API)</description>
 
     <properties>
         <java.version>17</java.version>
@@ -60,6 +60,13 @@
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-starter-model-ollama</artifactId>
+        </dependency>
+
+        <!-- Phase 2 MCP registration spike only (test scope; production /mcp is Phase 5). -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-mcp-server-webmvc</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <dependency>

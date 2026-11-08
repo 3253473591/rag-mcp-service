@@ -33,11 +33,16 @@
 
 | 指标 | 目标 | 测量条件 |
 |---|---|---|
-| p50 | < 250ms | 10k chunks，topK=5，hybrid |
+| p50 | < 250ms | **每套 chunk 策略 10k chunks**（fixed 10k + heading 10k，合计 20k），topK=5，hybrid |
 | p95 | **< 800ms** | 同上，10 并发 |
 | p99 | < 1500ms | 同上 |
 | 错误率 | < 1% | 10 并发，持续 60s |
 | 无结果率 | 记录，不设硬目标 | 40 条 QA |
+
+> **10k 口径（v1.1）**：这里的 10k 指**每套策略 10k chunks**，不是两套合计 10k。
+> 两套策略合计基准为 20k chunks；验收报告必须写明实际测试的每策略数量与总数。
+> Phase 2 实测：fixed 10k + heading 10k（合计 20k），50 次/策略 API 端到端
+> （含真实 bge-m3 query embedding），p50/p95 见 `docs/acceptance/phase2-report.md`。
 
 延迟预算（p95）：
 
@@ -56,9 +61,13 @@
 | 指标 | 目标 | 条件 |
 |---|---|---|
 | 1MB 文本型 PDF 解析+切分 | < 10s | 不含 embedding |
-| 全流程（含 embedding） | **< 30s** | 3 篇文档、Ollama 已加载模型 |
+| 全流程（含 embedding） | **< 30s / 每套策略；< 60s / 两套合计** | 3 篇文档、Ollama 已加载模型 |
 | 重复上传 | < 100ms | 命中 checksum |
 | 批量 embedding | 16~32 条/批 | 减少往返 |
+
+> **30s 口径（v1.1）**：30s 是**每套 chunk 策略**的目标；一次上传同时生成 fixed + heading
+> 时，3 篇文档的合计预算为 < 60s。Phase 2 的真实 smoke 中 3 篇文档两套策略合计约 14s
+> （2024 摘编 4.4s + 2025 版 7.8s + 企业内控 1.8s），不含首次模型冷启动。
 
 > 模型冷启动（首次加载 bge-m3）不计入 30s；README 说明先 `ollama pull` 并预热。
 

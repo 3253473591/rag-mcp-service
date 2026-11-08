@@ -1,0 +1,176 @@
+﻿{
+    "timestamp":  "2026-11-09T01:02:45.5750450+08:00",
+    "dataset":  "eval/qa.smoke.jsonl",
+    "datasetSha256":  "bcfda68329001167abebc96a42038a28b34ecd56a59f4332d265577e9e6b2eea",
+    "gitCommit":  "080adfbd7b185294ac245d4d596b71f38fe3fb0c",
+    "embedding":  "bge-m3",
+    "topK":  5,
+    "asOf":  "2026-11-09",
+    "qaCount":  8,
+    "answerable":  6,
+    "unanswerable":  2,
+    "strategies":  [
+                       {
+                           "chunkStrategy":  "fixed",
+                           "hitAt1":  0.1667,
+                           "hitAt3":  0.1667,
+                           "hitAt5":  0.1667,
+                           "mrr":  0.1667,
+                           "p50Ms":  71.69,
+                           "p95Ms":  94.13,
+                           "errors":  0,
+                           "answered":  6,
+                           "unanswered":  2,
+                           "falsePositiveRate":  1,
+                           "noAnswerAccuracy":  0,
+                           "hit5ThresholdMet":  false,
+                           "mrrThresholdMet":  false
+                       },
+                       {
+                           "chunkStrategy":  "heading",
+                           "hitAt1":  0.5,
+                           "hitAt3":  1,
+                           "hitAt5":  1,
+                           "mrr":  0.7222,
+                           "p50Ms":  86.85,
+                           "p95Ms":  159.2,
+                           "errors":  0,
+                           "answered":  6,
+                           "unanswered":  2,
+                           "falsePositiveRate":  1,
+                           "noAnswerAccuracy":  0,
+                           "hit5ThresholdMet":  true,
+                           "mrrThresholdMet":  true
+                       }
+                   ],
+    "details":  [
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "S01",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "S02",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "S03",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "S04",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "S05",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "S06",
+                        "answerable":  true,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "N01",
+                        "answerable":  false,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false
+                    },
+                    {
+                        "chunkStrategy":  "fixed",
+                        "id":  "N02",
+                        "answerable":  false,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "S01",
+                        "answerable":  true,
+                        "rank":  2,
+                        "results":  5,
+                        "error":  false
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "S02",
+                        "answerable":  true,
+                        "rank":  3,
+                        "results":  5,
+                        "error":  false
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "S03",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "S04",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "S05",
+                        "answerable":  true,
+                        "rank":  2,
+                        "results":  5,
+                        "error":  false
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "S06",
+                        "answerable":  true,
+                        "rank":  1,
+                        "results":  5,
+                        "error":  false
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "N01",
+                        "answerable":  false,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false
+                    },
+                    {
+                        "chunkStrategy":  "heading",
+                        "id":  "N02",
+                        "answerable":  false,
+                        "rank":  0,
+                        "results":  5,
+                        "error":  false
+                    }
+                ]
+}

@@ -46,6 +46,10 @@ public class ApiException extends RuntimeException {
         return new ApiException(ErrorCode.VALIDATION, message, details);
     }
 
+    public static ApiException invalidAsOf(String message) {
+        return new ApiException(ErrorCode.INVALID_AS_OF, message);
+    }
+
     public static ApiException fileTooLarge() {
         return new ApiException(ErrorCode.FILE_TOO_LARGE, "文件超过 20MB 上限");
     }

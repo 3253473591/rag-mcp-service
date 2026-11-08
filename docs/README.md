@@ -23,6 +23,9 @@
 | — | [acceptance/phase1-readiness.md](acceptance/phase1-readiness.md) | Phase 1 环境就绪检查（Maven/Docker/Ollama） |
 | — | [acceptance/phase1-checklist.md](acceptance/phase1-checklist.md) | Phase 1 验收 gate、命令、证据 |
 | — | [acceptance/phase1-report.md](acceptance/phase1-report.md) | Phase 1 验收报告（已通过，含独立复核证据） |
+| — | [acceptance/phase2-report.md](acceptance/phase2-report.md) | Phase 2 验收报告：检索、RRF、版本过滤、真实 smoke、性能、MCP spike |
+| — | [acceptance/phase2-smoke.md](acceptance/phase2-smoke.md) | Phase 2 真实 app smoke 结果与 citation |
+| — | [acceptance/phase2-mcp-spike.md](acceptance/phase2-mcp-spike.md) | MCP 低层注册 spike 结论（Phase 5 参考） |
 | — | [acceptance/phase1-report-template.md](acceptance/phase1-report-template.md) | Phase 1 验收报告模板 |
 
 阅读顺序：**00 → 01 → 08 → 10 → 02/03 → 04/05 → 06 → 07 → 09 → 11/12/13**。
