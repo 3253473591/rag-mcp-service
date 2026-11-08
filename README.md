@@ -2,8 +2,9 @@
 
 企业知识库 RAG 检索服务（Java/Spring Boot + PostgreSQL/pgvector + MCP + 治理层）。
 
-- 当前状态：**Phase 3（正式评测 + 性能补测）已验收（P0；10 并发 p95 residual）**，已合并 `main`。Phase 1/2 已验收。
-- Phase 3 交付：`eval/qa.jsonl` 40 条（35 可回答 + 5 不可回答，覆盖 v2025/v2024/enterprise）、fixed/heading 正式评测、gold 结构校验脚本、T-INT-EVAL-01、10k/策略 3 轮性能、10 并发 60s 脚本。heading hit@5=0.8857、MRR=0.6905；fixed hit@5=0.3429（如实报告，不改 gold）。
+- 当前状态：**Phase 4（治理 API：WorkItem → Approval → Mandate）已实现，位于 `phase4` 分支，未合并 `main`**；Phase 1/2/3 已验收并合并 `main`。
+- Phase 4 交付：`POST/GET /api/v1/work-items`、带 `X-Admin-Token` 的 approve/deny；审批只能缩小工具/文档/topK 范围；显式 `allowedDocIds` 语义；重复审批 409；管理员 token 常量时间比较、未配置时 401；approve 事务写 `work_item` + `mandate`。不做 MCP 强制校验/审计（Phase 5）。
+- Phase 3 交付（已验收）：`eval/qa.jsonl` 40 条（35 可回答 + 5 不可回答，覆盖 v2025/v2024/enterprise）、fixed/heading 正式评测、gold 结构校验脚本、T-INT-EVAL-01、10k/策略 3 轮性能、10 并发 60s 脚本。heading hit@5=0.8857、MRR=0.6905；fixed hit@5=0.3429（如实报告，不改 gold）。
 - Phase 2 交付保持不变：`POST /api/v1/search`（vector/keyword/hybrid + RRF）、版本三模式过滤、SQL 层 docIds/version/chunkStrategy 过滤、citation、Windows `scripts/eval.ps1`、MCP 低层注册 spike。
 - 验收证据：[docs/acceptance/phase3-report.md](docs/acceptance/phase3-report.md)、[phase2-report](docs/acceptance/phase2-report.md)、[检索 smoke](docs/acceptance/phase2-smoke.md)、[MCP spike](docs/acceptance/phase2-mcp-spike.md)、[eval report](eval/report.md)、[perf](docs/acceptance/phase3-perf.json)、[concurrency](docs/acceptance/phase3-concurrency.json)。
 - Phase 1 交付保持不变：Flyway V1 六张表、PDF/DOCX/Markdown/TXT 解析 + Block 模型、FixedWindow/HeadingAware 两套切分、Ollama bge-m3 1024 维 embedding（批量、重试）、文档上传/列表/详情/删除 API、SHA-256 幂等与版本治理字段。
@@ -37,6 +38,7 @@ mvn -v                             # Maven 3.9+
 RAG_DB_URL / RAG_DB_USER / RAG_DB_PASSWORD
 OLLAMA_BASE_URL (默认 http://localhost:11434)
 OLLAMA_EMBEDDING_MODEL (默认 bge-m3)
+ADMIN_TOKEN (Phase 4 管理员 token；为空时 approve/deny 全部 401，服务仍可启动)
 SERVER_ADDRESS (默认 127.0.0.1，仅监听本机回环)
 SERVER_PORT (默认 8080)
 ```
@@ -160,6 +162,114 @@ curl.exe -s -X POST http://localhost:8080/api/v1/search `
 - `fixed` chunk 不携带 `clauseId`（Phase 1 设计），citation 会省略章节段；这是固定窗口的已知限制。
 - HNSW + metadata filter：pgvector 0.8.7 下 vector SQL 在事务内执行 `SET LOCAL hnsw.iterative_scan = relaxed_order`，缓解过滤导致 HNSW 候选不足；可用 `app.search.hnsw-iterative-scan=false` 关闭。详见 [docs/05-non-functional.md](docs/05-non-functional.md) 3 与验收报告。
 
+## API（Phase 4）：治理 WorkItem / Approval / Mandate
+
+治理链路：`WorkItem(PENDING)` → 管理员 approve → `APPROVED` + `Mandate(ACTIVE)`；或 deny → `DENIED`。审批范围只能**缩小**，不能加入未申请的工具/文档或放大 topK。Mandate 过期是 Phase 5 的逻辑状态（`now() >= expires_at`），Phase 4 不写回 EXPIRED。
+
+### 创建 / 查看 WorkItem
+
+`POST /api/v1/work-items`（无鉴权，内部接口）：
+
+```json
+{
+  "requester": "agent-report-writer",
+  "purpose": "为体检报告生成检索高血压指南依据",
+  "requestedTools": ["search_knowledge", "get_document"],
+  "requestedDocIds": ["0d5b1f6e-6c1a-4a3d-9a8a-6d0f0f7a1b2c"],
+  "requestedTopK": 5
+}
+```
+
+| 字段 | 必填 | 规则 |
+|---|---|---|
+| `requester` | 是 | 非空字符串；v1 不做身份校验 |
+| `purpose` | 是 | ≤ 500 字符 |
+| `requestedTools` | 是 | 1~5 个；只允许 `search_knowledge` / `get_document` |
+| `requestedDocIds` | 否 | `null`/不传 = 全部文档；`[]` = 不申请任何文档；数组最多 50 个 UUID |
+| `requestedTopK` | 否 | 1~20，默认 5 |
+
+- 201 返回 `{"workItemId":"...","status":"PENDING","createdAt":"..."}`，落库 `work_item`。
+- `GET /api/v1/work-items/{workItemId}` 返回 `requester/purpose/requestedTools/requestedDocIds/requestedTopK/status/decidedBy/decidedAt/decisionReason/createdAt`；`APPROVED` 时附 `mandate`。
+- 不存在 404 `ERR-WORKITEM_NOT_FOUND`；非法 UUID 400 `ERR-VALIDATION`。不做 WorkItem 列表/审批 UI。
+
+### 批准 WorkItem
+
+`POST /api/v1/work-items/{workItemId}/approve`，Header `X-Admin-Token`：
+
+```json
+{
+  "ttlSeconds": 3600,
+  "allowedTools": ["search_knowledge"],
+  "allowedDocIds": ["0d5b1f6e-6c1a-4a3d-9a8a-6d0f0f7a1b2c"],
+  "maxTopK": 3,
+  "reason": "报告生成场景，限高血压指南"
+}
+```
+
+- 200 返回 `workItemId`、`status=APPROVED`、`mandate{mandateId,allowedTools,allowedDocIds,maxTopK,expiresAt}`。
+- 事务内更新 `work_item`（APPROVED + decidedBy/at/reason）并插入 `mandate`（ACTIVE）；任一步失败整体回滚，不留半截。
+- `ttlSeconds` 60~86400，默认 3600；`expiresAt = now + ttl`。
+- `allowedTools` 必须是 `requestedTools` 子集；`maxTopK` 必须 1~20 且 ≤ `requestedTopK`；只能缩小。
+- 重复 approve/deny、approve 已 DENIED、deny 已 APPROVED → 409 `ERR-APPROVAL_INVALID`，且不会重复创建 mandate。
+
+**`allowedDocIds` 显式语义**（关键）：
+
+| 创建时 `requestedDocIds` | approve 时 `allowedDocIds` | 结果 |
+|---|---|---|
+| `null`/不传（全部） | 字段缺失 | 400 `ERR-VALIDATION`（不默认全量） |
+| `null`/不传（全部） | 显式 `null` | 允许，mandate 为全部文档 |
+| `null`/不传（全部） | 数组 | 允许，作为全量的子集 |
+| `[]`（无） | 字段缺失或 `[]` | mandate 为 `[]`（不允许任何文档） |
+| `[]`（无） | 显式 `null` 或非空数组 | 400 `ERR-VALIDATION` |
+| `[A,B]` | 字段缺失 | mandate 为 `[A,B]` |
+| `[A,B]` | `[A]` 或 `[]` | 允许 |
+| `[A,B]` | 显式 `null` 或含 `C` | 400 `ERR-VALIDATION` |
+
+实现方式：`ApproveWorkItemRequest` 用自定义 `@JsonSetter` 记录 `allowedDocIds` 字段是否出现，区分“缺失”与“显式 null”；JSONB 中 SQL NULL = 全部、`[]` = 无。
+
+### 拒绝 WorkItem
+
+`POST /api/v1/work-items/{workItemId}/deny`，Header `X-Admin-Token`，body `{"reason":"申请范围过大"}`（可选）。
+
+- PENDING → DENIED，记录 `decidedBy/decidedAt/decisionReason`；200 返回 `workItemId/status=DENIED/decidedAt`。
+- 已 APPROVED/DENIED 再 deny → 409；不存在 404；无/错 token 401。
+
+### 管理员鉴权与配置
+
+- `application.yml`：`app.admin.token: ${ADMIN_TOKEN:}`；`.env.example` 只放 `ADMIN_TOKEN=` 占位，不提交真实值。
+- token 缺失/错误/服务端未配置 → 401 `ERR-ADMIN_UNAUTHORIZED`；未配置时服务可正常启动（fail closed）。
+- 比较使用 `MessageDigest.isEqual` 常量时间比较，不使用 `String.equals`；不记录 token 日志。
+
+```powershell
+$env:ADMIN_TOKEN = "local-dev-token-not-committed"
+mvn spring-boot:run
+
+$create = @{
+  requester = "agent-report-writer"
+  purpose = "报告生成"
+  requestedTools = @("search_knowledge")
+  requestedDocIds = @()
+  requestedTopK = 5
+} | ConvertTo-Json
+$created = Invoke-RestMethod -Method Post -Uri http://localhost:8080/api/v1/work-items `
+  -ContentType "application/json" -Body $create
+$created.workItemId
+
+$approve = @{ allowedDocIds = @(); maxTopK = 3 } | ConvertTo-Json
+Invoke-RestMethod -Method Post `
+  -Uri "http://localhost:8080/api/v1/work-items/$($created.workItemId)/approve" `
+  -Headers @{ "X-Admin-Token" = $env:ADMIN_TOKEN } `
+  -ContentType "application/json" -Body $approve
+```
+
+> 用 PowerShell 的 `Invoke-RestMethod` 避免 `curl.exe -d '<json>'` 在 Windows 原生参数传递下的引号问题；CI/curl 场景可用 `--data-binary "@body.json"`。
+
+### Phase 4 错误码
+
+`ERR-ADMIN_UNAUTHORIZED(401)`、`ERR-WORKITEM_NOT_FOUND(404)`、`ERR-APPROVAL_INVALID(409)`；参数/缩小范围失败沿用 `ERR-VALIDATION(400)`。错误体仍为 `{code,message,traceId,details}`。
+
+Phase 4 **不写** `mcp_audit_log`、不做 MCP 端点/mandate 强制校验/过期拒绝；这些属于 Phase 5。
+
 ## 切分口径
 
 - **FixedWindowChunker**：目标 600 tokens、overlap 80 tokens；优先段落边界，段落超长按句切，单句超长按 token 硬切；表格不中间截断，超长表格按行切并重复表头。
@@ -190,6 +300,7 @@ mvn test          # 单元 + Testcontainers 集成；默认不跑真实 Ollama
 ```
 
 - 集成测试用 Testcontainers `pgvector/pgvector:pg16` + `@TestConfiguration` fake `EmbeddingService`，不依赖本机 Ollama。
+- Phase 4 治理测试 33 个：`MandatePolicyTest` 13（缩小规则/显式文档语义/Phase 5 只读校验）、`AdminAuthTest` 3（常量时间比较/fail closed）、`GovernanceIntegrationTest` 16（T-GOV-01~07 + 边界 + 事务回滚）、`GovernanceAdminUnconfiguredIntegrationTest` 1（未配置 token 仍启动且 401）。全量 `mvn test`：167 tests，0 failures/errors，1 skipped（手动真实 Ollama smoke）。
 - 格式 fixture 位于 `src/test/resources/fixtures/`（验收 kit 提供，`FormatFixturesTest` 守护，可直接用于 Gate 2 上传）；集成测试的 PDF/DOCX 仍在运行时用 PDFBox/POI 生成，`docs/samples/*.pdf` 不提交。
 - 真实 Ollama smoke（手动，条件执行，默认跳过）：
 
@@ -265,14 +376,18 @@ Phase 2 只在 test scope 验证 Spring AI 1.1.8 的低层 `SyncToolSpecificatio
 7. **企业内控 heading 无 clause_id**：该文档 11 条题只能按 `pageRange` 匹配，粒度比 clause 粗；这是数据/解析事实，不是 gold 放宽。
 8. **10 并发 p95 未稳定达标**：错误率 0%，p50≈130-157ms，但三次 60s 的 p95 为 808/552/1129ms。根因主要是 Ollama embedding 长尾（直接 10 并发 p99≈3.0s），GC 最大 pause 45ms、Hikari 无失败。要硬保证需缓存/限流/专用推理，本轮不做。
 9. **性能口径**：10k/策略是本地 Docker + Ollama 实测；不承诺在其它机器复现同一数字，但脚本可复现测量方法。p99 受 PostgreSQL checkpoint/autovacuum 与 Ollama 影响，报告已记录。
-10. **Phase 3 范围**：没有 WorkItem/Approval/Mandate、生产 MCP、前端、聊天、agent 编排、评测 UI；未合并 main。
+10. **Phase 3 范围（历史）**：Phase 3 未包含 WorkItem/Approval/Mandate、生产 MCP、前端、聊天、agent 编排、评测 UI；Phase 4 已补治理 API，生产 MCP 与 mandate 强制校验仍留 Phase 5。
+11. **`docs/02-api-contract.md` 2.5 旧措辞**：该节写“`requestedDocIds` 为空/不传表示申请全部文档”，与 Phase 4 任务书及 [docs/03-data-model.md](docs/03-data-model.md) 的 `NULL=全部，[]=无` 冲突。本实现按任务书 + data model，`null`=全部、`[]`=无，并用集成测试覆盖；`docs/02` 未改动，留给验收方决定是否同步契约文字。
+12. **`allowedTools=[]`**：允许管理员显式批准 0 个工具（单调缩小，不扩大权限；mandate 实际不可用），未额外定义为 400。
+13. **治理数据保留**：v1 不自动清理 `work_item`/`mandate`；`mcp_audit_log` 写入与审计保留属 Phase 5。
 
 ## 目录
 
 ```text
 src/main/java/com/lqx/ragmcp/
-  api/          # 文档/搜索接口、统一错误体、traceId
+  api/          # 文档/搜索/治理接口、统一错误体、traceId
   search/       # SearchService / SearchRepository / RRF / citation / 参数校验
+  governance/   # WorkItem/Mandate 记录、审批策略、JdbcTemplate 仓储、AdminAuth
   chunk/        # FixedWindowChunker / HeadingAwareChunker / TokenCounter
   document/     # 上传编排、事务、版本治理、JdbcTemplate 仓储
   embedding/    # EmbeddingService + Spring AI Ollama 实现 + health indicator
@@ -287,5 +402,6 @@ docs/acceptance/phase2-report.md
 docs/acceptance/phase3-report.md
 docs/acceptance/phase3-perf.json
 docs/acceptance/phase3-concurrency.json
+docs/acceptance/phase4-report.md
 ```
 

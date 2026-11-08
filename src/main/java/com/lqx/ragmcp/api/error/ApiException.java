@@ -80,4 +80,17 @@ public class ApiException extends RuntimeException {
     public static ApiException dbUnavailable() {
         return new ApiException(ErrorCode.DB_UNAVAILABLE, "数据库暂时不可用，请稍后重试");
     }
+
+    public static ApiException adminUnauthorized() {
+        return new ApiException(ErrorCode.ADMIN_UNAUTHORIZED, "管理员 token 缺失或错误");
+    }
+
+    public static ApiException workItemNotFound(String workItemId) {
+        return new ApiException(ErrorCode.WORKITEM_NOT_FOUND, "WorkItem 不存在",
+                Map.of("workItemId", workItemId == null ? "" : workItemId));
+    }
+
+    public static ApiException approvalInvalid(String message) {
+        return new ApiException(ErrorCode.APPROVAL_INVALID, message);
+    }
 }

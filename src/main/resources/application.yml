@@ -46,6 +46,9 @@ management:
         enabled: true
 
 app:
+  admin:
+    # Phase 4: WorkItem approve/deny require X-Admin-Token. Empty means "reject all" (fail closed).
+    token: ${ADMIN_TOKEN:}
   upload:
     max-file-size-bytes: 20971520
     max-pdf-pages: 500
