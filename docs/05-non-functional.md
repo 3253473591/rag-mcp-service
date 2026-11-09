@@ -110,7 +110,8 @@
 |---|---|---|
 | hit@5 | ≥ 0.85 | 40 条 QA，35 条可回答 |
 | MRR | ≥ 0.65 | 第一条命中的倒数排名均值 |
-| 无答案误报率 | 记录，不设硬门槛 | 5 条不可回答题单独统计 |
+| 无答案误报率 | **≤ 0.2，有门槛** | 5 条不可回答题单独统计；Phase 7 起服务端按余弦分拒答，低质量候选不再当结果返回 |
+| 无答案正确率 | **≥ 0.8** | `noAnswerAccuracy = 未返回结果的比例`；与误报率同源，单独报告 |
 | 失败/超时 | 单独计数 | 不能当 miss/丢弃 |
 
 Phase 3 实测（`eval/qa.jsonl` 40 条，382 chunks，2026-11-09）：
@@ -121,8 +122,21 @@ Phase 3 实测（`eval/qa.jsonl` 40 条，382 chunks，2026-11-09）：
 | heading | 0.5429 | 0.8286 | **0.8857** | **0.6905** | 0 |
 
 heading 达到 hit@5≥0.85、MRR≥0.65；fixed 低是固定窗口无 clause 元数据、page_no 为窗口起始页的真实结果，
-未修改 gold。不可回答题两策略均 `falsePositiveRate=1.0`（hybrid 总返回 topK），按约定只记录、不设硬门槛。
-详见 [docs/acceptance/phase3-report.md](acceptance/phase3-report.md) 第 3 节。
+未修改 gold。Phase 3 时不可回答题两策略均 `falsePositiveRate=1.0`（hybrid 总返回 topK），当时只记录；
+该缺口在 Phase 7 由服务端拒答守卫关闭。Phase 3 明细见
+[docs/acceptance/phase3-report.md](acceptance/phase3-report.md) 第 3 节。
+
+Phase 7 实测（2026-11-09，当前库 248 chunks = fixed 102 + heading 146，3 篇样例文档）：
+阈值 `minTopScore=0.55`、`highConfidenceTopScore=0.63`、`minDenseCandidates=8`、`minScoreGap=0.02`。
+
+| chunkStrategy | hit@5 | MRR | falsePositiveRate（前 → 后） | noAnswerAccuracy（前 → 后） | answerableAbstained |
+|---|---:|---:|---:|---:|---:|
+| fixed | 0.7429 | 0.7143 | 1.0 → **0.2** | 0 → **0.8** | 0 |
+| heading | 0.9714 | 0.8748 | 1.0 → **0.2** | 0 → **0.8** | 0 |
+
+可回答题 hit@5/MRR 与 Phase 6c 基线完全一致（未牺牲召回）；5 条不可回答题中 4 条被拒答，
+剩余 1 条（N05，2026 新增药物）与可回答题余弦分布重叠，按“优先保召回”的取舍保留为已记录误报。
+阈值扫描、两条原因的实测样例和限制见 [docs/acceptance/phase7-abstain.md](acceptance/phase7-abstain.md)。
 
 公式、QA schema、gold 匹配口径见 [11-retrieval-and-eval-spec.md](11-retrieval-and-eval-spec.md)。
 

@@ -383,44 +383,108 @@ Header：`X-Admin-Token: <ADMIN_TOKEN>`
 | `strategy` | 否 | `hybrid`（默认）/ `vector` / `keyword`；检索方式 |
 | `detectConflicts` | 否 | P1 可选；默认 false；true 时返回 `conflicts` |
 
-**200 OK**
+**200 OK（正常命中）**
 
 ```json
 {
-  "query": "高血压的诊断标准是什么？",
-  "asOf": "2026-11-08",
+  "query": "诊室血压的诊断标准是多少？",
+  "asOf": "2026-11-09",
   "chunkStrategy": "heading",
   "strategy": "hybrid",
-  "tookMs": 123,
+  "tookMs": 24,
   "results": [
     {
-      "chunkId": "7f1e...",
-      "docId": "0d5b...",
+      "chunkId": "c8a5fcb2-...",
+      "docId": "34a38cdb-...",
       "docKey": "hypertension-guideline",
       "docVersion": "2025",
       "docStatus": "ACTIVE",
       "effectiveFrom": "2025-01-01",
       "effectiveTo": null,
-      "title": "国家基层高血压防治管理指南2025版",
-      "clauseId": "3.2",
-      "clausePath": "第三章 > 3.2 诊断标准",
-      "pageNo": 12,
-      "pageEnd": 13,
-      "score": 0.0328,
+      "title": "hypertension-2025",
+      "clauseId": "4.2.1",
+      "clausePath": "4  高血压诊断与评估 > 4.2  高血压诊断标准 > 4.2.1  诊断标准",
+      "pageNo": 4,
+      "pageEnd": 4,
+      "score": 0.01639344262295082,
       "content": "……",
-      "citation": "《国家基层高血压防治管理指南2025版》v2025（2025-01-01 生效） > 第三章 > 第12页"
+      "citation": "《hypertension-2025》v2025（2025-01-01 生效） > 4.2.1  诊断标准 > 第4页"
     }
   ],
-  "conflicts": []
+  "conflicts": [],
+  "abstained": false,
+  "abstainReason": null,
+  "message": null,
+  "diagnostics": {
+    "topScore": 0.7801635497858199,
+    "secondScore": 0.7599190712457524,
+    "scoreGap": 0.0202444785400675,
+    "candidateCount": 30,
+    "denseCount": 30,
+    "minTopScore": 0.55,
+    "highConfidenceTopScore": 0.63,
+    "minDenseCandidates": 8,
+    "minScoreGap": 0.02,
+    "enabled": true,
+    "reason": "NONE"
+  }
 }
 ```
 
+**200 OK（拒答：NO_MATCH）**
+
+```json
+{
+  "query": "公司年假有多少天？",
+  "asOf": "2026-11-09",
+  "chunkStrategy": "heading",
+  "strategy": "hybrid",
+  "tookMs": 65,
+  "results": [],
+  "conflicts": [],
+  "abstained": true,
+  "abstainReason": "NO_MATCH",
+  "message": "未检索到足以回答该问题的资料。请补充更具体的信息，或联系管理员确认知识库是否已收录相关内容。",
+  "diagnostics": {
+    "topScore": 0.4609866554427876,
+    "secondScore": 0.4410002231598402,
+    "scoreGap": 0.019986432282947386,
+    "candidateCount": 30,
+    "denseCount": 0,
+    "minTopScore": 0.55,
+    "highConfidenceTopScore": 0.63,
+    "minDenseCandidates": 8,
+    "minScoreGap": 0.02,
+    "enabled": true,
+    "reason": "NO_MATCH"
+  }
+}
+```
+
+> 为可读性省略了 `diagnostics.candidateScores`（参与判定的余弦降序列表）；完整数组见实际响应和
+> `eval/report.json`。示例中的 `chunkId`/`docId` 也做了缩写。
+
 说明：
 
-- 无结果返回 `results: []`，HTTP 200，不报错。
+- 非拒答路径的 `results` 语义、字段、排序完全不变；`abstained` / `abstainReason` / `message` /
+  `diagnostics` 是 Phase 7 追加字段，旧客户端可忽略。
+- `abstained=true` 时 `results` 必须为空数组，`message` 必须为非空中文文案，且 `abstainReason`
+  只能是 `NO_MATCH` 或 `TOO_NOISY`；不允许“空数组 + 空消息”的静默失败。
+- `NO_MATCH` 与 `TOO_NOISY` 是两条不同判定：前者是 top-1 余弦低于绝对下限；后者是 top-1 达标但
+  高分候选过多且 top1/top2 差距过小（噪声过多，无法判断）。规则见
+  [11-retrieval-and-eval-spec.md](11-retrieval-and-eval-spec.md) 3.4。
+- `message` 由服务端生成，**不是模型输出，也不允许模型改写**；正常命中时为 `null`。
+- `diagnostics` 在正常和拒答两种路径都存在（`reason=NONE` 表示未拒答），至少包含 `topScore`、
+  `candidateCount`、`reason`；运营可据此复核“为什么拒/为什么没拒”。`candidateScores` 为参与判定
+  的余弦降序列表（最多 `app.search.candidate-limit` 个）。
+- 拒答判定在服务端完成，默认开启，不新增请求参数来触发/关闭；配置项为
+  `app.search.abstain.*`（`enabled`、`min-top-score`、`high-confidence-top-score`、
+  `min-dense-candidates`、`min-score-gap`）。
+- 无结果返回 `results: []`，HTTP 200，不报错；即使 `app.search.abstain.enabled=false`，空结果也
+  必须带非空 `message`，不会出现空数组 + 空消息。
 - `content` 超过 2000 字符时截断，末尾加 `…`。
 - `pageNo` 是 chunk 起始页；`pageEnd` 是包含结束页（`>= pageNo`，Phase 6 additive）。固定窗口 chunk 可能跨页，citation 仍以 `pageNo` 为起始页，不编造结束页。
-- `score` 为**原始 RRF 分**（典型 0.016~0.033，不是 0~1 概率）；公式见 [11-retrieval-and-eval-spec.md](11-retrieval-and-eval-spec.md)，不同策略之间不可直接比较。
+- `score` 为**原始 RRF 分**（典型 0.016~0.033，不是 0~1 概率）；公式见 [11-retrieval-and-eval-spec.md](11-retrieval-and-eval-spec.md)，不同策略之间不可直接比较。相关性阈值使用 `diagnostics.topScore`（余弦），不要拿 `score` 卡阈值。
 - 结果按 score 降序；同分按 `docId + chunkIndex` 稳定排序。
 - 默认只返回 `ACTIVE` 且 `asOf` 在生效区间内的文档；`DRAFT` 永不返回。
 - `asOf` 为过去日期时，返回当时有效的版本（允许 `SUPERSEDED`），仍看 `effective_to`。
@@ -533,43 +597,87 @@ Header：`X-Admin-Token: <ADMIN_TOKEN>`
 }
 ```
 
-**输出**
+**输出（正常命中）**
 
 ```json
 {
   "results": [
     {
-      "chunkId": "7f1e...",
-      "docId": "0d5b...",
+      "chunkId": "c8a5fcb2-...",
+      "docId": "34a38cdb-...",
       "docKey": "hypertension-guideline",
       "docVersion": "2025",
       "docStatus": "ACTIVE",
       "effectiveFrom": "2025-01-01",
       "effectiveTo": null,
-      "title": "国家基层高血压防治管理指南2025版",
-      "clauseId": "3.2",
-      "clausePath": "第三章 > 3.2 诊断标准",
-      "pageNo": 12,
-      "pageEnd": 13,
-      "score": 0.0328,
+      "title": "hypertension-2025",
+      "clauseId": "4.2.1",
+      "clausePath": "4  高血压诊断与评估 > 4.2  高血压诊断标准 > 4.2.1  诊断标准",
+      "pageNo": 4,
+      "pageEnd": 4,
+      "score": 0.01639344262295082,
       "content": "……",
-      "citation": "《国家基层高血压防治管理指南2025版》v2025（2025-01-01 生效） > 第三章 > 第12页"
+      "citation": "《hypertension-2025》v2025（2025-01-01 生效） > 4.2.1  诊断标准 > 第4页"
     }
   ],
-  "conflicts": []
+  "conflicts": [],
+  "abstained": false,
+  "abstainReason": null,
+  "message": null,
+  "diagnostics": {
+    "topScore": 0.7801635497858199,
+    "candidateCount": 30,
+    "denseCount": 30,
+    "minTopScore": 0.55,
+    "reason": "NONE"
+  }
+}
+```
+
+**输出（拒答时）**
+
+```json
+{
+  "results": [],
+  "conflicts": [],
+  "abstained": true,
+  "abstainReason": "TOO_NOISY",
+  "message": "检索到的内容噪声过多，无法判断。请缩小问题范围或提供更明确的条款、文档名称后重试。",
+  "diagnostics": {
+    "topScore": 0.6094036046245114,
+    "secondScore": 0.593435516712153,
+    "scoreGap": 0.015968087912358375,
+    "candidateCount": 30,
+    "denseCount": 16,
+    "minTopScore": 0.55,
+    "highConfidenceTopScore": 0.63,
+    "minDenseCandidates": 8,
+    "minScoreGap": 0.02,
+    "enabled": true,
+    "reason": "TOO_NOISY"
+  }
 }
 ```
 
 约束：
 
 - 最多返回 10 条；每条 content ≤ 2000 字符。
-- 结果字段与 HTTP 检索一致，Phase 6 新增 additive `pageEnd`；旧客户端可忽略。
-- 无结果返回 `{"results":[]}`，不是错误。
+- 结果字段与 HTTP 检索一致，Phase 6 新增 additive `pageEnd`；Phase 7 新增 additive
+  `abstained` / `abstainReason` / `message` / `diagnostics`，旧客户端可忽略。
+- 无结果或拒答返回 `results: []`，**不是错误**；`abstainReason` 只能是 `NO_MATCH` / `TOO_NOISY`，
+  `message` 必须是非空系统文案，`diagnostics` 必须存在（至少 `topScore`、`candidateCount`、
+  `reason`）。禁止“空数组 + 空消息”。
+- `message` 是服务端兜底常量，不是模型可改写的内容；未来接生成层时，模型空回复也会被
+  `AnswerFallback` 替换为对应原因的文案。
+- 拒答默认开启，由服务端按余弦分判定；MCP schema 不新增“是否拒答/是否输出结果”的开关，
+  tool description 也不包含“如果不确定就拒答”之类引导。
 - `mandateId` 必须存在、未过期、允许 `search_knowledge`；`topK` ≤ mandate.maxTopK；`docIds` 必须是 mandate.allowedDocIds 的子集。
 - 默认只返回 ACTIVE；`asOf` 缺省今天；`includeSuperseded=true` 才允许旧版（只要求 `effectiveFrom <= asOf`，忽略 `effectiveTo`）。
 - `detectConflicts` 为 P1 可选；P0 阶段忽略该参数并返回 `conflicts: []`。
 - 参数不符合 schema/类型错误返回 JSON-RPC `-32602`；业务错误（mandate/文档不存在等）返回 tool error（`isError: true`）+ `{"code":"ERR-...","message":"..."}`。
 - 越权/过期返回 `ERR-MANDATE_SCOPE` / `ERR-MANDATE_EXPIRED`。
+- mandate 的 `allowedDocIds=[]` 时不会调用检索，直接返回 `results=[]`、`abstained=true`、
+  `abstainReason="NO_MATCH"`、非空 `message` 和 `diagnostics`（不泄露任何文档）。
 
 ### 3.3 Tool：`get_document`
 
