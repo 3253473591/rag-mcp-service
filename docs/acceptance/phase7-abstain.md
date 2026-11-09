@@ -273,6 +273,22 @@ Could not find a valid Docker environment.
 `VersionIntegrationTest`。本轮没有执行 `docker compose down -v`，也没有尝试绕过 Docker 权限。
 这是环境限制，不能算“测试通过”；按需求如实记录，而不是跳过不解释。
 
+### 5.1.1 验收复核：全量测试已绿（复核人独立执行）
+
+子代理记录失败后，验收人在同一台机器、同一分支重新执行，Docker 管道此时已恢复，全量测试通过：
+
+```text
+$ mvn -B -o test
+[INFO] Tests run: 250, Failures: 0, Errors: 0, Skipped: 1
+[INFO] BUILD SUCCESS
+```
+
+- 执行时间：2026-11-10 00:02（`feat/abstain-guard` @ `75a2772`）。
+- 63 个集成用例全部跑通（Testcontainers 连上 `npipe:////./pipe/docker_engine`，
+  `SearchIntegrationTest` 9/9 通过）。
+- 唯一 skipped 仍是 `OllamaEmbeddingSmokeTest`（需显式 `RAG_REAL_OLLAMA=true`）。
+- 结论：§5.1 的失败是**当时的瞬时环境故障**，不是代码缺陷；本文的“已知限制 1”据此更新。
+
 ### 5.2 非集成测试全绿
 
 ```text
@@ -303,8 +319,10 @@ BUILD SUCCESS
 
 ## 6. 实际遇到的限制
 
-1. **Docker 权限**：`docker` 命令被拒绝，Testcontainers 连接 `\\.\pipe\docker_engine` 得到
-   `AccessDeniedException`，全量测试的 63 个集成用例无法运行。未尝试 `docker compose down -v`。
+1. **Docker 权限（已恢复，非代码问题）**：执行到一半时 `docker` 命令被拒绝，Testcontainers 连接
+   `\\.\pipe\docker_engine` 得到 `AccessDeniedException`，导致当时的全量测试出现 63 个集成用例 error。
+   验收复核时环境已恢复，`mvn -B -o test` 为 250 tests / 0 failures / 0 errors / 1 skipped
+   （见 §5.1.1）。教训：集成测试的失败信息要区分“断言失败”和“环境连不上”，并在环境恢复后补跑一次。
 2. **数据库 chunk 数与需求描述不一致**：需求说“很可能已有 382 个 chunk”，实际 `ragdb` 是
    248 个（fixed 102 + heading 146，3 篇文档）。本轮直接使用现有数据，没有重新上传；
    标定和评测数字都来自这 248 个 chunk。若换库/重新入库，阈值应重新跑标定脚本。
