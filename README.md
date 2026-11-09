@@ -2,8 +2,8 @@
 
 企业知识库 RAG 检索服务（Java/Spring Boot + PostgreSQL/pgvector + MCP + 治理层）。
 
-- 当前状态：**Phase 6（R1-R4 收尾）已验收（P0，带 residual）**，已合并 `main`；Phase 1/2/3/4/5 已验收。
-- Phase 6b（R1，`phase6b` 分支，待验收方决定合并）：检索 query 批处理（8 条 / 5ms 窗口）+ 最多 3 个并发 batch + 有界队列/缓存；3 次独立 60s、10 并发 p95=**445.29 / 500.12 / 468.59ms**，errors=0，cacheHits=0/8004（未用缓存伪造基准）；40 QA 指标与 Phase 6 一致。详见 [phase6b-report](docs/acceptance/phase6b-report.md)。
+- 当前状态：**Phase 6/6b 已验收（R1 本机 p95 达标；R2/R3/R4 residual）**，已合并 `main`；Phase 1/2/3/4/5 已验收。
+- Phase 6b（R1）已验收：检索 query 批处理（8 条 / 5ms 窗口）+ 最多 3 个并发 batch + 有界队列/缓存；实现方 3 次 + 验收方 3 次 60s、10 并发 p95 全部 <800ms（验收方 498.53/368.39/408.52ms），cacheHits=0（未用缓存伪造基准）；40 QA 指标与 Phase 6 一致。详见 [phase6b-report](docs/acceptance/phase6b-report.md)。
 - Phase 6 交付：中文“第X条”条款 heading 与 `clause_id`；PDF 双栏阅读顺序 + heading 候选清洗；`page_end` 页面跨度 + fixed chunk 主导 section 元数据 + eval pageRange 相交匹配；10 并发残余风险如实复测。详见 [phase6-report](docs/acceptance/phase6-report.md)。
 - Phase 5 交付：生产 `spring-ai-starter-mcp-server-webmvc`、Streamable HTTP `/mcp`、Bearer 401、两个低层 tool（`search_knowledge` / `get_document`）、mandate（存在/过期/工具/topK/docIds/文档范围）、`mcp_audit_log`（query 只存哈希）、未知 tool `-32601`、坏参数 `-32602`、内部错误 `-32603`。真实 MCP Java client 集成测试覆盖 initialize/tools/list/tools/call；默认协商协议版本实测为 **2025-11-25**，2025-06-18 客户端请求也按 2025-06-18 回显。
 - Phase 4 交付（已验收）：`POST/GET /api/v1/work-items`、带 `X-Admin-Token` 的 approve/deny；审批只能缩小工具/文档/topK 范围；显式 `allowedDocIds` 语义；重复审批 409；管理员 token 常量时间比较、未配置时 401；approve 事务写 `work_item` + `mandate`。

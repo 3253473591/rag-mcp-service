@@ -89,7 +89,10 @@ Phase 3 的 citation 章节段出现 `90 mmHg`、`3 d、至少`、`20 g、川牛
 | Q18（enterprise） | `第一章 总 则 > 第三条 ... > 第2页` | 第三条为目标；page-only gold 仍可能命中同页错误条款，见 R4 残余 |
 
 - 2025 heading chunk 中 `clause_path LIKE '%90 mmHg%'` / `%3 d%` / `%20 g%` 计数均为 **0**（Phase 6 DB，见第 6 节 SQL）。
-- **不声称全文顺序已修**：表格/流程图仍可能跨栏拆散；Q05 等少数量题仍可能取到错误 section 的 chunk。R3 的交付边界是“clausePath 噪声 + 主正文/heading 阅读顺序”，不是“双栏表格 100% 还原”。
+- **R3 验收口径（用户澄清）**：不要求全文双栏顺序完全还原，只要求返回信息正确、不编造。
+  - Q01/Q08/Q12/Q18/Q25 抽样内容正确；Q05 的 top-1 来自 `5.4.7` 而不是 gold `4.2`，但“白大衣/隐蔽性高血压定义”内容正确，按信息正确口径应算过；
+  - Q04 的 top-1 是 `4.3 初诊评估`，不是 `4.2.2 诊断流程`，这是已知信息错误，不能因“不要求全文顺序”而放过；
+  - 因此 R3 仍保留 Q04 这个 correctness residual；不再把“全文顺序未完全还原”当作失败理由。
 
 ---
 
@@ -247,7 +250,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\perf-concurren
 | 正式 eval | fixed hit@5 **0.7429** / MRR **0.6867**；heading hit@5 **0.9429** / MRR **0.8319**；0 errors；与实现方一致 |
 | chunk 数 | 248（2025 171、enterprise 67、2024 10）；2025 heading 从 231 降到 91 是 section 合并，heading token 36,328、fixed token 40,701，无空 chunk；未观察到丢内容 |
 | R4 | 企业 heading 49 个，48 个有 `clause_id`；唯一 NULL 是封面标题；`clause_path` 带章 |
-| R3 | 2025 `clause_path` 中 `90 mmHg` / `3 d` / `20 g` 计数均 0；heading Q18 top-1 第三条正确 |
+| R3 | `clause_path` 中 `90 mmHg` / `3 d` / `20 g` 计数均 0；5 条抽样内容正确；Q05 内容正确但来自 5.4.7；Q04 top-1 4.3 是已知信息错误，留 correctness residual |
 | R2 语义残余 | fixed Q18 top-1 是第四条（错误），但因 page-only gold `[2,2]` 被算 hit；fixed 指标含 pageRange 粗匹配，不能等同 clause 级正确 |
 | 10 并发独立复跑 | requests=972，errors=0，p50=259.05ms，p95=**2243.04ms**，p99=4545.93ms；仍不达标，R1 residual |
 | 结论 | **R4 已修；R2 显著改善但未完全闭环；R3 部分修复；R1 未达标**；Phase 6 可合并 `main`，residual 保留 |
