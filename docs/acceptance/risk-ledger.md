@@ -1,10 +1,10 @@
 # 风险台账（跨 Phase 追踪）
 
 - 更新：2026-11-09
-- 当前 `main`：Phase 6b 签收后；`phase6c` 待验收（Q04 修复，不自行合并）
+- 当前 `main`：Phase 6c 签收后
 - Phase 6：`phase6` 已验收（P0，带 residual）并合并 `main`；R1–R4 状态见下
 - Phase 6b：仅 R1；`phase6b` 已验收并合并 `main`；实现方 3 次 + 验收方 3 次 60s，p95 全部 <800ms
-- Phase 6c：仅 R3/Q04；`phase6c` 已 push，是否合并由验收方决定
+- Phase 6c：仅 R3/Q04；`phase6c` 已验收并合并 `main`；Q04 heading/fixed top-1 为 4.2.2，R3 按信息正确性闭环
 - 用途：把“已解决 / 部分改善 / 仍待修”说清楚，避免把测量、定位或文档口径当成已修复。
 
 ## 状态总表

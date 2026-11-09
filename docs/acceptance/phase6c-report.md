@@ -16,7 +16,7 @@
    - 标题长度必须在 3–20 字之间（过滤“总则”这类过短标题和企业 `第X条 …` 长条款文本）；
    - 只有该叶子标题**完整出现**在规范化 query 中才给 boost；
    - boost = `0.0005 × 标题字数`，上限 `0.003`；4 字标题即 `0.002`。
-3. `RrfFusion` 在 vector + keyword 的 RRF 分之上加这个 boost，并在 top-K 截断**之前**排序，因此原本在向量 top-K 边缘的 section 可以进入返回窗口。3 参 `fuse()` 保留原行为（boost=0），既有单测不受影响。
+3. `RrfFusion` 用这个 boost 参与 top-K 截断**之前**的排序，因此原本在向量 top-K 边缘的 section 可以进入返回窗口；**但暴露的 `score` 仍是原始 RRF 分**（boost 只影响排序，不污染 API 契约）。3 参 `fuse()` 保留原行为（boost=0）。
 4. `SearchService` 只把 `query.query()` 规范化一次，再传入 boost 函数；不新增 SQL、不改变两路召回、不改默认配置。
 
 泛化性：
@@ -82,7 +82,7 @@ Q04 的 fixed 原本已 hit@5，本轮提升到 rank 1；不是靠改 pageRange/
 | `McpIntegrationTest` | **14 / 0 / 0** |
 | `SearchIntegrationTest` | 新增 Q04 集成断言后 9/0/0 |
 | `SectionTitleMatcherTest` | 3/0/0（规范化、叶子标题 boost、长条款/短标题忽略） |
-| `RrfFusionTest` | 5/0/0（新增 boost 重排 + 分数含 boost） |
+| `RrfFusionTest` | 5/0/0（boost 重排；暴露 score 保持 raw RRF） |
 | `SearchServiceTest` | 7/0/0（新增 Q04-like 查询重排） |
 | `validate-gold.ps1` | **35/35** locator 存在 |
 | `eval/qa.jsonl` sha256 | `1487e261b728debd22a876d31016f376efeb40932d8888d45d2d15b91a15af4c`（未变） |
@@ -102,7 +102,7 @@ p95 远低于 800ms，未因新逻辑明显回退；p99/max 长尾与 Phase 6b �
 
 1. **Q12 rank 1→2**：query 含 `药物治疗方案`，父节 `5.4.3` 的叶子标题命中并加 `0.003`，超过更具体的 `5.4.3.1`（rank 2，仍 hit@5）。这是本信号唯一的 ranking 回退；如需消除，需要层级感知（父/子标题同时命中时把 boost 给更具体子节），不在本轮范围。
 2. **纯词面信号**：query 必须点名 section 标题（如“诊断流程”）才生效；同义改写（如“高血压怎么确诊”）不会获得 boost。后续可做受限同义词/术语扩展，但要单独跑 40 QA。
-3. **Q05 fixed top-1 仍是 4.2.3**：Phase 6 既有现象，本轮未改变；heading 的 Q05 top-1 `5.4.7` 内容正确。
+3. **Q05 fixed top-1 的 clause 标签仍是 4.2.3**：Phase 6 既有现象，本轮未改变；但其 chunk 内容包含“白大衣/隐蔽性高血压”的正确解释，按“信息正确”口径算过，clause 标签仍偏粗。heading 的 Q05 top-1 `5.4.7` 内容正确。
 4. **keyword 分支仍是整句 ILIKE**：自然问句 keyword 0 命中，本轮未改，避免大范围排序变化。
 5. **全文双栏顺序仍未重建**：R3 验收口径不要求全文顺序，只要求返回信息正确；Q04 已满足。
 6. **性能长尾**：p99 1.04s、max 5.74s；p95 达标不等于长尾消失。
@@ -112,3 +112,20 @@ p95 远低于 800ms，未因新逻辑明显回退；p99/max 长尾与 Phase 6b �
 **建议合并**。理由：Q04 heading/fixed 均 rank 1 且内容正确；40 QA 无 hit@5 回归，heading 达到 34/35、MRR 提升；改动是一个 3 参数兼容的融合后 boost，无 gold/API/配置变更；全量测试、McpIntegrationTest、validate-gold、并发冒烟均通过。残余 Q12 1→2 与 R3 全文顺序问题已如实记录，不阻塞验收。
 
 Q04 在 R3 中可标记为**已闭环**；R3 的“全文双栏顺序未重建”作为非验收项保留。
+
+---
+
+## 7. 验收方独立复核（2026-11-09）
+
+| 项 | 结果 |
+|---|---|
+| `mvn clean test` | **228 / 0 / 0 / 1**，BUILD SUCCESS |
+| Q04 heading | top-1 = `4.2.2 诊断流程`，第4页；content 含诊断流程/明确诊断/白大衣/隐蔽性 |
+| Q04 fixed | top-1 = `4.2.2 诊断流程`；content 含 4.2.2 诊断流程正文 |
+| 40 QA | fixed hit@5=0.7429/MRR=0.7143；heading hit@5=**0.9714 (34/35)**/MRR=0.8748；0 errors |
+| gold | `validate-gold.ps1` 35/35；`eval/qa.jsonl` sha256 不变 |
+| Q05 fixed | clause 标签 `4.2.3`，但 chunk 内容包含白大衣/隐蔽性正确解释；按信息正确口径算过，标签偏粗 |
+| Q12 | heading rank 1→2，仍 hit@5；唯一 ranking 回退，已记录 |
+| API score | **验收方修正**：boost 只参与排序，`score` 保持原始 RRF；`RrfFusionTest` 锁定 raw score，docs/02 契约不变 |
+| 性能 | 实现方 10 并发 60s p95=375/388.65ms，errors=0；Phase 6b 的 6/6 结果不受 ranking 改动影响 |
+| 结论 | **Q04 信息错误已闭环；R3 可关闭（Q12 rank2/Q05 fixed 标签为残余，不是信息错误）** |

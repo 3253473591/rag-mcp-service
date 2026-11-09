@@ -35,8 +35,10 @@ public final class RrfFusion {
     }
 
     /**
-     * @param headingBoost additive, explainable boost per candidate; must be deterministic and
-     *                     non-negative. Zero preserves the plain two-route RRF result.
+     * @param headingBoost additive, explainable boost used only for ordering; must be deterministic
+     *                     and non-negative. The exposed {@link ScoredCandidate#score()} remains the
+     *                     raw RRF score as promised by the API contract. Zero preserves the plain
+     *                     two-route RRF order.
      */
     public static List<ScoredCandidate> fuse(List<SearchCandidate> vector,
                                              List<SearchCandidate> keyword,
@@ -56,7 +58,9 @@ public final class RrfFusion {
         return byChunk.values().stream()
                 .sorted(order)
                 .limit(Math.max(0, topK))
-                .map(acc -> new ScoredCandidate(acc.candidate(), totalScore(acc, headingBoost)))
+                // Contract: score is the raw RRF contribution. The heading boost only changes
+                // the ordering above, never the exposed score.
+                .map(acc -> new ScoredCandidate(acc.candidate(), acc.score()))
                 .toList();
     }
 
