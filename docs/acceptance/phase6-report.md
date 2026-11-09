@@ -1,11 +1,11 @@
 # Phase 6 验收报告：R1-R4 收尾
 
 - 日期：2026-11-09
-- 分支：`phase6`（从 `main` @ `d490a7a` 创建；不合并 main）
+- 分支：`phase6`（从 `main` @ `d490a7a` 创建；验收后合并 `main`）
 - 实现 commit：`e14c96b69f4774f0cd19b14bcb1dab51ea7f8f29`
 - 证据 commit：本报告所在 commit；`eval/report.*` 在该实现 commit 上以 `dirty=False` 重跑
 - 基线：Phase 1–5 已验收；Phase 3 正式指标见 [phase3-report.md](phase3-report.md)
-- 结论：**R4 已修，R3 部分修复（clausePath 噪声已清，content 仍可能交错），R2 已修（fixed hit@5 0.3429 → 0.7429，gold 未改），R1 完成一次真实复测但 p95 仍未稳定达标，保留 residual。**
+- 结论：**R4 已修；R2 显著改善（fixed hit@5 0.3429 → 0.7429，gold 未改，但仍有 page-only 粗匹配残余）；R3 部分修复（clausePath 噪声已清，content 仍可能交错）；R1 完成真实复测但 p95 仍未达标，保留 residual。**
 
 ---
 
@@ -230,7 +230,31 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\perf-concurren
 
 1. **R1 未稳定达标**：p95 仍可能 >800ms；本轮一次测量如实记录，未用缓存伪造。
 2. **R3 不是全文双栏还原**：表格/流程图仍可能交错；clausePath 噪声已清，但 content 仍可能跨栏。
-3. **enterprise gold 仍是 pageRange**：Q18 本轮 top-1 正确（第三条），但 page-only 匹配按页命中仍可能取到同页错误条款；改 gold 需要逐条校验并记录 hash，本次未改。
+3. **enterprise gold 仍是 pageRange**：Q18 的 heading top-1 是第三条（正确）；但 fixed top-1 是第四条（错误条款），仍因 pageRange=[2,2] 被算作 hit。page-only 匹配会高估 fixed 的语义正确率；改 gold 需要逐条校验并记录 hash，本次未改。
 4. **fixed 仍低于 heading**：0.7429 < 0.9429；主导 section 是启发式，窗口跨多个标题时可能选错 section。
 5. **pageEnd 的语义**：fixed 的 pageEnd 是覆盖页范围，citation 仍只展示起始页；没有改 citation 格式，避免破坏 Phase 3/5 契约。
 6. **不能用本轮数字宣称 R1 达标**，也不能把 R3 的“clausePath 已清”说成“全文顺序已修”。
+
+---
+
+## 10. 验收方独立复核（2026-11-09）
+
+| 项 | 结果 |
+|---|---|
+| `mvn clean test` | **207 / 0 / 0 / 1**，BUILD SUCCESS；skip 为条件 Ollama smoke |
+| `McpIntegrationTest` | **14 / 0 / 0**；Phase 5 `/mcp` 未破坏 |
+| gold | `validate-gold.ps1` **35/35**；`eval/qa.jsonl` sha256 仍为 `1487e261...`，未改 |
+| 正式 eval | fixed hit@5 **0.7429** / MRR **0.6867**；heading hit@5 **0.9429** / MRR **0.8319**；0 errors；与实现方一致 |
+| chunk 数 | 248（2025 171、enterprise 67、2024 10）；2025 heading 从 231 降到 91 是 section 合并，heading token 36,328、fixed token 40,701，无空 chunk；未观察到丢内容 |
+| R4 | 企业 heading 49 个，48 个有 `clause_id`；唯一 NULL 是封面标题；`clause_path` 带章 |
+| R3 | 2025 `clause_path` 中 `90 mmHg` / `3 d` / `20 g` 计数均 0；heading Q18 top-1 第三条正确 |
+| R2 语义残余 | fixed Q18 top-1 是第四条（错误），但因 page-only gold `[2,2]` 被算 hit；fixed 指标含 pageRange 粗匹配，不能等同 clause 级正确 |
+| 10 并发独立复跑 | requests=972，errors=0，p50=259.05ms，p95=**2243.04ms**，p99=4545.93ms；仍不达标，R1 residual |
+| 结论 | **R4 已修；R2 显著改善但未完全闭环；R3 部分修复；R1 未达标**；Phase 6 可合并 `main`，residual 保留 |
+
+### 10.1 验收方判断
+
+- R2 的 0.3429→0.7429 是真实代码/元数据变化带来的提升，但其中包含 page-only 粗匹配；不能宣称 fixed 已达到 clause 级语义正确。
+- R4 的 clause_id 是真实 metadata 修复；QA gold 仍 page-only，是刻意的 dataset 边界，不是本次为了指标而改。
+- R3 只承诺 clausePath 噪声与主阅读顺序，不承诺表格/流程图 100% 还原。
+- R1 没有靠缓存/挑选数字掩盖；p95 2243 与实现方 1780 都如实保留。
