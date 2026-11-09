@@ -39,6 +39,61 @@ function Get-Percentile {
     return [Math]::Round($sorted[$rank], 2)
 }
 
+function Get-ActuatorMeasurement {
+    param([string]$Name, [string]$Statistic)
+    try {
+        $metric = Invoke-RestMethod -Uri ("{0}/actuator/metrics/{1}" -f $BaseUrl, $Name) -TimeoutSec 5
+        foreach ($measurement in @($metric.measurements)) {
+            if ($measurement.statistic -eq $Statistic) { return [double]$measurement.value }
+        }
+    } catch {
+        return $null
+    }
+    return $null
+}
+
+# Phase 6b: capture embedding batching/cache counters for the measured window. Optional: if
+# /actuator/metrics is not exposed the benchmark still runs and the field is $null.
+function Get-EmbeddingSnapshot {
+    $requests = Get-ActuatorMeasurement 'rag.query.embedding.requests' 'COUNT'
+    if ($null -eq $requests) { return $null }
+    return [pscustomobject]@{
+        requests = $requests
+        cacheHits = Get-ActuatorMeasurement 'rag.query.embedding.cache.hits' 'COUNT'
+        cacheMisses = Get-ActuatorMeasurement 'rag.query.embedding.cache.misses' 'COUNT'
+        batches = Get-ActuatorMeasurement 'rag.query.embedding.batches' 'COUNT'
+        batchSizeCount = Get-ActuatorMeasurement 'rag.query.embedding.batch.size' 'COUNT'
+        batchSizeTotal = Get-ActuatorMeasurement 'rag.query.embedding.batch.size' 'TOTAL'
+        failures = Get-ActuatorMeasurement 'rag.query.embedding.failures' 'COUNT'
+        rejected = Get-ActuatorMeasurement 'rag.query.embedding.rejected' 'COUNT'
+        waitTimeouts = Get-ActuatorMeasurement 'rag.query.embedding.wait.timeouts' 'COUNT'
+    }
+}
+
+function Get-EmbeddingDelta {
+    param($Before, $After)
+    if ($null -eq $Before -or $null -eq $After) { return $null }
+    $requests = [double]$After.requests - [double]$Before.requests
+    $hits = [double]$After.cacheHits - [double]$Before.cacheHits
+    $misses = [double]$After.cacheMisses - [double]$Before.cacheMisses
+    $batches = [double]$After.batches - [double]$Before.batches
+    $batchCount = [double]$After.batchSizeCount - [double]$Before.batchSizeCount
+    $batchTotal = [double]$After.batchSizeTotal - [double]$Before.batchSizeTotal
+    $hitRate = if ($requests -gt 0) { [Math]::Round($hits / $requests, 6) } else { 0 }
+    $avgBatch = if ($batchCount -gt 0) { [Math]::Round($batchTotal / $batchCount, 3) } else { 0 }
+    return [pscustomobject]@{
+        requests = [int]$requests
+        cacheHits = [int]$hits
+        cacheMisses = [int]$misses
+        cacheHitRate = $hitRate
+        batches = [int]$batches
+        avgBatchSize = $avgBatch
+        failures = [int]([double]$After.failures - [double]$Before.failures)
+        rejected = [int]([double]$After.rejected - [double]$Before.rejected)
+        waitTimeouts = [int]([double]$After.waitTimeouts - [double]$Before.waitTimeouts)
+    }
+}
+
 function Invoke-Warmup {
     param([string]$Strategy, [string]$AsOf, [string]$SearchStrategy)
     $client = New-Object System.Net.Http.HttpClient
@@ -165,6 +220,7 @@ WHERE document_id = '$docId'::uuid GROUP BY chunk_strategy ORDER BY chunk_strate
 
     Invoke-Warmup -Strategy $ChunkStrategy -AsOf $asOf -SearchStrategy $SearchStrategy
     Get-ChildItem .tmp/concurrency-worker-*.json -ErrorAction SilentlyContinue | Remove-Item -Force
+    $embeddingBefore = Get-EmbeddingSnapshot
 
     $jobs = @()
     for ($workerId = 1; $workerId -le $Concurrency; $workerId++) {
@@ -180,6 +236,8 @@ WHERE document_id = '$docId'::uuid GROUP BY chunk_strategy ORDER BY chunk_strate
         }
     }
     $jobs | Remove-Job -Force
+    $embeddingAfter = Get-EmbeddingSnapshot
+    $embeddingMetrics = Get-EmbeddingDelta $embeddingBefore $embeddingAfter
 
     $files = @(Get-ChildItem .tmp/concurrency-worker-*.json -ErrorAction Stop)
     if ($files.Count -ne $Concurrency) {
@@ -247,6 +305,7 @@ WHERE document_id = '$docId'::uuid GROUP BY chunk_strategy ORDER BY chunk_strate
         avgResults = if ($counts.Count) { [Math]::Round(($counts | Measure-Object -Average).Average, 2) } else { 0 }
         minResults = if ($counts.Count) { ($counts | Measure-Object -Minimum).Minimum } else { 0 }
         maxResults = if ($counts.Count) { ($counts | Measure-Object -Maximum).Maximum } else { 0 }
+        embeddingMetrics = $embeddingMetrics
         workers = $workerReports
         note = '10 concurrent PowerShell worker processes, each with a reusable HttpClient; errors exclude non-2xx and exceptions. clientMs is end-to-end; serverMs is app tookMs (query embedding + SQL + RRF). Synthetic vectors are cycled from the real chunk pool; this measures latency, not retrieval quality.'
     }

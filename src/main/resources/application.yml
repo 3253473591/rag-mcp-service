@@ -60,7 +60,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics
   endpoint:
     health:
       show-details: always
@@ -88,6 +88,15 @@ app:
     timeout-seconds: 120
     # Concurrent query/ingest embedding calls; docs/05 targets 10 concurrent retrievals.
     max-concurrent-calls: ${EMBEDDING_MAX_CONCURRENT_CALLS:10}
+    # Phase 6b: query-only batching/cache. Ingestion still uses batch-size above.
+    # query-batch-size=1 disables batching; query-cache-size=0 disables the cache.
+    query-batch-size: ${QUERY_EMBEDDING_BATCH_SIZE:8}
+    query-batch-window-ms: ${QUERY_EMBEDDING_BATCH_WINDOW_MS:5}
+    query-cache-size: ${QUERY_EMBEDDING_CACHE_SIZE:1000}
+    query-cache-ttl-seconds: ${QUERY_EMBEDDING_CACHE_TTL_SECONDS:300}
+    query-queue-capacity: ${QUERY_EMBEDDING_QUEUE_CAPACITY:200}
+    query-max-concurrent-batches: ${QUERY_EMBEDDING_MAX_CONCURRENT_BATCHES:3}
+    query-wait-timeout-ms: ${QUERY_EMBEDDING_WAIT_TIMEOUT_MS:130000}
   search:
     # Both routes return top 30 before RRF (docs/11-retrieval-and-eval-spec.md 3.3).
     candidate-limit: 30

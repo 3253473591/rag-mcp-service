@@ -5,7 +5,7 @@ import com.lqx.ragmcp.api.dto.SearchResponse;
 import com.lqx.ragmcp.api.dto.SearchResultItem;
 import com.lqx.ragmcp.api.error.ApiException;
 import com.lqx.ragmcp.config.SearchProperties;
-import com.lqx.ragmcp.embedding.EmbeddingService;
+import com.lqx.ragmcp.embedding.QueryEmbeddingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,14 +23,14 @@ public class SearchService {
     private static final Logger log = LoggerFactory.getLogger(SearchService.class);
     private static final int MAX_CONTENT_CHARS = 2000;
 
-    private final EmbeddingService embeddingService;
+    private final QueryEmbeddingService queryEmbeddingService;
     private final SearchRepository searchRepository;
     private final SearchProperties properties;
 
-    public SearchService(EmbeddingService embeddingService,
+    public SearchService(QueryEmbeddingService queryEmbeddingService,
                          SearchRepository searchRepository,
                          SearchProperties properties) {
-        this.embeddingService = embeddingService;
+        this.queryEmbeddingService = queryEmbeddingService;
         this.searchRepository = searchRepository;
         this.properties = properties;
     }
@@ -73,22 +73,18 @@ public class SearchService {
     }
 
     private float[] embedQuery(String query) {
-        final List<float[]> vectors;
+        final float[] vector;
         try {
-            vectors = embeddingService.embed(List.of(query));
+            vector = queryEmbeddingService.embedQuery(query);
         } catch (ApiException ex) {
             throw ex;
         } catch (RuntimeException ex) {
             log.warn("query embedding failed type={}", ex.getClass().getSimpleName());
             throw ApiException.embeddingUnavailable("embedding 服务不可用，请确认 Ollama 与 bge-m3 已就绪");
         }
-        if (vectors == null || vectors.size() != 1) {
-            throw ApiException.embeddingUnavailable("embedding 返回数量与输入不一致");
-        }
-        float[] vector = vectors.get(0);
-        if (vector == null || vector.length != embeddingService.dimension()) {
+        if (vector == null || vector.length != queryEmbeddingService.dimension()) {
             throw ApiException.embeddingUnavailable(
-                    "embedding 维度不是 " + embeddingService.dimension() + "，请检查模型配置");
+                    "embedding 维度不是 " + queryEmbeddingService.dimension() + "，请检查模型配置");
         }
         boolean nonZero = false;
         for (float value : vector) {

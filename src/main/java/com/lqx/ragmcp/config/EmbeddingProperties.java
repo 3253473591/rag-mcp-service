@@ -30,6 +30,30 @@ public class EmbeddingProperties {
      */
     private int maxConcurrentCalls = 10;
 
+    /**
+     * Phase 6b: maximum number of concurrent retrieval queries coalesced into one
+     * {@code embed(List)} call. 1 disables batching. Document ingestion is unaffected.
+     */
+    private int queryBatchSize = 8;
+
+    /** Phase 6b: how long to collect concurrent queries (milliseconds) before dispatching. */
+    private long queryBatchWindowMs = 5;
+
+    /** Phase 6b: bounded LRU cache capacity for query vectors; 0 disables the cache. */
+    private int queryCacheSize = 1000;
+
+    /** Phase 6b: query cache TTL in seconds; 0 disables the cache. */
+    private long queryCacheTtlSeconds = 300;
+
+    /** Phase 6b: bounded number of queries waiting to be batched; overflow returns 503. */
+    private int queryQueueCapacity = 200;
+
+    /** Phase 6b: number of batch calls that may run against Ollama at the same time. */
+    private int queryMaxConcurrentBatches = 2;
+
+    /** Phase 6b: upper bound on how long one query waits for its batch result. */
+    private long queryWaitTimeoutMs = 130_000;
+
     public String getModel() {
         return model;
     }
@@ -84,5 +108,61 @@ public class EmbeddingProperties {
 
     public void setMaxConcurrentCalls(int maxConcurrentCalls) {
         this.maxConcurrentCalls = maxConcurrentCalls;
+    }
+
+    public int getQueryBatchSize() {
+        return queryBatchSize;
+    }
+
+    public void setQueryBatchSize(int queryBatchSize) {
+        this.queryBatchSize = queryBatchSize;
+    }
+
+    public long getQueryBatchWindowMs() {
+        return queryBatchWindowMs;
+    }
+
+    public void setQueryBatchWindowMs(long queryBatchWindowMs) {
+        this.queryBatchWindowMs = queryBatchWindowMs;
+    }
+
+    public int getQueryCacheSize() {
+        return queryCacheSize;
+    }
+
+    public void setQueryCacheSize(int queryCacheSize) {
+        this.queryCacheSize = queryCacheSize;
+    }
+
+    public long getQueryCacheTtlSeconds() {
+        return queryCacheTtlSeconds;
+    }
+
+    public void setQueryCacheTtlSeconds(long queryCacheTtlSeconds) {
+        this.queryCacheTtlSeconds = queryCacheTtlSeconds;
+    }
+
+    public int getQueryQueueCapacity() {
+        return queryQueueCapacity;
+    }
+
+    public void setQueryQueueCapacity(int queryQueueCapacity) {
+        this.queryQueueCapacity = queryQueueCapacity;
+    }
+
+    public int getQueryMaxConcurrentBatches() {
+        return queryMaxConcurrentBatches;
+    }
+
+    public void setQueryMaxConcurrentBatches(int queryMaxConcurrentBatches) {
+        this.queryMaxConcurrentBatches = queryMaxConcurrentBatches;
+    }
+
+    public long getQueryWaitTimeoutMs() {
+        return queryWaitTimeoutMs;
+    }
+
+    public void setQueryWaitTimeoutMs(long queryWaitTimeoutMs) {
+        this.queryWaitTimeoutMs = queryWaitTimeoutMs;
     }
 }

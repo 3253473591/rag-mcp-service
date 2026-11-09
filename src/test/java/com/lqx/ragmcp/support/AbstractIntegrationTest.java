@@ -46,6 +46,10 @@ public abstract class AbstractIntegrationTest {
         registry.add("spring.datasource.username", POSTGRES::getUsername);
         registry.add("spring.datasource.password", POSTGRES::getPassword);
         registry.add("spring.ai.ollama.base-url", () -> "http://127.0.0.1:1");
+        // Tests assert delegate call behavior through FakeEmbeddingService.FAIL_NEXT; a shared
+        // query cache could satisfy a repeated query without calling the delegate. Batching stays
+        // on so the production query path is exercised.
+        registry.add("app.embedding.query-cache-size", () -> "0");
     }
 
     @Autowired

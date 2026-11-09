@@ -5,7 +5,7 @@ import com.lqx.ragmcp.api.dto.SearchResponse;
 import com.lqx.ragmcp.api.error.ApiException;
 import com.lqx.ragmcp.api.error.ErrorCode;
 import com.lqx.ragmcp.config.SearchProperties;
-import com.lqx.ragmcp.embedding.EmbeddingService;
+import com.lqx.ragmcp.embedding.QueryEmbeddingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -18,7 +18,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -28,16 +27,16 @@ class SearchServiceTest {
 
     private static final LocalDate TODAY = LocalDate.of(2026, 11, 9);
 
-    private EmbeddingService embeddingService;
+    private QueryEmbeddingService queryEmbeddingService;
     private SearchRepository repository;
     private SearchService service;
 
     @BeforeEach
     void setUp() {
-        embeddingService = mock(EmbeddingService.class);
+        queryEmbeddingService = mock(QueryEmbeddingService.class);
         repository = mock(SearchRepository.class);
         SearchProperties properties = new SearchProperties();
-        service = new SearchService(embeddingService, repository, properties);
+        service = new SearchService(queryEmbeddingService, repository, properties);
     }
 
     @Test
@@ -51,7 +50,7 @@ class SearchServiceTest {
         SearchResponse response = service.search(new SearchRequest(
                 "关键词", 5, null, null, "2026-11-09", null, null, "keyword", true), TODAY);
 
-        verify(embeddingService, never()).embed(anyList());
+        verify(queryEmbeddingService, never()).embedQuery(any());
         assertThat(response.strategy()).isEqualTo("keyword");
         assertThat(response.chunkStrategy()).isEqualTo("heading");
         assertThat(response.results()).hasSize(1);
@@ -63,7 +62,7 @@ class SearchServiceTest {
 
     @Test
     void vectorRouteEmbeddingFailureIs503AndDoesNotQueryDatabase() {
-        when(embeddingService.embed(anyList()))
+        when(queryEmbeddingService.embedQuery(any()))
                 .thenThrow(ApiException.embeddingUnavailable("ollama down"));
 
         assertThatThrownBy(() -> service.search(vectorRequest(), TODAY))
@@ -74,7 +73,7 @@ class SearchServiceTest {
 
     @Test
     void vectorRouteTimeoutIs504() {
-        when(embeddingService.embed(anyList()))
+        when(queryEmbeddingService.embedQuery(any()))
                 .thenThrow(ApiException.embeddingTimeout("timeout"));
 
         assertThatThrownBy(() -> service.search(vectorRequest(), TODAY))
@@ -84,8 +83,8 @@ class SearchServiceTest {
 
     @Test
     void wrongEmbeddingDimensionIs503() {
-        when(embeddingService.dimension()).thenReturn(1024);
-        when(embeddingService.embed(anyList())).thenReturn(List.of(new float[512]));
+        when(queryEmbeddingService.dimension()).thenReturn(1024);
+        when(queryEmbeddingService.embedQuery(any())).thenReturn(new float[512]);
 
         assertThatThrownBy(() -> service.search(vectorRequest(), TODAY))
                 .isInstanceOfSatisfying(ApiException.class,
@@ -94,8 +93,8 @@ class SearchServiceTest {
 
     @Test
     void databaseFailureIsNotSwallowedAsEmptyResult() {
-        when(embeddingService.dimension()).thenReturn(1024);
-        when(embeddingService.embed(anyList())).thenReturn(List.of(unitVector()));
+        when(queryEmbeddingService.dimension()).thenReturn(1024);
+        when(queryEmbeddingService.embedQuery(any())).thenReturn(unitVector());
         when(repository.vectorSearch(any(), any(), anyInt()))
                 .thenThrow(new DataAccessResourceFailureException("db down"));
 
@@ -105,8 +104,8 @@ class SearchServiceTest {
 
     @Test
     void vectorAndKeywordRoutesAreBothUsedForHybrid() {
-        when(embeddingService.dimension()).thenReturn(1024);
-        when(embeddingService.embed(anyList())).thenReturn(List.of(unitVector()));
+        when(queryEmbeddingService.dimension()).thenReturn(1024);
+        when(queryEmbeddingService.embedQuery(any())).thenReturn(unitVector());
         SearchCandidate a = RrfFusionTest.candidate(
                 "00000000-0000-0000-0000-000000000001",
                 "00000000-0000-0000-0000-000000000101", "heading", 0);
