@@ -342,7 +342,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\eval.ps1
 - 匹配口径：`docKey` 相同；gold 有 `clauseId` 且结果也有 `clauseId` 时按 clause 匹配；结果没有 `clauseId` 时用 chunk `[pageNo,pageEnd]` 与 `pageRange` 相交判断（`pageEnd` 缺省等于 `pageNo`）。不同 clause 仍是 miss，不能靠同页放宽。
 - 逐题可选 `asOf` / `includeSuperseded` 覆盖全局 `-AsOf`；2024 历史题即用此能力。
 - 脚本兼容 Windows PowerShell 5.1；请求用 `HttpClient` + 原始字节 UTF-8 解码（`Invoke-WebRequest` 曾在实测中出现 19.8s 客户端假延迟）。p50/p95 采用应用 `tookMs`，客户端 p95 在 JSON 的 `clientP95Ms`。
-- 2026-11-09 Phase 6 实测（40 条，248 chunks；gold 未改）：heading hit@1=0.7714、hit@3=0.8857、hit@5=0.9429、MRR=0.8319、p50=54ms、p95=189ms；fixed hit@1=0.6571、hit@3=0.7143、hit@5=0.7429、MRR=0.6867、p50=202ms、p95=433ms；errors=0。
+- 2026-11-09 Phase 6 实测（40 条，248 chunks；gold 未改）：heading hit@1=0.7714、hit@3=0.8857、hit@5=0.9429、MRR=0.8319、p50=128ms、p95=389ms；fixed hit@1=0.6571、hit@3=0.7143、hit@5=0.7429、MRR=0.6867、p50=75ms、p95=214ms；errors=0。
 - Phase 3 历史对照（382 chunks）：heading hit@5=0.8857、MRR=0.6905；fixed hit@5=0.3429、MRR=0.3214。两轮都未修改 gold 来抬指标。
 - `eval/*.jsonl` 通过 `.gitattributes` 固定 LF，保证 Windows/Unix 下 dataset SHA-256 一致；当前 hash 仍为 `1487e261...`。
 - 退出码：有 HTTP/检索错误返回 1；指标阈值只报告，不因 fixed 未达标而伪造通过。

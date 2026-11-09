@@ -2,6 +2,8 @@
 
 - 日期：2026-11-09
 - 分支：`phase6`（从 `main` @ `d490a7a` 创建；不合并 main）
+- 实现 commit：`e14c96b69f4774f0cd19b14bcb1dab51ea7f8f29`
+- 证据 commit：本报告所在 commit；`eval/report.*` 在该实现 commit 上以 `dirty=False` 重跑
 - 基线：Phase 1–5 已验收；Phase 3 正式指标见 [phase3-report.md](phase3-report.md)
 - 结论：**R4 已修，R3 部分修复（clausePath 噪声已清，content 仍可能交错），R2 已修（fixed hit@5 0.3429 → 0.7429，gold 未改），R1 完成一次真实复测但 p95 仍未稳定达标，保留 residual。**
 
@@ -111,9 +113,9 @@ Phase 3：fixed hit@5=0.3429、MRR=0.3214；fixed 无 clause 元数据，`page_n
 | chunkStrategy | hit@1 | hit@3 | hit@5 | MRR | p50 | p95 | errors |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | fixed Phase 3 | 0.3143 | 0.3143 | 0.3429 | 0.3214 | 51 | 106 | 0 |
-| **fixed Phase 6** | **0.6571** | **0.7143** | **0.7429** | **0.6867** | 202 | 433 | 0 |
+| **fixed Phase 6** | **0.6571** | **0.7143** | **0.7429** | **0.6867** | 75 | 214 | 0 |
 | heading Phase 3 | 0.5429 | 0.8286 | 0.8857 | 0.6905 | 58 | 141 | 0 |
-| **heading Phase 6** | **0.7714** | **0.8857** | **0.9429** | **0.8319** | 54 | 189 | 0 |
+| **heading Phase 6** | **0.7714** | **0.8857** | **0.9429** | **0.8319** | 128 | 389 | 0 |
 
 - `fixed` 仍低于 heading 的 0.9429；它不再是 Phase 3 的 0.3429，但也不宣称超过 heading。未改 gold、未删 QA、未放宽 matcher。
 - 2025 最终 chunk 数：fixed 80 + heading 91；2024：fixed 4 + heading 6；enterprise：fixed 18 + heading 49；合计 248。
