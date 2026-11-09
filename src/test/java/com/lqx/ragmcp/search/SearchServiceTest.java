@@ -2,6 +2,7 @@ package com.lqx.ragmcp.search;
 
 import com.lqx.ragmcp.api.dto.SearchRequest;
 import com.lqx.ragmcp.api.dto.SearchResponse;
+import com.lqx.ragmcp.api.dto.SearchResultItem;
 import com.lqx.ragmcp.api.error.ApiException;
 import com.lqx.ragmcp.api.error.ErrorCode;
 import com.lqx.ragmcp.config.SearchProperties;
@@ -121,6 +122,53 @@ class SearchServiceTest {
         verify(repository).vectorSearch(any(), any(), anyInt());
         verify(repository).keywordSearch(any(), anyInt());
         assertThat(response.results()).hasSize(2);
+    }
+
+    @Test
+    void q04LikeQueryPromotesSectionWhoseLeafTitleIsNamedByTheQuestion() {
+        when(queryEmbeddingService.dimension()).thenReturn(1024);
+        when(queryEmbeddingService.embedQuery(any())).thenReturn(unitVector());
+        SearchCandidate wrong = candidate(
+                "00000000-0000-0000-0000-000000000001",
+                "00000000-0000-0000-0000-000000000101",
+                "4.3", "4  高血压诊断与评估 > 4.3  初诊评估", 0,
+                "评估是确定高血压治疗策略的基础。");
+        SearchCandidate right = candidate(
+                "00000000-0000-0000-0000-000000000002",
+                "00000000-0000-0000-0000-000000000102",
+                "4.2.2", "4  高血压诊断与评估 > 4.2  高血压诊断标准 > 4.2.2  诊断流程", 1,
+                "当首诊诊室血压≥140/90 mmHg 时，应明确诊断或转诊。");
+        when(repository.vectorSearch(any(), any(), anyInt())).thenReturn(List.of(wrong, right));
+        when(repository.keywordSearch(any(), anyInt())).thenReturn(List.of());
+
+        SearchResponse response = service.search(new SearchRequest(
+                "高血压的诊断流程是什么？", 5, null, null, "2026-11-09",
+                null, null, "hybrid", null), TODAY);
+
+        assertThat(response.results()).extracting(SearchResultItem::clauseId)
+                .containsExactly("4.2.2", "4.3");
+        assertThat(response.results().get(0).content()).contains("明确诊断");
+    }
+
+    private static SearchCandidate candidate(String chunkId, String docId, String clauseId,
+                                             String clausePath, int chunkIndex, String content) {
+        return new SearchCandidate(
+                java.util.UUID.fromString(chunkId),
+                java.util.UUID.fromString(docId),
+                "hypertension-guideline",
+                "2025",
+                "ACTIVE",
+                LocalDate.of(2025, 1, 1),
+                null,
+                "hypertension-2025",
+                clauseId,
+                clausePath,
+                4,
+                4,
+                content,
+                "heading",
+                chunkIndex,
+                0.8);
     }
 
     private SearchRequest vectorRequest() {

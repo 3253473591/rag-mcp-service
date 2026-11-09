@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.ToDoubleFunction;
 
 /**
  * Reciprocal Rank Fusion with k=60:
@@ -15,6 +16,10 @@ import java.util.UUID;
  *
  * <p>Deduplicates by chunkId. Equal scores are ordered by docId, chunkStrategy, chunkIndex,
  * then chunkId for deterministic pagination-independent output.</p>
+ *
+ * <p>Phase 6c adds an optional additive heading boost (see {@link SectionTitleMatcher}). It is
+ * applied after route contributions and before the top-K cut, so a section whose title is named
+ * by the query can enter the returned window even when it was just outside the vector top-K.</p>
  */
 public final class RrfFusion {
 
@@ -26,12 +31,23 @@ public final class RrfFusion {
     public static List<ScoredCandidate> fuse(List<SearchCandidate> vector,
                                              List<SearchCandidate> keyword,
                                              int topK) {
+        return fuse(vector, keyword, topK, candidate -> 0.0d);
+    }
+
+    /**
+     * @param headingBoost additive, explainable boost per candidate; must be deterministic and
+     *                     non-negative. Zero preserves the plain two-route RRF result.
+     */
+    public static List<ScoredCandidate> fuse(List<SearchCandidate> vector,
+                                             List<SearchCandidate> keyword,
+                                             int topK,
+                                             ToDoubleFunction<SearchCandidate> headingBoost) {
         Map<UUID, Accumulator> byChunk = new LinkedHashMap<>();
         addRoute(byChunk, vector);
         addRoute(byChunk, keyword);
 
         Comparator<Accumulator> order = Comparator
-                .comparingDouble(Accumulator::score).reversed()
+                .comparingDouble((Accumulator acc) -> totalScore(acc, headingBoost)).reversed()
                 .thenComparing(acc -> acc.candidate().docId())
                 .thenComparing(acc -> acc.candidate().chunkStrategy())
                 .thenComparingInt(acc -> acc.candidate().chunkIndex())
@@ -40,8 +56,13 @@ public final class RrfFusion {
         return byChunk.values().stream()
                 .sorted(order)
                 .limit(Math.max(0, topK))
-                .map(acc -> new ScoredCandidate(acc.candidate(), acc.score()))
+                .map(acc -> new ScoredCandidate(acc.candidate(), totalScore(acc, headingBoost)))
                 .toList();
+    }
+
+    private static double totalScore(Accumulator accumulator,
+                                     ToDoubleFunction<SearchCandidate> headingBoost) {
+        return accumulator.score() + headingBoost.applyAsDouble(accumulator.candidate());
     }
 
     private static void addRoute(Map<UUID, Accumulator> byChunk, List<SearchCandidate> route) {

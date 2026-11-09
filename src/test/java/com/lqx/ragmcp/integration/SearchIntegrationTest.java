@@ -84,6 +84,33 @@ class SearchIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void q04SectionHeadingBoostReturnsDiagnosisFlowBeforeGeneralAssessment() throws Exception {
+        UUID docId = insertDocument("hypertension-guideline", "国家基层高血压防治管理指南2025版",
+                "2025", "ACTIVE", LocalDate.of(2025, 1, 1), null);
+        UUID assessment = insertChunk(docId, "heading", 0,
+                "评估是确定高血压治疗策略的基础，内容包括病史和体格检查。", "4.3",
+                "4  高血压诊断与评估 > 4.3  初诊评估", 4);
+        UUID diagnosisFlow = insertChunk(docId, "heading", 1,
+                "当首诊诊室血压≥140/90 mmHg 时，应明确诊断或转诊。", "4.2.2",
+                "4  高血压诊断与评估 > 4.2  高血压诊断标准 > 4.2.2  诊断流程", 4);
+
+        JsonNode response = search(Map.of(
+                "query", "高血压的诊断流程是什么？",
+                "topK", 5,
+                "asOf", "2026-11-09",
+                "chunkStrategy", "heading",
+                "strategy", "hybrid"), 200);
+
+        assertThat(response.get("results")).hasSize(2);
+        JsonNode first = response.get("results").get(0);
+        assertThat(first.get("chunkId").asText()).isEqualTo(diagnosisFlow.toString());
+        assertThat(first.get("clauseId").asText()).isEqualTo("4.2.2");
+        assertThat(first.get("content").asText()).contains("明确诊断");
+        assertThat(first.get("citation").asText()).contains("4.2.2  诊断流程");
+        assertThat(findResult(response, assessment).get("clauseId").asText()).isEqualTo("4.3");
+    }
+
+    @Test
     void tIntSearch02_keywordLiteralWildcardsAreEscaped() throws Exception {
         UUID docId = insertDocument("literal", "字面量测试", "2025", "ACTIVE",
                 LocalDate.of(2025, 1, 1), null);

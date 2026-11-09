@@ -55,8 +55,10 @@ public class SearchService {
             keywordCandidates = searchRepository.keywordSearch(query, properties.getCandidateLimit());
         }
 
+        String normalizedQuery = SectionTitleMatcher.normalizeQuestion(query.query());
         List<RrfFusion.ScoredCandidate> fused =
-                RrfFusion.fuse(vectorCandidates, keywordCandidates, query.topK());
+                RrfFusion.fuse(vectorCandidates, keywordCandidates, query.topK(),
+                        candidate -> SectionTitleMatcher.boost(normalizedQuery, candidate.clausePath()));
 
         List<SearchResultItem> results = fused.stream()
                 .map(scored -> toResponse(scored.candidate(), scored.score()))

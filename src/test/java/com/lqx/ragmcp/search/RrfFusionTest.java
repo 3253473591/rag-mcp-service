@@ -81,6 +81,23 @@ class RrfFusionTest {
         assertThat(RrfFusion.fuse(List.of(a, b), List.of(), 0)).isEmpty();
     }
 
+    @Test
+    void headingBoostReordersCandidatesAndIsIncludedInExposedScore() {
+        SearchCandidate wrongFirst = candidate("00000000-0000-0000-0000-000000000001",
+                "00000000-0000-0000-0000-000000000101", "heading", 0);
+        SearchCandidate rightSecond = candidate("00000000-0000-0000-0000-000000000002",
+                "00000000-0000-0000-0000-000000000102", "heading", 0);
+
+        List<RrfFusion.ScoredCandidate> fused = RrfFusion.fuse(
+                List.of(wrongFirst, rightSecond), List.of(), 5,
+                candidate -> candidate.chunkId().equals(rightSecond.chunkId()) ? 0.002d : 0.0d);
+
+        assertThat(fused).extracting(scored -> scored.candidate().chunkId())
+                .containsExactly(rightSecond.chunkId(), wrongFirst.chunkId());
+        assertThat(fused.get(0).score()).isCloseTo(1.0d / 62.0d + 0.002d, within(1e-12));
+        assertThat(fused.get(1).score()).isCloseTo(1.0d / 61.0d, within(1e-12));
+    }
+
     static SearchCandidate candidate(String chunkId, String docId, String strategy, int chunkIndex) {
         return new SearchCandidate(
                 UUID.fromString(chunkId),
