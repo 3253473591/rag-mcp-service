@@ -405,6 +405,7 @@ Header：`X-Admin-Token: <ADMIN_TOKEN>`
       "clauseId": "3.2",
       "clausePath": "第三章 > 3.2 诊断标准",
       "pageNo": 12,
+      "pageEnd": 13,
       "score": 0.0328,
       "content": "……",
       "citation": "《国家基层高血压防治管理指南2025版》v2025（2025-01-01 生效） > 第三章 > 第12页"
@@ -418,6 +419,7 @@ Header：`X-Admin-Token: <ADMIN_TOKEN>`
 
 - 无结果返回 `results: []`，HTTP 200，不报错。
 - `content` 超过 2000 字符时截断，末尾加 `…`。
+- `pageNo` 是 chunk 起始页；`pageEnd` 是包含结束页（`>= pageNo`，Phase 6 additive）。固定窗口 chunk 可能跨页，citation 仍以 `pageNo` 为起始页，不编造结束页。
 - `score` 为**原始 RRF 分**（典型 0.016~0.033，不是 0~1 概率）；公式见 [11-retrieval-and-eval-spec.md](11-retrieval-and-eval-spec.md)，不同策略之间不可直接比较。
 - 结果按 score 降序；同分按 `docId + chunkIndex` 稳定排序。
 - 默认只返回 `ACTIVE` 且 `asOf` 在生效区间内的文档；`DRAFT` 永不返回。
@@ -548,6 +550,7 @@ Header：`X-Admin-Token: <ADMIN_TOKEN>`
       "clauseId": "3.2",
       "clausePath": "第三章 > 3.2 诊断标准",
       "pageNo": 12,
+      "pageEnd": 13,
       "score": 0.0328,
       "content": "……",
       "citation": "《国家基层高血压防治管理指南2025版》v2025（2025-01-01 生效） > 第三章 > 第12页"
@@ -560,6 +563,7 @@ Header：`X-Admin-Token: <ADMIN_TOKEN>`
 约束：
 
 - 最多返回 10 条；每条 content ≤ 2000 字符。
+- 结果字段与 HTTP 检索一致，Phase 6 新增 additive `pageEnd`；旧客户端可忽略。
 - 无结果返回 `{"results":[]}`，不是错误。
 - `mandateId` 必须存在、未过期、允许 `search_knowledge`；`topK` ≤ mandate.maxTopK；`docIds` 必须是 mandate.allowedDocIds 的子集。
 - 默认只返回 ACTIVE；`asOf` 缺省今天；`includeSuperseded=true` 才允许旧版（只要求 `effectiveFrom <= asOf`，忽略 `effectiveTo`）。

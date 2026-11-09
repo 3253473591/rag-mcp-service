@@ -46,7 +46,7 @@ public class ChunkingService {
                     continue;
                 }
                 prepared.add(new PreparedChunk(strategy, index++, content, tokens,
-                        draft.clauseId(), draft.clausePath(), draft.pageNo(), draft.table()));
+                        draft.clauseId(), draft.clausePath(), draft.pageNo(), draft.pageEnd(), draft.table()));
             }
             result.put(strategy, prepared);
             total += prepared.size();

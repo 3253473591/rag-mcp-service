@@ -50,6 +50,7 @@
 ### AC-04 元数据
 
 - [ ] chunk 至少带 `docId`、`title`、`clausePath`、`pageNo`、`chunkIndex`。
+- [ ] PDF chunk 的 `pageEnd` 存在且 `>= pageNo`（Phase 6 additive）；fixed chunk 也有主导 section 的 clause 元数据（存在 heading 时）。
 - 证据：SQL 抽样 + API 响应。
 
 ### AC-05 Embedding

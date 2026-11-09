@@ -12,6 +12,18 @@ class DocxDocumentParserTest {
     private final DocxDocumentParser parser = new DocxDocumentParser();
 
     @Test
+    void tUnitParse02b_extractsChineseArticleClauseIds() {
+        List<Block> blocks = parser.parse(TestDocuments.docxWithChineseArticles(), "articles.docx");
+
+        assertThat(blocks).anySatisfy(block -> {
+            assertThat(block.isHeading()).isTrue();
+            assertThat(block.text()).startsWith("第五条");
+            assertThat(block.clauseId()).isEqualTo("第五条");
+            assertThat(block.clausePath()).contains("第一章 总 则").contains("第五条");
+        });
+    }
+
+    @Test
     void tUnitParse02_extractsHeadingStylesAndTables() {
         List<Block> blocks = parser.parse(TestDocuments.docxWithHeadings(), "sample.docx");
 

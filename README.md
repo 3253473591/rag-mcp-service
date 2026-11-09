@@ -2,7 +2,8 @@
 
 企业知识库 RAG 检索服务（Java/Spring Boot + PostgreSQL/pgvector + MCP + 治理层）。
 
-- 当前状态：**Phase 5（生产 MCP：`/mcp` + Bearer + mandate 强制校验 + audit）已验收（P0）**，已合并 `main`；Phase 1/2/3/4 已验收。
+- 当前状态：**Phase 6（R1-R4 收尾）在 `phase6` 分支实现，待验收，未合并 `main`**；Phase 1/2/3/4/5 已验收。
+- Phase 6 交付：中文“第X条”条款 heading 与 `clause_id`；PDF 双栏阅读顺序 + heading 候选清洗；`page_end` 页面跨度 + fixed chunk 主导 section 元数据 + eval pageRange 相交匹配；10 并发残余风险如实复测。详见 [phase6-report](docs/acceptance/phase6-report.md)。
 - Phase 5 交付：生产 `spring-ai-starter-mcp-server-webmvc`、Streamable HTTP `/mcp`、Bearer 401、两个低层 tool（`search_knowledge` / `get_document`）、mandate（存在/过期/工具/topK/docIds/文档范围）、`mcp_audit_log`（query 只存哈希）、未知 tool `-32601`、坏参数 `-32602`、内部错误 `-32603`。真实 MCP Java client 集成测试覆盖 initialize/tools/list/tools/call；默认协商协议版本实测为 **2025-11-25**，2025-06-18 客户端请求也按 2025-06-18 回显。
 - Phase 4 交付（已验收）：`POST/GET /api/v1/work-items`、带 `X-Admin-Token` 的 approve/deny；审批只能缩小工具/文档/topK 范围；显式 `allowedDocIds` 语义；重复审批 409；管理员 token 常量时间比较、未配置时 401；approve 事务写 `work_item` + `mandate`。
 - Phase 3 交付（已验收）：`eval/qa.jsonl` 40 条（35 可回答 + 5 不可回答，覆盖 v2025/v2024/enterprise）、fixed/heading 正式评测、gold 结构校验脚本、T-INT-EVAL-01、10k/策略 3 轮性能、10 并发 60s 脚本。heading hit@5=0.8857、MRR=0.6905；fixed hit@5=0.3429（如实报告，不改 gold）。
@@ -154,14 +155,15 @@ curl.exe -s -X POST http://localhost:8080/api/v1/search `
 
 返回字段按 [docs/02-api-contract.md](docs/02-api-contract.md) 2.9：
 `query/asOf/chunkStrategy/strategy/tookMs/results/conflicts`；每条结果含
-`chunkId/docId/docKey/docVersion/docStatus/effectiveFrom/effectiveTo/title/clauseId/clausePath/pageNo/score/content/citation`。
+`chunkId/docId/docKey/docVersion/docStatus/effectiveFrom/effectiveTo/title/clauseId/clausePath/pageNo/pageEnd/score/content/citation`。
 
 - `content` > 2000 字符截断并加 `…`。
 - `score` 是**原始 RRF 分** `Σ 1/(60+rank)`（典型 0.016~0.033），不是 0~1 概率；两路各 top 30，按 chunkId 去重，同分按 `docId + chunkStrategy + chunkIndex` 稳定排序。
 - `citation`：`《title》v{version}（{effectiveFrom} 生效） > {clausePath} > 第{pageNo}页`；没有版本/章节/页码就省略对应段，不编造。
+- `pageNo` 是 chunk 起始页，`pageEnd` 是包含结束页（Phase 6 additive，`>= pageNo`）；citation 仍以起始页为准。
 - 无结果：HTTP 200 + `results: []`；embedding 失败 503/504，DB 失败 503，不静默返回空结果。
 - 版本三模式：默认只看 `ACTIVE` + 生效区间；过去 `asOf` 允许 `ACTIVE/SUPERSEDED` 且仍看 `effective_to`；`includeSuperseded=true` 允许旧版且忽略 `effective_to`。`DRAFT` 永不返回。
-- `fixed` chunk 不携带 `clauseId`（Phase 1 设计），citation 会省略章节段；这是固定窗口的已知限制。
+- Phase 6 起 `fixed` chunk 也会继承覆盖区间内主导 section 的 `clauseId`/`clausePath`（窗口仍是 600/80），并记录 `pageNo..pageEnd`；没有可继承 heading 时才为 NULL。
 - HNSW + metadata filter：pgvector 0.8.7 下 vector SQL 在事务内执行 `SET LOCAL hnsw.iterative_scan = relaxed_order`，缓解过滤导致 HNSW 候选不足；可用 `app.search.hnsw-iterative-scan=false` 关闭。详见 [docs/05-non-functional.md](docs/05-non-functional.md) 3 与验收报告。
 
 ## API（Phase 4）：治理 WorkItem / Approval / Mandate
@@ -274,11 +276,11 @@ Phase 4 **不写** `mcp_audit_log`、不做 MCP 端点/mandate 强制校验/过�
 
 ## 切分口径
 
-- **FixedWindowChunker**：目标 600 tokens、overlap 80 tokens；优先段落边界，段落超长按句切，单句超长按 token 硬切；表格不中间截断，超长表格按行切并重复表头。
+- **FixedWindowChunker**：目标 600 tokens、overlap 80 tokens；优先段落边界，段落超长按句切，单句超长按 token 硬切；表格不中间截断，超长表格按行切并重复表头。Phase 6 起每个 chunk 继承主导 section 的 `clause_id`/`clause_path`，并记录 `page_no..page_end`。
 - **HeadingAwareChunker**：按标题层级分节；每节 ≤ 900 tokens 不切；超长递归到 600/80；chunk 带 `clause_id`/`clause_path`；标题本身不单独成块；无标题文档 fallback 到 fixed。
 - **Token 口径**：jtokkit cl100k；中文为近似值，不承诺与 bge-m3 完全一致。
-- **标题识别**：PDF 优先 outline/bookmark，其次字号 > 正文中位数 1.2 倍且加粗，最后匹配 `第X章/节/条` 或 `^\d+(\.\d+)*\s`；DOCX 用 Heading 1~6 样式（无样式时加粗+大字号降级）；Markdown 用 ATX 标题；TXT 不识别标题（`clause_path` 为 NULL）。
-- 页码仅 PDF 有（1-based）；DOCX/Markdown/TXT 为 NULL。PDF 段落按页切分（跨页段落取起始页）。
+- **标题识别**：PDF 优先 outline/bookmark，其次字号 > 正文中位数 1.2 倍且加粗，最后匹配 `第X章/节/条`（中文/阿拉伯数字、可带空格）或清洗后的 `^\d+(\.\d+)*\s`；数值/单位/表格碎片（`90 mmHg`、`3 d`、`mg qd`）不再成为 heading。双栏 PDF 按左栏→右栏重排。DOCX 用 Heading 1~6 样式（无样式时加粗+大字号降级）；Markdown 用 ATX 标题；TXT 不识别标题（`clause_path` 为 NULL）。
+- 页码仅 PDF 有（1-based）；DOCX/Markdown/TXT 为 NULL。PDF 段落按页切分（跨页段落取起始页），chunk 记录 `[page_no,page_end]`。
 - 全空/扫描件（无可提取文本）返回 422；v1 不做 OCR。
 
 ## Embedding
@@ -321,7 +323,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\accept-phase1.
 
 > `scripts/accept-phase1.ps1` 的 “six tables” 期望顺序已在验收方提交 `ffa9368` 中修复；修复后 Gate 0/1/2 全部 PASS。最新证据见 `docs/acceptance/phase1-report.md` 第 2 节。
 
-## 评测（Phase 3：40 条正式 QA）
+## 评测（Phase 3/6：40 条正式 QA）
 
 `eval/qa.jsonl` 共 40 条：35 条可回答 + 5 条不可回答，覆盖 `hypertension-guideline` v2025（17）、`enterprise-internal-control` v2026（11）、`hypertension-guideline` v2024 历史（7，逐题 `asOf=2024-06-01`）。`eval/qa.smoke.jsonl` 保留为 8 条 smoke。
 
@@ -337,10 +339,12 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\eval.ps1
 
 - 分别跑 `fixed` / `heading`，输出 hit@1/3/5、MRR、p50/p95、errors，写 `eval/report.md` + `eval/report.json`（含 dataset sha256、git commit、embedding、chunk strategies、topK、逐题 rank/citation）。
 - 不可回答题单独统计 `falsePositiveRate` / `noAnswerAccuracy`，不混入 hit@k；errors 单独计数且不进 hit@k/MRR 分母。
-- 匹配口径：`docKey` 相同；gold 有 `clauseId` 且结果也有 `clauseId` 时按 clause 匹配；结果没有 `clauseId` 时回退 `pageRange`（fixed chunk 和部分企业 heading chunk 无 clause_id）。
+- 匹配口径：`docKey` 相同；gold 有 `clauseId` 且结果也有 `clauseId` 时按 clause 匹配；结果没有 `clauseId` 时用 chunk `[pageNo,pageEnd]` 与 `pageRange` 相交判断（`pageEnd` 缺省等于 `pageNo`）。不同 clause 仍是 miss，不能靠同页放宽。
 - 逐题可选 `asOf` / `includeSuperseded` 覆盖全局 `-AsOf`；2024 历史题即用此能力。
 - 脚本兼容 Windows PowerShell 5.1；请求用 `HttpClient` + 原始字节 UTF-8 解码（`Invoke-WebRequest` 曾在实测中出现 19.8s 客户端假延迟）。p50/p95 采用应用 `tookMs`，客户端 p95 在 JSON 的 `clientP95Ms`。
-- 2026-11-09 实测（40 条，382 chunks）：heading hit@1=0.5429、hit@3=0.8286、hit@5=0.8857、MRR=0.6905、p50=58ms、p95=141ms；fixed hit@5=0.3429、MRR=0.3214、p50=51ms、p95=106ms；errors=0。没有修改 gold 让指标达标。
+- 2026-11-09 Phase 6 实测（40 条，248 chunks；gold 未改）：heading hit@1=0.7714、hit@3=0.8857、hit@5=0.9429、MRR=0.8319、p50=54ms、p95=189ms；fixed hit@1=0.6571、hit@3=0.7143、hit@5=0.7429、MRR=0.6867、p50=202ms、p95=433ms；errors=0。
+- Phase 3 历史对照（382 chunks）：heading hit@5=0.8857、MRR=0.6905；fixed hit@5=0.3429、MRR=0.3214。两轮都未修改 gold 来抬指标。
+- `eval/*.jsonl` 通过 `.gitattributes` 固定 LF，保证 Windows/Unix 下 dataset SHA-256 一致；当前 hash 仍为 `1487e261...`。
 - 退出码：有 HTTP/检索错误返回 1；指标阈值只报告，不因 fixed 未达标而伪造通过。
 
 ## 性能
@@ -353,10 +357,11 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\perf.ps1 -Roun
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\perf-concurrency.ps1 -DurationSeconds 60
 ```
 
-- 10k/策略（fixed 10k + heading 10k = 20k，另 382 真实 chunks），每轮每策略 50 次，10 次 warm-up，topK=5，hybrid，真实 bge-m3 embedding；插入前后 `VACUUM (ANALYZE)` 避免 autovacuum 干扰。
+- 10k/策略（fixed 10k + heading 10k = 20k，另 248 真实 chunks），每轮每策略 50 次，10 次 warm-up，topK=5，hybrid，真实 bge-m3 embedding；插入前后 `VACUUM (ANALYZE)` 避免 autovacuum 干扰。
 - 2026-11-09 最终 3 轮 p95/p99：fixed 42.72/97.19、64.62/91.87、120.88/136.88ms；heading 33.28/39.51、121.71/131.54、88.21/93.50ms；全部 <250ms/<800ms/<1500ms，0 errors。详见 [phase3-perf.json](docs/acceptance/phase3-perf.json)。
 - **关键修复**：原先 `kb_chunk JOIN kb_document ORDER BY embedding <=> ?` 被 PostgreSQL 规划成 nested loop + 全量 top-N sort，HNSW 实际没被使用；10k 时串行尚可、10 并发会打满 DB。现在先在 SQL 层解析 eligible docIds，再在 `kb_chunk` 上走 HNSW（`document_id IN (...) AND chunk_strategy=?`），最后只为候选取文档元数据；`EXPLAIN` 走 `idx_kb_chunk_embedding`。embedding 并发池也从固定 2 改为可配置 `app.embedding.max-concurrent-calls=10`。
-- 10 并发 60s 实测四次：requests 2076/2851/1803/2166，errors 0（错误率 0%），p50 157/136/130/119ms，p95 **808.59 / 552.07 / 1129.14 / 826.31ms**，p99 1233.82/991.34/4679.77/2118.88ms。**错误率达标，p95 未稳定 <800ms**；长尾与直接对 Ollama `/api/embed` 做 10 并发的 p99≈3.0s 同量级，GC 最大 pause 45ms、Hikari 无失败，判定为 embedding 排队/长尾而非 SQL/GC。详见 [phase3-concurrency.json](docs/acceptance/phase3-concurrency.json) 与 [phase3-report.md](docs/acceptance/phase3-report.md) 第 5 节。
+- 10 并发 60s Phase 3 实测四次：requests 2076/2851/1803/2166，errors 0（错误率 0%），p50 157/136/130/119ms，p95 **808.59 / 552.07 / 1129.14 / 826.31ms**，p99 1233.82/991.34/4679.77/2118.88ms。**错误率达标，p95 未稳定 <800ms**；长尾与直接对 Ollama `/api/embed` 做 10 并发的 p99≈3.0s 同量级，GC 最大 pause 45ms、Hikari 无失败，判定为 embedding 排队/长尾而非 SQL/GC。详见 [phase3-concurrency.json](docs/acceptance/phase3-concurrency.json) 与 [phase3-report.md](docs/acceptance/phase3-report.md) 第 5 节。
+- 10 并发 60s Phase 6 复测一次：requests=1057，errors=0，p50=262.12ms，p95=**1780.18ms**，p99=5050.61ms，max=7935.39ms。**仍未达标，且比 Phase 3 更差**；本轮没有加 cache 伪造结果。证据：[phase6-concurrency.json](docs/acceptance/phase6-concurrency.json)。
 - `hnsw-iterative-scan=false` 实测没有收益（heading p95=473ms、p99=1032ms，默认 true 为 33~122/39~137ms），且存在 under-return 风险，保持默认 true。
 - 口径：10k 是**每套策略**，两套合计 20k；入库 30s 是**每套策略**，两套合计 <60s。详见 [docs/05-non-functional.md](docs/05-non-functional.md) 2.1/2.2。
 - synthetic chunks 从真实 chunk 向量池循环取样，只衡量 SQL/HTTP/RRF/embedding 延迟，不代表检索质量；本机数字不承诺跨机复现。
@@ -427,10 +432,10 @@ npx @modelcontextprotocol/inspector
 2. **T-VERSION-01 属检索断言**：`docs/06-test-plan.md` 把它描述为“默认检索只返回新版”；Phase 2 已用 `SearchIntegrationTest` 覆盖默认 ACTIVE/历史 asOf/includeSuperseded。
 3. **表格跨页**：v1 不合并跨页/多栏表格；超长表格按行切并重复表头；这是已知降级，不对指标做承诺。
 4. **`@Disabled`**：没有长期禁用测试；`OllamaEmbeddingSmokeTest` 用 `@EnabledIfEnvironmentVariable` 条件跳过，属于手动真实模型 smoke，不是被禁用的失败测试。
-5. **fixed chunk 无 clause_id**：Phase 1 的 FixedWindowChunker 不写 `clause_id`/`clause_path`，所以 fixed 检索结果 citation 省略章节段；heading 有章节。fixed 的 600-token 窗口以起始页为 `page_no`，答案页可能在窗口内部，eval 的 pageRange 回退会 miss；因此 fixed hit@5=0.3429 是真实结果，未改 gold。
-6. **PDF 双栏标题噪声**：2025 版 PDF 是双栏排版，Phase 1 的标题识别会把一些数值/页眉误识别成 `clausePath`（例如 “90 mmHg”）。检索忠实使用落库的 `clausePath`；gold 优先用稳定 `clauseId`，Q03 这类 clause 不稳定的题只用 `pageRange`。citation 抽查见 [phase3-report.md](docs/acceptance/phase3-report.md) 第 4 节。
-7. **企业内控 heading 无 clause_id**：该文档 11 条题只能按 `pageRange` 匹配，粒度比 clause 粗；这是数据/解析事实，不是 gold 放宽。
-8. **10 并发 p95 未稳定达标**：错误率 0%，p50≈130-157ms，但三次 60s 的 p95 为 808/552/1129ms。根因主要是 Ollama embedding 长尾（直接 10 并发 p99≈3.0s），GC 最大 pause 45ms、Hikari 无失败。要硬保证需缓存/限流/专用推理，本轮不做。
+5. **fixed chunk 的 clause/page 元数据是启发式**：Phase 6 起 fixed chunk 会继承覆盖区间内主导 section 的 `clause_id`/`clause_path`，并记录 `page_no..page_end`；但一个 600-token 窗口跨多个 heading 时只有一个 section 能胜出，fixed hit@5=0.7429 仍低于 heading 0.9429。未改 gold。
+6. **PDF 双栏只修到 clausePath/主正文顺序**：Phase 6 按 gutter 重排左右栏并清洗 heading 候选，`90 mmHg`/`3 d`/`20 g` 不再成为 clausePath；表格/流程图仍可能跨栏交错，**没有**还原全文顺序。Q05 等少数题仍可能取到错误 section；不宣称 R3 全文已修。
+7. **企业内控 heading 有 clause_id，但 QA gold 仍是 pageRange**：企业 heading 48/49 有 `clause_id`（唯一 NULL 是封面标题），但 11 条 enterprise QA 没有逐条升级为 clauseId，dataset hash 保持 `1487e...`；Q18 本轮 top-1 是“第三条（目标）”，但 page-only 匹配仍可能命中同页错误条款。这是 page-only gold 的已知粗粒度，不是 R4 未修。
+8. **10 并发 p95 未达标**：Phase 6 一次 60s 复测 requests=1057、errors=0、p50=262.12ms、p95=1780.18ms、p99=5050.61ms，差于 Phase 3 的 A/B/C/D（808/552/1129/826ms）。根因仍是 Ollama embedding 排队/长尾；query 缓存对 `perf-concurrency.ps1` 的唯一 query 基准无效，本轮没有加缓存伪造 p95。要硬保证需专用推理/限流隔离/更多预热。
 9. **性能口径**：10k/策略是本地 Docker + Ollama 实测；不承诺在其它机器复现同一数字，但脚本可复现测量方法。p99 受 PostgreSQL checkpoint/autovacuum 与 Ollama 影响，报告已记录。
 10. **Phase 3/4 范围（历史）**：Phase 3 未包含 WorkItem/Approval/Mandate、生产 MCP、前端、聊天、agent 编排、评测 UI；Phase 4 已补治理 API； Phase 5 已补生产 MCP、mandate 强制校验与审计（本分支，未合并 main）。
 11. **`docs/02-api-contract.md` 2.5 旧措辞**：该节写“`requestedDocIds` 为空/不传表示申请全部文档”，与 Phase 4 任务书及 [docs/03-data-model.md](docs/03-data-model.md) 的 `NULL=全部，[]=无` 冲突。本实现按任务书 + data model，`null`=全部、`[]`=无，并用集成测试覆盖；`docs/02` 未改动，留给验收方决定是否同步契约文字。

@@ -45,7 +45,8 @@ foreach ($row in $rows) {
     if ($gold.version) { $chunkWhere += " AND d.version='$($gold.version)'" }
     if ($gold.clauseId) { $chunkWhere += " AND c.clause_id='$($gold.clauseId)'" }
     if ($gold.pageRange) {
-        $chunkWhere += " AND c.page_no BETWEEN $($gold.pageRange[0]) AND $($gold.pageRange[1])"
+        $chunkWhere += " AND c.page_no <= $($gold.pageRange[1])"
+        $chunkWhere += " AND COALESCE(c.page_end, c.page_no) >= $($gold.pageRange[0])"
     }
     $chunkCount = [int](Invoke-Psql @"
 SELECT count(*) FROM kb_chunk c JOIN kb_document d ON d.id=c.document_id WHERE $chunkWhere;

@@ -1,0 +1,131 @@
+{
+    "timestamp":  "2026-11-09T13:10:33.3247471+08:00",
+    "gitCommit":  "d490a7a9c4dec22c2fb07a33231be4a51fe8f1a7",
+    "pgvectorVersion":  "0.8.7",
+    "baseUrl":  "http://127.0.0.1:8080",
+    "concurrency":  10,
+    "durationSeconds":  60,
+    "chunkStrategy":  "heading",
+    "searchStrategy":  "hybrid",
+    "warmupRequests":  50,
+    "chunksPerStrategy":  10000,
+    "totalSyntheticChunks":  20000,
+    "requests":  1057,
+    "successes":  1057,
+    "errors":  0,
+    "errorRate":  0,
+    "clientP50Ms":  262.12,
+    "clientP95Ms":  1780.18,
+    "clientP99Ms":  5050.61,
+    "clientMaxMs":  7935.39,
+    "serverP50Ms":  252,
+    "serverP95Ms":  1761,
+    "serverP99Ms":  5048,
+    "serverMaxMs":  7932,
+    "avgResults":  5,
+    "minResults":  5,
+    "maxResults":  5,
+    "workers":  [
+                    {
+                        "worker":  1,
+                        "requests":  95,
+                        "errors":  0,
+                        "clientP95Ms":  2024.05,
+                        "serverP95Ms":  2017,
+                        "messages":  [
+
+                                     ]
+                    },
+                    {
+                        "worker":  10,
+                        "requests":  115,
+                        "errors":  0,
+                        "clientP95Ms":  1412.61,
+                        "serverP95Ms":  1410,
+                        "messages":  [
+
+                                     ]
+                    },
+                    {
+                        "worker":  2,
+                        "requests":  94,
+                        "errors":  0,
+                        "clientP95Ms":  2437.71,
+                        "serverP95Ms":  2360,
+                        "messages":  [
+
+                                     ]
+                    },
+                    {
+                        "worker":  3,
+                        "requests":  98,
+                        "errors":  0,
+                        "clientP95Ms":  1881.15,
+                        "serverP95Ms":  1877,
+                        "messages":  [
+
+                                     ]
+                    },
+                    {
+                        "worker":  4,
+                        "requests":  99,
+                        "errors":  0,
+                        "clientP95Ms":  2005.99,
+                        "serverP95Ms":  2001,
+                        "messages":  [
+
+                                     ]
+                    },
+                    {
+                        "worker":  5,
+                        "requests":  107,
+                        "errors":  0,
+                        "clientP95Ms":  1911.36,
+                        "serverP95Ms":  1898,
+                        "messages":  [
+
+                                     ]
+                    },
+                    {
+                        "worker":  6,
+                        "requests":  110,
+                        "errors":  0,
+                        "clientP95Ms":  1780.18,
+                        "serverP95Ms":  1778,
+                        "messages":  [
+
+                                     ]
+                    },
+                    {
+                        "worker":  7,
+                        "requests":  111,
+                        "errors":  0,
+                        "clientP95Ms":  1832.62,
+                        "serverP95Ms":  1581,
+                        "messages":  [
+
+                                     ]
+                    },
+                    {
+                        "worker":  8,
+                        "requests":  113,
+                        "errors":  0,
+                        "clientP95Ms":  1700.67,
+                        "serverP95Ms":  1697,
+                        "messages":  [
+
+                                     ]
+                    },
+                    {
+                        "worker":  9,
+                        "requests":  115,
+                        "errors":  0,
+                        "clientP95Ms":  1569.58,
+                        "serverP95Ms":  1555,
+                        "messages":  [
+
+                                     ]
+                    }
+                ],
+    "note":  "10 concurrent PowerShell worker processes, each with a reusable HttpClient; errors exclude non-2xx and exceptions. clientMs is end-to-end; serverMs is app tookMs (query embedding + SQL + RRF). Synthetic vectors are cycled from the real chunk pool; this measures latency, not retrieval quality."
+}

@@ -19,6 +19,7 @@ public record SearchCandidate(
         String clauseId,
         String clausePath,
         Integer pageNo,
+        Integer pageEnd,
         String content,
         String chunkStrategy,
         int chunkIndex,

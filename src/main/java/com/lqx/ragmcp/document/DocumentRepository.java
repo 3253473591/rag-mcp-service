@@ -110,9 +110,9 @@ public class DocumentRepository {
         String sql = """
                 INSERT INTO kb_chunk
                   (id, document_id, chunk_index, chunk_strategy, content, token_count,
-                   clause_id, clause_path, page_no, metadata, embedding)
+                   clause_id, clause_path, page_no, page_end, metadata, embedding)
                 VALUES
-                  (?::uuid, ?::uuid, ?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?::vector)
+                  (?::uuid, ?::uuid, ?, ?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?::vector)
                 """;
         List<Object[]> batch = new ArrayList<>(chunks.size());
         for (ChunkInsert chunk : chunks) {
@@ -127,6 +127,7 @@ public class DocumentRepository {
                     prepared.clauseId(),
                     prepared.clausePath(),
                     prepared.pageNo(),
+                    prepared.pageEnd(),
                     chunk.metadataJson(),
                     toVectorLiteral(chunk.embedding())
             });

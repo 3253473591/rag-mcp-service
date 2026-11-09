@@ -98,9 +98,31 @@ class GoldMatcherTest {
                 .isZero();
     }
 
+    @Test
+    void pageSpanOverlapMatchesGoldPageRange() {
+        EvalGold gold = new EvalGold("enterprise-internal-control", "2026", null, List.of(4, 4));
+        List<SearchResultItem> results = List.of(
+                result("enterprise-internal-control", null, 3, 5));
+
+        assertThat(GoldMatcher.findRank(results, gold)).isEqualTo(1);
+    }
+
+    @Test
+    void pageSpanThatDoesNotReachGoldPageStillMisses() {
+        EvalGold gold = new EvalGold("enterprise-internal-control", "2026", null, List.of(5, 5));
+        List<SearchResultItem> results = List.of(
+                result("enterprise-internal-control", null, 2, 3));
+
+        assertThat(GoldMatcher.findRank(results, gold)).isZero();
+    }
+
     static SearchResultItem result(String docKey, String clauseId, Integer pageNo) {
+        return result(docKey, clauseId, pageNo, null);
+    }
+
+    static SearchResultItem result(String docKey, String clauseId, Integer pageNo, Integer pageEnd) {
         return new SearchResultItem(
-                "chunk-" + docKey + "-" + clauseId + "-" + pageNo,
+                "chunk-" + docKey + "-" + clauseId + "-" + pageNo + "-" + pageEnd,
                 "doc-" + docKey,
                 docKey,
                 "2025",
@@ -111,6 +133,7 @@ class GoldMatcherTest {
                 clauseId,
                 clauseId == null ? null : "chapter > " + clauseId,
                 pageNo,
+                pageEnd,
                 0.032,
                 "content",
                 "citation");

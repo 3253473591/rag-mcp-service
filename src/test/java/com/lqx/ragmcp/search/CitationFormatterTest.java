@@ -45,6 +45,7 @@ class CitationFormatterTest {
                 "3.2",
                 clausePath,
                 pageNo,
+                pageNo,
                 "内容",
                 "heading",
                 0,

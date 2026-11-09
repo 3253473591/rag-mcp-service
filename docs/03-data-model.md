@@ -79,9 +79,10 @@ CREATE TABLE kb_chunk (
   chunk_strategy TEXT NOT NULL DEFAULT 'heading', -- fixed / heading
   content       TEXT NOT NULL,
   token_count   INT NOT NULL,
-  clause_id     TEXT,                            -- "3.2"
+  clause_id     TEXT,                            -- "3.2" / "第五条"
   clause_path   TEXT,                            -- "第三章 > 3.2 诊断标准"
-  page_no       INT,                             -- 1-based；无页码为 NULL
+  page_no       INT,                             -- 1-based 起始页；无页码为 NULL
+  page_end      INT,                             -- 1-based 结束页（含）；无页码为 NULL
   metadata      JSONB NOT NULL DEFAULT '{}'::jsonb,
   embedding     VECTOR(1024) NOT NULL,           -- bge-m3
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -220,9 +221,10 @@ CREATE TABLE eval_run (
 | `chunk_strategy` | TEXT | `fixed`/`heading`；同文档两套 chunk 共存 |
 | `content` | TEXT | 原文片段 |
 | `token_count` | INT | jtokkit/cl100k 计数 |
-| `clause_id` | TEXT | 条款号，如 `3.2`；无则 NULL |
+| `clause_id` | TEXT | 条款号，如 `3.2`、`第五条`；无则 NULL |
 | `clause_path` | TEXT | 条款路径；无标题则 NULL |
-| `page_no` | INT | 1-based；未知为 NULL |
+| `page_no` | INT | 1-based 起始页；未知为 NULL |
+| `page_end` | INT | 1-based 结束页（含），`>= page_no`；未知为 NULL |
 | `metadata` | JSONB | 冗余 `docId`/`title`/`version`/`chunkIndex` |
 | `embedding` | VECTOR(1024) | bge-m3 |
 | `created_at` | TIMESTAMPTZ | 入库时间 |
@@ -322,6 +324,7 @@ CREATE TABLE eval_run (
 - 所有变更走 Flyway：`V2__...sql`、`V3__...sql`。
 - 禁止 `ddl-auto=update`。
 - 迁移必须可重复执行（`IF NOT EXISTS` 谨慎使用；Flyway 版本管理优先）。
+- `V2__add_chunk_page_end.sql` 增加 `kb_chunk.page_end` 与 `page_end >= page_no` 约束；这是 additive 变更，旧数据 `page_end` 为 NULL。
 
 ---
 
@@ -330,7 +333,7 @@ CREATE TABLE eval_run (
 ### 5.1 向量检索
 
 ```sql
-SELECT c.id, c.document_id, c.content, c.clause_path, c.page_no,
+SELECT c.id, c.document_id, c.content, c.clause_path, c.page_no, c.page_end,
        d.version, d.effective_from, d.effective_to, d.status,
        1 - (c.embedding <=> ?::vector) AS score
 FROM kb_chunk c
@@ -357,7 +360,7 @@ LIMIT ?;
 ### 5.2 关键词候选
 
 ```sql
-SELECT c.id, c.document_id, c.content, c.clause_path, c.page_no,
+SELECT c.id, c.document_id, c.content, c.clause_path, c.page_no, c.page_end,
        d.version, d.effective_from, d.effective_to, d.status,
        similarity(c.content, ?) AS score
 FROM kb_chunk c
@@ -450,7 +453,8 @@ WHERE m.id = ?
 | `chunkCount` | `count(kb_chunk)` |
 | `clauseId` | `kb_chunk.clause_id` |
 | `clausePath` | `kb_chunk.clause_path` |
-| `pageNo` | `kb_chunk.page_no` |
+| `pageNo` | `kb_chunk.page_no`（起始页） |
+| `pageEnd` | `kb_chunk.page_end`（结束页，含；Phase 6 additive） |
 | `citation` | 由 `title + version + effectiveFrom + clausePath + pageNo` 组装 |
 | `score` | 向量/关键词/RRF 计算值，不落库 |
 | `workItemId` | `work_item.id` |

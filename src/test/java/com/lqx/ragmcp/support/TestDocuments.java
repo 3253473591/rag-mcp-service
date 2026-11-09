@@ -38,6 +38,49 @@ public final class TestDocuments {
         }
     }
 
+    /**
+     * One-page two-column PDF. The left and right columns share the same y coordinates, so a
+     * row-major PDFTextStripper sort interleaves them; the parser must emit the left column first.
+     */
+    public static byte[] twoColumnPdf() {
+        try (PDDocument document = new PDDocument(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            PDPage page = new PDPage(PDRectangle.A4);
+            document.addPage(page);
+            try (PDPageContentStream stream = new PDPageContentStream(document, page)) {
+                heading(stream, "1 Left", 72, 750);
+                heading(stream, "2 Right", 330, 750);
+                body(stream, "LEFT alpha line", 72, 720);
+                body(stream, "RIGHT alpha line", 330, 720);
+                body(stream, "LEFT beta line", 72, 700);
+                body(stream, "RIGHT beta line", 330, 700);
+                body(stream, "LEFT gamma line", 72, 680);
+                body(stream, "RIGHT gamma line", 330, 680);
+            }
+            document.save(out);
+            return out.toByteArray();
+        } catch (IOException ex) {
+            throw new UncheckedIOException(ex);
+        }
+    }
+
+    /** One-page single-column PDF with table/measurement lines that must not become headings. */
+    public static byte[] pdfWithMeasurementNoise() {
+        try (PDDocument document = new PDDocument(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            PDPage page = new PDPage(PDRectangle.A4);
+            document.addPage(page);
+            try (PDPageContentStream stream = new PDPageContentStream(document, page)) {
+                heading(stream, "1 Real heading", 72, 750);
+                body(stream, "90 mmHg", 72, 720);
+                body(stream, "3 d at least 12 readings", 72, 700);
+                body(stream, "20 g root fragment", 72, 680);
+            }
+            document.save(out);
+            return out.toByteArray();
+        } catch (IOException ex) {
+            throw new UncheckedIOException(ex);
+        }
+    }
+
     /** Text PDF without any extractable text content (simulates a scanned document). */
     public static byte[] blankPdf() {
         try (PDDocument document = new PDDocument(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
@@ -48,6 +91,22 @@ public final class TestDocuments {
         } catch (IOException ex) {
             throw new UncheckedIOException(ex);
         }
+    }
+
+    private static void heading(PDPageContentStream stream, String text, float x, float y) throws IOException {
+        stream.beginText();
+        stream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 18);
+        stream.newLineAtOffset(x, y);
+        stream.showText(text);
+        stream.endText();
+    }
+
+    private static void body(PDPageContentStream stream, String text, float x, float y) throws IOException {
+        stream.beginText();
+        stream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 10);
+        stream.newLineAtOffset(x, y);
+        stream.showText(text);
+        stream.endText();
     }
 
     private static void addPage(PDDocument document, String heading, String... bodyLines) throws IOException {
@@ -69,6 +128,19 @@ public final class TestDocuments {
                 stream.endText();
                 y -= 18;
             }
+        }
+    }
+
+    /** DOCX with Chinese chapter/article headings, used to lock the clause_id contract. */
+    public static byte[] docxWithChineseArticles() {
+        try (XWPFDocument document = new XWPFDocument(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            paragraph(document, "第一章 总 则", "Heading1");
+            paragraph(document, "第五条 企业建立与实施有效的内部控制，应当包括下列要素：", "Heading2");
+            paragraph(document, "内部环境、风险评估、控制活动、信息与沟通、内部监督。", null);
+            document.write(out);
+            return out.toByteArray();
+        } catch (IOException ex) {
+            throw new UncheckedIOException(ex);
         }
     }
 

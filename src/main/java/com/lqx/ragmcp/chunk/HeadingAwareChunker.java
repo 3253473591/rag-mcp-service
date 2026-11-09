@@ -57,12 +57,14 @@ public class HeadingAwareChunker implements Chunker {
                 String content = joinBlocks(section.blocks());
                 if (!content.isBlank()) {
                     result.add(new ChunkDraft(content, section.clauseId(), section.clausePath(),
-                            firstPage(section.blocks()), false));
+                            firstPage(section.blocks()), lastPage(section.blocks()), false));
                 }
             } else {
                 for (ChunkDraft sub : fixedFallback.chunk(section.blocks())) {
                     result.add(new ChunkDraft(sub.content(), section.clauseId(), section.clausePath(),
-                            sub.pageNo() != null ? sub.pageNo() : firstPage(section.blocks()), sub.table()));
+                            sub.pageNo() != null ? sub.pageNo() : firstPage(section.blocks()),
+                            sub.pageEnd() != null ? sub.pageEnd() : lastPage(section.blocks()),
+                            sub.table()));
                 }
             }
         }
@@ -116,6 +118,16 @@ public class HeadingAwareChunker implements Chunker {
             }
         }
         return null;
+    }
+
+    private static Integer lastPage(List<Block> blocks) {
+        Integer last = null;
+        for (Block block : blocks) {
+            if (block.pageNo() != null && (last == null || block.pageNo() > last)) {
+                last = block.pageNo();
+            }
+        }
+        return last;
     }
 
     private record Section(String clauseId, String clausePath, List<Block> blocks) {

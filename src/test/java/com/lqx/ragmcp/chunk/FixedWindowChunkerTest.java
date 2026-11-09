@@ -1,8 +1,10 @@
 package com.lqx.ragmcp.chunk;
 
 import com.lqx.ragmcp.parse.Block;
+import com.lqx.ragmcp.parse.HeadingContext;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -58,6 +60,28 @@ class FixedWindowChunkerTest {
     void tUnitChunk06_blankInputProducesNoChunks() {
         assertThat(chunker.chunk(List.of(Block.paragraph("   ", null)))).isEmpty();
         assertThat(chunker.chunk(List.of())).isEmpty();
+    }
+
+    @Test
+    void fixedChunksInheritDominantClauseAndFullPageSpan() {
+        HeadingContext context = new HeadingContext();
+        List<Block> blocks = new ArrayList<>();
+        blocks.add(context.heading(1, "1 诊断标准", 1));
+        blocks.add(Block.paragraph("第一页诊断内容。".repeat(220), 1));
+        blocks.add(context.heading(2, "2 治疗原则", 2));
+        blocks.add(Block.paragraph("第二页治疗内容。".repeat(220), 2));
+
+        List<ChunkDraft> chunks = chunker.chunk(blocks);
+
+        assertThat(chunks).hasSizeGreaterThan(1);
+        assertThat(chunks).allSatisfy(chunk -> {
+            assertThat(chunk.clauseId()).isNotNull();
+            assertThat(chunk.clausePath()).isNotNull();
+        });
+        assertThat(chunks).anySatisfy(chunk -> {
+            assertThat(chunk.pageNo()).isEqualTo(1);
+            assertThat(chunk.pageEnd()).isEqualTo(2);
+        });
     }
 
     @Test

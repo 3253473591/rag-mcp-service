@@ -1,0 +1,3 @@
+# Keep evaluation datasets byte-stable across Windows (core.autocrlf=true) and Unix checkouts.
+# The eval report records SHA-256; CRLF conversion would silently change that hash.
+eval/*.jsonl text eol=lf

@@ -94,6 +94,7 @@ class RrfFusionTest {
                 "3.2",
                 "第三章 > 3.2",
                 12,
+                12,
                 "内容",
                 strategy,
                 chunkIndex,

@@ -44,7 +44,7 @@ class SearchServiceTest {
     void keywordOnlyDoesNotCallEmbeddingAndTruncatesLongContent() {
         SearchCandidate candidate = new SearchCandidate(
                 UUID.randomUUID(), UUID.randomUUID(), "doc-key", "2025", "ACTIVE",
-                LocalDate.of(2025, 1, 1), null, "标题", "3.2", "第三章", 12,
+                LocalDate.of(2025, 1, 1), null, "标题", "3.2", "第三章", 12, 12,
                 "x".repeat(2500), "heading", 0, 0.4);
         when(repository.keywordSearch(any(), anyInt())).thenReturn(List.of(candidate));
 

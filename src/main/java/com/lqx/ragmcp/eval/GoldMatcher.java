@@ -13,9 +13,9 @@ import java.util.Objects;
  *   <li>{@code docKey} must be equal.</li>
  *   <li>When gold has a {@code clauseId}: a result that carries a clause id matches only when the
  *       normalized clause ids are equal. A result without a clause id (fixed-window chunks, and
- *       some heading chunks) falls back to {@code pageRange}.</li>
- *   <li>When gold has no {@code clauseId}: match by {@code pageRange} (or by docKey alone if the
- *       gold also has no page range).</li>
+ *       some heading chunks) falls back to {@code pageRange}, using the chunk page span.</li>
+ *   <li>When gold has no {@code clauseId}: match by {@code pageRange} overlap (or by docKey alone
+ *       if the gold also has no page range).</li>
  * </ol>
  *
  * <p>The returned rank is the 1-based position of the first matching result. Multiple chunks from
@@ -55,13 +55,13 @@ public final class GoldMatcher {
                     // A different clause id is a genuine miss even if the page overlaps.
                     continue;
                 }
-                if (hasPageRange && pageInRange(result.pageNo(), gold.pageRange())) {
+                if (hasPageRange && pageOverlaps(result.pageNo(), result.pageEnd(), gold.pageRange())) {
                     return rank;
                 }
                 continue;
             }
             if (hasPageRange) {
-                if (pageInRange(result.pageNo(), gold.pageRange())) {
+                if (pageOverlaps(result.pageNo(), result.pageEnd(), gold.pageRange())) {
                     return rank;
                 }
                 continue;
@@ -77,11 +77,18 @@ public final class GoldMatcher {
                 && pageRange.get(0) != null && pageRange.get(1) != null;
     }
 
-    private static boolean pageInRange(Integer pageNo, List<Integer> pageRange) {
+    /**
+     * A chunk matches a gold page range when its inclusive page span intersects the range.
+     * Fixed-window chunks can start before the answer page and end on it, so checking only
+     * {@code pageNo} (the start page) under-counts true hits; this is why Phase 6 adds
+     * {@code pageEnd} without changing the gold data.
+     */
+    private static boolean pageOverlaps(Integer pageNo, Integer pageEnd, List<Integer> pageRange) {
         if (pageNo == null) {
             return false;
         }
-        return pageNo >= pageRange.get(0) && pageNo <= pageRange.get(1);
+        int end = pageEnd == null ? pageNo : Math.max(pageNo, pageEnd);
+        return pageNo <= pageRange.get(1) && end >= pageRange.get(0);
     }
 
     private static String normalizeClause(String clauseId) {

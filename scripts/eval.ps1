@@ -66,6 +66,18 @@ function Get-Percentile {
     return [Math]::Round($sorted[$rank], 2)
 }
 
+function Test-PageOverlap {
+    param($Result, $Range)
+    if ($null -eq $Result.pageNo) { return $false }
+    $start = [int]$Range[0]
+    $end = [int]$Range[1]
+    $page = [int]$Result.pageNo
+    $pageEnd = $page
+    if ($null -ne $Result.pageEnd) { $pageEnd = [int]$Result.pageEnd }
+    if ($pageEnd -lt $page) { $pageEnd = $page }
+    return ($page -le $end -and $pageEnd -ge $start)
+}
+
 function Find-Rank {
     param($Results, $Gold)
     if ($null -eq $Gold -or -not $Gold.docKey) { return 0 }
@@ -89,22 +101,12 @@ function Find-Rank {
                 # A different clause id is a real miss even when the page overlaps.
                 continue
             }
-            if ($hasRange -and $null -ne $result.pageNo) {
-                $start = [int]$range[0]
-                $end = [int]$range[1]
-                $page = [int]$result.pageNo
-                if ($page -ge $start -and $page -le $end) { return $rank }
-            }
+            if ($hasRange -and (Test-PageOverlap $result $range)) { return $rank }
             continue
         }
 
         if ($hasRange) {
-            if ($null -ne $result.pageNo) {
-                $start = [int]$range[0]
-                $end = [int]$range[1]
-                $page = [int]$result.pageNo
-                if ($page -ge $start -and $page -le $end) { return $rank }
-            }
+            if (Test-PageOverlap $result $range) { return $rank }
             continue
         }
         # docKey-only gold: first chunk of the right document counts.
@@ -194,6 +196,7 @@ foreach ($strategy in $ChunkStrategies) {
                     docVersion = $results[$i].docVersion
                     clauseId = $results[$i].clauseId
                     pageNo = $results[$i].pageNo
+                    pageEnd = $results[$i].pageEnd
                     citation = $results[$i].citation
                 }
             }

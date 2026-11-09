@@ -80,6 +80,21 @@ class HeadingAwareChunkerTest {
     }
 
     @Test
+    void sectionContinuingAcrossPagesRecordsPageEnd() {
+        HeadingContext context = new HeadingContext();
+        List<Block> blocks = List.of(
+                context.heading(1, "1 目的", 1),
+                Block.paragraph("本制度用于测试跨页范围。", 1),
+                Block.paragraph("这一段继续在第二页。", 2));
+
+        List<ChunkDraft> chunks = chunker.chunk(blocks);
+
+        assertThat(chunks).hasSize(1);
+        assertThat(chunks.get(0).pageNo()).isEqualTo(1);
+        assertThat(chunks.get(0).pageEnd()).isEqualTo(2);
+    }
+
+    @Test
     void noHeadingsFallsBackToFixedWindows() {
         String text = "没有标题的文本用于验证回退。".repeat(80);
         List<ChunkDraft> chunks = chunker.chunk(List.of(Block.paragraph(text, null)));

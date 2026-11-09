@@ -15,6 +15,7 @@ public record SearchResultItem(
         String clauseId,
         String clausePath,
         Integer pageNo,
+        Integer pageEnd,
         double score,
         String content,
         String citation) {

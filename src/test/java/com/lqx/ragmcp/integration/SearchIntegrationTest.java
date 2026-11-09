@@ -64,6 +64,10 @@ class SearchIntegrationTest extends AbstractIntegrationTest {
         assertThat(first.get("effectiveTo").isNull()).isTrue();
         assertThat(first.get("title").asText()).isEqualTo("国家基层高血压防治管理指南2025版");
         assertThat(first.get("pageNo").asInt()).isBetween(1, 100);
+        assertThat(first.has("pageEnd")).isTrue();
+        if (!first.get("pageEnd").isNull()) {
+            assertThat(first.get("pageEnd").asInt()).isGreaterThanOrEqualTo(first.get("pageNo").asInt());
+        }
         assertThat(first.get("score").asDouble()).isBetween(1.0d / 61.0d - 1e-12, 2.0d / 61.0d + 1e-12);
         assertThat(first.get("content").asText()).isNotBlank();
         assertThat(first.get("citation").asText())

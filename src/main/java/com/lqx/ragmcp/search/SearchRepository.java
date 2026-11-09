@@ -51,6 +51,7 @@ public class SearchRepository {
             c.clause_id AS clause_id,
             c.clause_path AS clause_path,
             c.page_no AS page_no,
+            c.page_end AS page_end,
             d.doc_key AS doc_key,
             d.title AS title,
             d.version AS doc_version,
@@ -67,7 +68,8 @@ public class SearchRepository {
             c.content AS content,
             c.clause_id AS clause_id,
             c.clause_path AS clause_path,
-            c.page_no AS page_no
+            c.page_no AS page_no,
+            c.page_end AS page_end
             """;
 
     private final JdbcTemplate jdbc;
@@ -129,6 +131,7 @@ public class SearchRepository {
                         rs.getString("clause_id"),
                         rs.getString("clause_path"),
                         rs.getObject("page_no", Integer.class),
+                        rs.getObject("page_end", Integer.class),
                         rs.getString("content"),
                         rs.getString("chunk_strategy"),
                         rs.getInt("chunk_index"),
@@ -249,6 +252,7 @@ public class SearchRepository {
                 rs.getString("clause_id"),
                 rs.getString("clause_path"),
                 rs.getObject("page_no", Integer.class),
+                rs.getObject("page_end", Integer.class),
                 rs.getString("content"),
                 rs.getString("chunk_strategy"),
                 rs.getInt("chunk_index"),

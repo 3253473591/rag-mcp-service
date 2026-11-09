@@ -90,6 +90,18 @@ class DocumentUploadIntegrationTest extends AbstractIntegrationTest {
                 "SELECT count(*) FROM kb_chunk WHERE document_id = ?::uuid "
                         + "AND chunk_strategy = 'heading' AND clause_id = '3.2'",
                 Integer.class, pdfId)).isGreaterThan(0);
+        assertThat(jdbc.queryForObject(
+                "SELECT count(*) FROM kb_chunk WHERE document_id = ?::uuid "
+                        + "AND chunk_strategy = 'fixed' AND clause_id IS NULL",
+                Integer.class, pdfId)).isZero();
+        assertThat(jdbc.queryForObject(
+                "SELECT count(*) FROM kb_chunk WHERE document_id = ?::uuid "
+                        + "AND chunk_strategy = 'fixed' AND page_end IS NULL",
+                Integer.class, pdfId)).isZero();
+        assertThat(jdbc.queryForObject(
+                "SELECT count(*) FROM kb_chunk WHERE document_id = ?::uuid "
+                        + "AND page_end < page_no",
+                Integer.class, pdfId)).isZero();
 
         JsonNode docx = upload(file("policy.docx", TestDocuments.docxWithHeadings()),
                 metadata("policy", "2026", "2026-01-01", "fixed,heading"), 201);

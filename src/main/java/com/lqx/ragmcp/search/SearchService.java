@@ -116,6 +116,7 @@ public class SearchService {
                 candidate.clauseId(),
                 candidate.clausePath(),
                 candidate.pageNo(),
+                candidate.pageEnd(),
                 score,
                 truncate(candidate.content()),
                 CitationFormatter.format(candidate));

@@ -11,5 +11,6 @@ public record PreparedChunk(ChunkStrategy strategy,
                             String clauseId,
                             String clausePath,
                             Integer pageNo,
+                            Integer pageEnd,
                             boolean table) {
 }

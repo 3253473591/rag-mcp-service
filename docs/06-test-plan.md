@@ -78,8 +78,12 @@ mvn spring-boot:run
 | T-UNIT-CHUNK-05 | 表格 | 超长表格 | 不截断行/重复表头（按实现） |
 | T-UNIT-CHUNK-06 | 空文本 | 空白 | 抛业务异常/空列表 |
 | T-UNIT-PARSE-01 | PDF 解析 | 文本型 PDF | 页号/文本正确 |
+| T-UNIT-PARSE-01b | PDF 双栏 | 左右栏同 y | 左栏完整先于右栏 |
+| T-UNIT-PARSE-01c | PDF heading 清洗 | `90 mmHg` / `3 d` / `mg qd` | 不成为 heading/clauseId |
 | T-UNIT-PARSE-02 | DOCX 解析 | 标题+段落 | 文本正确 |
 | T-UNIT-PARSE-03 | Markdown | 嵌套标题 | 层级正确 |
+| T-UNIT-CLAUSE-01 | ClauseIds | `第五条` / `第 12 条` / `第１２条` | 稳定可读 clauseId |
+| T-UNIT-CHUNK-08 | FixedWindowChunker | 跨 heading/页 | 主导 clause + pageEnd |
 | T-UNIT-RRF-01 | RRF | 两路候选 | 分数/排序正确 |
 | T-UNIT-RRF-02 | RRF | 重复 chunk | 去重 |
 | T-UNIT-METRIC-01 | hit@k | gold 在第 3 位 | hit@1=0, hit@3=1, hit@5=1 |

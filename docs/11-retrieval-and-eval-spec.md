@@ -35,10 +35,12 @@ record Block(
 
 1. PDF outline/bookmark（最可靠）；
 2. 字号 > 正文中位数 1.2 倍且加粗；
-3. 匹配 `第[一二三四五六七八九十百]+[章节条]` 或 `^\d+(\.\d+)*\s`；
+3. 匹配 `第[空格]?[中文数字/阿拉伯数字/全角数字][空格]?[章节条]`，或经过清洗的 `^\d+(\.\d+)*\s`（数值/单位/表格碎片不成为标题）；
 4. 都没有 → 视为无标题，fallback 到 FixedWindowChunker。
 
-页码：PDFBox 按页提取，Block 带页号；跨页段落取起始页。
+页码：PDFBox 按页提取，Block 带页号；跨页段落取起始页。PDF 双栏页面按
+“页面 → 左栏完整读完后右栏”的顺序重排；找不到纵向栏间距的页面按普通自上而下处理。
+表格仍可能被拆/交错，本版只承诺主正文阅读顺序与 heading 候选清洗。
 
 ### 1.3 DOCX 标题
 
@@ -58,7 +60,9 @@ record Block(
 
 - 目标 600 tokens，overlap 80 tokens；
 - 优先在段落边界切；段落超长再按句子切；
-- 不把表格从中间切断；超长表格按行切，重复表头。
+- 不把表格从中间切断；超长表格按行切，重复表头；
+- Phase 6 起，每个 chunk 从覆盖的 heading 区间继承**主导 section** 的 `clauseId`/`clausePath`
+  （按 token 数取最大贡献者），并记录 `[pageNo, pageEnd]` 页面跨度；窗口本身仍是 600/80。
 
 `HeadingAwareChunker`：
 
@@ -73,9 +77,10 @@ record Block(
 
 ### 1.6 clauseId 提取
 
-- 正则：`^(\d+(?:\.\d+)*)(?:\s|、|\.)`；
-- 没有编号 → NULL；
-- 不编造条款号。
+- 数字编号：`^(\d+(?:\.\d+)*)(?=\s|、|\.|$)`，例如 `4.2.1`；
+- 中文条款：`^第\s*([中文数字/阿拉伯数字/全角数字]+)\s*([章节条])`，归一化为 `第五条` / 第12条 / 第一章；
+- 没有编号、或编号后紧跟 `mmHg`/`cm`/`min`/`d`/`g` 等计量单位 → NULL；
+- 不编造条款号；正文中间出现的“第X条”不提取。
 
 ---
 
@@ -175,7 +180,9 @@ rank_i 从 1 开始
 
 ### 4.2 匹配口径
 
-- 命中：结果 `docKey` 相同，且 `clauseId` 相同（若 gold 有 clauseId）；没有 clauseId 时按 `pageNo` 落在 `pageRange`。
+- 命中：结果 `docKey` 相同，且 `clauseId` 相同（若 gold 有 clauseId）；没有 clauseId 时按
+  chunk 的 `[pageNo, pageEnd]` 与 gold `pageRange` **相交**判断（`pageEnd` 缺省等于 `pageNo`）。
+- 不同 clauseId 仍是 miss，即使页码重叠；不能靠“同页就算命中”放宽。
 - 只看 topK 的文档/条款，不要求 exact chunk id。
 - 同一文档多个 chunk 只算一次。
 

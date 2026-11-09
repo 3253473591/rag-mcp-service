@@ -28,7 +28,7 @@ class SchemaIntegrationTest extends AbstractIntegrationTest {
                 "SELECT column_name FROM information_schema.columns WHERE table_name = 'kb_chunk'",
                 String.class);
         assertThat(chunkColumns).contains("chunk_strategy", "clause_id", "clause_path", "embedding",
-                "token_count", "page_no", "metadata", "chunk_index");
+                "token_count", "page_no", "page_end", "metadata", "chunk_index");
         assertThat(chunkColumns).doesNotContain("section_path");
 
         String strategyDefault = jdbc.queryForObject("""
@@ -83,6 +83,12 @@ class SchemaIntegrationTest extends AbstractIntegrationTest {
                 WHERE table_name = 'kb_chunk' AND column_name = 'embedding'
                 """, String.class);
         assertThat(embeddingNullable).isEqualTo("NO");
+
+        String pageEndNullable = jdbc.queryForObject("""
+                SELECT is_nullable FROM information_schema.columns
+                WHERE table_name = 'kb_chunk' AND column_name = 'page_end'
+                """, String.class);
+        assertThat(pageEndNullable).isEqualTo("YES");
 
         List<String> evalColumns = jdbc.queryForList(
                 "SELECT column_name FROM information_schema.columns WHERE table_name = 'eval_run'",
