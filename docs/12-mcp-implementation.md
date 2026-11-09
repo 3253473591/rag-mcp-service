@@ -16,8 +16,10 @@
 - Spring Boot 3.5.16
 - Spring AI 1.1.8（BOM）
 - MCP Java SDK：以 Spring AI 1.1.8 传递依赖为准，锁版本
+  - 实际：`io.modelcontextprotocol.sdk:mcp-core:0.18.3`、`mcp-spring-webmvc:0.18.3`
 - **v1 目标协议：MCP 2025-06-18**
 - 规范已有更新版本（2026-07-28），但 Spring AI 1.1.8 不保证全支持；README 记录实际协商版本，客户端请求更高版本时明确拒绝或降级记录，不假装支持。
+- **Phase 5 实测（2026-11-09）**：SDK 0.18.3 的 `LATEST_PROTOCOL_VERSION=2025-11-25`，默认 Java client 请求 2025-11-25，服务端按请求回显；仅请求 2025-06-18 时回显 2025-06-18。两种版本均完成 initialize/tools/list/tools/call。不要写成 2026-07-28。
 
 ---
 
@@ -50,9 +52,19 @@ spring:
     mcp:
       server:
         protocol: STREAMABLE
+        type: SYNC
+        stdio: false
         request-timeout: 30s
         # 关键：不要自动把应用里所有 @Tool 都发布成 MCP tool
         tool-callback-converter: false
+        # 额外防线：不扫描 @McpTool
+        annotation-scanner:
+          enabled: false
+        capabilities:
+          tool: true
+          resource: false
+          prompt: false
+          completion: false
         streamable-http:
           mcp-endpoint: /mcp
     ollama:
@@ -63,12 +75,16 @@ spring:
 
 app:
   mcp:
-    auth-token: ${MCP_AUTH_TOKEN}
+    auth-token: ${MCP_AUTH_TOKEN:}
   admin:
-    token: ${ADMIN_TOKEN}
+    token: ${ADMIN_TOKEN:}
 ```
 
 > 属性名以 1.1.8 实际文档为准；如果 `tool-callback-converter` 不生效，必须用低层 `SyncToolSpecification` 显式注册，不能依赖注解扫描。
+>
+> Phase 5 实测：`spring.ai.mcp.server.streamable-http.mcp-endpoint`、`spring.ai.mcp.server.capabilities.*`、
+> `spring.ai.mcp.server.annotation-scanner.enabled` 均按上述名称生效；`tool-callback-converter`
+> 的条件位于 `ToolCallbackConverterAutoConfiguration$ToolCallbackConverterCondition$ToolCallbackConvertCondition`。
 
 ---
 
@@ -104,6 +120,11 @@ McpServerFeatures.SyncToolSpecification searchKnowledgeTool(SearchService search
 ```
 
 `get_document` 同理，只返回元数据，不返回全文。
+
+> **Phase 5 实测修正**：上面的单 bean 写法在 1.1.8 不会被 `McpServerAutoConfiguration` 收集。
+> 必须暴露**一个** `List<McpServerFeatures.SyncToolSpecification>` bean（两个独立 bean 不行）；
+> 实际实现见 `mcp/McpToolRegistration.java`。SDK 0.18.3 的 `McpSchema.Tool` 构造参数与旧文档不同，
+> 用 `McpSchema.Tool.builder()`。
 
 要求：
 
@@ -167,6 +188,11 @@ McpServerFeatures.SyncToolSpecification searchKnowledgeTool(SearchService search
 | 参数不符合 schema | JSON-RPC `-32602` |
 | 内部异常 | JSON-RPC `-32603`，不暴露堆栈 |
 
+> Phase 5 实测：MCP SDK 0.18.3 的 `McpAsyncServer` 对未知 tool 内部返回 `-32602`。本服务在
+> `/mcp` 的 HTTP gate 中对未知 `tools/call` 返回 `-32601`，以满足 `docs/02` 的契约；已知 tool
+> 仍走 SDK 的 session/schema 管线。坏参数由 tool 层主动抛 `McpError(-32602)`，内部异常由
+> tool 层捕获后抛 `McpError(-32603)`，message 固定为“服务内部错误”。
+
 ### 7.2 Tool 业务层
 
 用 `CallToolResult(..., isError=true)`：
@@ -208,6 +234,10 @@ McpServerFeatures.SyncToolSpecification searchKnowledgeTool(SearchService search
 - 未知 tool `-32601`；坏参数 `-32602`。
 - 超时 30s 行为符合预期。
 - 审计有 workItemId/mandateId。
+
+Phase 5 实际自动化：`McpIntegrationTest` 用 MCP Java client（`HttpClientStreamableHttpTransport`）
+在真实随机端口完成 initialize / tools/list / tools/call；`McpUnconfiguredTokenIntegrationTest`
+覆盖 token 未配置仍启动但全 401。Inspector 命令见 README，人工复核用。
 
 ---
 

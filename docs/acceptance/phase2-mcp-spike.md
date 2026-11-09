@@ -74,3 +74,11 @@ assertThat(tools).extracting(McpSchema.Tool::name)
 如果后续发现 test-scope MCP starter 影响其他测试，可删除
 `pom.xml` 中 test scope 的 `spring-ai-starter-mcp-server-webmvc` 与两个
 `Mcp*Spike*` 文件；生产代码没有引入任何 MCP 依赖。
+
+## 7. Phase 5 后续
+
+Phase 5 已将 MCP starter 升为生产依赖，并用
+`mcp/McpToolRegistration.java` 的单个 `List<SyncToolSpecification>` bean 正式注册两个 tool；
+Phase 2 的 `McpRegistrationSpikeTest` / `McpSpikeConfig` 已被生产实现与
+`McpIntegrationTest` 取代（spike 结论保留在本文件）。生产测试同时验证
+`tool-callback-converter=false`：新增测试用 `@Tool` 不会出现在 `tools/list`。

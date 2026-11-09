@@ -2,11 +2,12 @@
 
 企业知识库 RAG 检索服务（Java/Spring Boot + PostgreSQL/pgvector + MCP + 治理层）。
 
-- 当前状态：**Phase 4（治理 API：WorkItem → Approval → Mandate）已验收（P0）**，已合并 `main`；Phase 1/2/3 已验收并合并。
-- Phase 4 交付：`POST/GET /api/v1/work-items`、带 `X-Admin-Token` 的 approve/deny；审批只能缩小工具/文档/topK 范围；显式 `allowedDocIds` 语义；重复审批 409；管理员 token 常量时间比较、未配置时 401；approve 事务写 `work_item` + `mandate`。不做 MCP 强制校验/审计（Phase 5）。
+- 当前状态：**Phase 5（生产 MCP：`/mcp` + Bearer + mandate 强制校验 + audit）已在 `phase5` 分支实现，待验收；未合并 `main`**。`main` 仍是 Phase 4（`032f50f`）；Phase 1/2/3/4 已验收。
+- Phase 5 交付：生产 `spring-ai-starter-mcp-server-webmvc`、Streamable HTTP `/mcp`、Bearer 401、两个低层 tool（`search_knowledge` / `get_document`）、mandate（存在/过期/工具/topK/docIds/文档范围）、`mcp_audit_log`（query 只存哈希）、未知 tool `-32601`、坏参数 `-32602`、内部错误 `-32603`。真实 MCP Java client 集成测试覆盖 initialize/tools/list/tools/call；默认协商协议版本实测为 **2025-11-25**，2025-06-18 客户端请求也按 2025-06-18 回显。
+- Phase 4 交付（已验收）：`POST/GET /api/v1/work-items`、带 `X-Admin-Token` 的 approve/deny；审批只能缩小工具/文档/topK 范围；显式 `allowedDocIds` 语义；重复审批 409；管理员 token 常量时间比较、未配置时 401；approve 事务写 `work_item` + `mandate`。
 - Phase 3 交付（已验收）：`eval/qa.jsonl` 40 条（35 可回答 + 5 不可回答，覆盖 v2025/v2024/enterprise）、fixed/heading 正式评测、gold 结构校验脚本、T-INT-EVAL-01、10k/策略 3 轮性能、10 并发 60s 脚本。heading hit@5=0.8857、MRR=0.6905；fixed hit@5=0.3429（如实报告，不改 gold）。
-- Phase 2 交付保持不变：`POST /api/v1/search`（vector/keyword/hybrid + RRF）、版本三模式过滤、SQL 层 docIds/version/chunkStrategy 过滤、citation、Windows `scripts/eval.ps1`、MCP 低层注册 spike。
-- 验收证据：[docs/acceptance/phase3-report.md](docs/acceptance/phase3-report.md)、[phase2-report](docs/acceptance/phase2-report.md)、[检索 smoke](docs/acceptance/phase2-smoke.md)、[MCP spike](docs/acceptance/phase2-mcp-spike.md)、[eval report](eval/report.md)、[perf](docs/acceptance/phase3-perf.json)、[concurrency](docs/acceptance/phase3-concurrency.json)。
+- Phase 2 交付保持不变：`POST /api/v1/search`（vector/keyword/hybrid + RRF）、版本三模式过滤、SQL 层 docIds/version/chunkStrategy 过滤、citation、Windows `scripts/eval.ps1`。
+- 验收证据：[docs/acceptance/phase5-report.md](docs/acceptance/phase5-report.md)、[phase4-report](docs/acceptance/phase4-report.md)、[phase3-report](docs/acceptance/phase3-report.md)、[phase2-report](docs/acceptance/phase2-report.md)、[检索 smoke](docs/acceptance/phase2-smoke.md)、[MCP spike](docs/acceptance/phase2-mcp-spike.md)、[eval report](eval/report.md)、[perf](docs/acceptance/phase3-perf.json)、[concurrency](docs/acceptance/phase3-concurrency.json)。
 - Phase 1 交付保持不变：Flyway V1 六张表、PDF/DOCX/Markdown/TXT 解析 + Block 模型、FixedWindow/HeadingAware 两套切分、Ollama bge-m3 1024 维 embedding（批量、重试）、文档上传/列表/详情/删除 API、SHA-256 幂等与版本治理字段。
 
 ## 技术栈
@@ -18,7 +19,7 @@
 | Spring AI | 1.1.8（BOM）+ `spring-ai-starter-model-ollama` |
 | 数据库 | PostgreSQL 16 + pgvector 0.8.7 + pg_trgm；Flyway 迁移；JdbcTemplate（无 JPA） |
 | 检索 | pgvector cosine（HNSW）+ `pg_trgm` ILIKE/similarity + RRF (k=60) |
-| MCP | Phase 2 仅 test-scope spike（`spring-ai-starter-mcp-server-webmvc`）；生产 `/mcp` 留 Phase 5 |
+| MCP | `spring-ai-starter-mcp-server-webmvc` 1.1.8（生产依赖）；Streamable HTTP `/mcp`；SDK `mcp-core 0.18.3` |
 | 解析 | PDFBox 3.0.5、POI 5.4.1 |
 | Token | jtokkit 1.1.0，cl100k_base |
 | 测试 | JUnit 5 / Mockito / Testcontainers `pgvector/pgvector:pg16` |
@@ -39,6 +40,7 @@ RAG_DB_URL / RAG_DB_USER / RAG_DB_PASSWORD
 OLLAMA_BASE_URL (默认 http://localhost:11434)
 OLLAMA_EMBEDDING_MODEL (默认 bge-m3)
 ADMIN_TOKEN (Phase 4 管理员 token；为空时 approve/deny 全部 401，服务仍可启动)
+MCP_AUTH_TOKEN (Phase 5 /mcp 的 Bearer token；与 ADMIN_TOKEN 分开；为空时 /mcp 全部 401，服务仍可启动)
 SERVER_ADDRESS (默认 127.0.0.1，仅监听本机回环)
 SERVER_PORT (默认 8080)
 ```
@@ -300,7 +302,9 @@ mvn test          # 单元 + Testcontainers 集成；默认不跑真实 Ollama
 ```
 
 - 集成测试用 Testcontainers `pgvector/pgvector:pg16` + `@TestConfiguration` fake `EmbeddingService`，不依赖本机 Ollama。
-- Phase 4 治理测试 33 个：`MandatePolicyTest` 13（缩小规则/显式文档语义/Phase 5 只读校验）、`AdminAuthTest` 3（常量时间比较/fail closed）、`GovernanceIntegrationTest` 16（T-GOV-01~07 + 边界 + 事务回滚）、`GovernanceAdminUnconfiguredIntegrationTest` 1（未配置 token 仍启动且 401）。全量 `mvn test`：167 tests，0 failures/errors，1 skipped（手动真实 Ollama smoke）。
+- Phase 4 治理测试 33 个：`MandatePolicyTest` 13（缩小规则/显式文档语义/Phase 5 只读校验）、`AdminAuthTest` 3（常量时间比较/fail closed）、`GovernanceIntegrationTest` 16（T-GOV-01~07 + 边界 + 事务回滚）、`GovernanceAdminUnconfiguredIntegrationTest` 1（未配置 token 仍启动且 401）。
+- Phase 5 MCP 测试 22 个：`McpAuthTest` 4（Bearer 解析/常量时间/fingerprint）、`McpToolServiceTest` 3（业务错误/-32602/-32603 不泄露）、`McpIntegrationTest` 14（真实 Streamable HTTP initialize/tools/list/tools/call + mandate 矩阵 + audit + 未知 tool/坏参数）、`McpUnconfiguredTokenIntegrationTest` 1（token 未配置仍启动但 401）。
+- 全量 `mvn test`：**188 tests，0 failures/errors，1 skipped**（手动真实 Ollama smoke）。
 - 格式 fixture 位于 `src/test/resources/fixtures/`（验收 kit 提供，`FormatFixturesTest` 守护，可直接用于 Gate 2 上传）；集成测试的 PDF/DOCX 仍在运行时用 PDFBox/POI 生成，`docs/samples/*.pdf` 不提交。
 - 真实 Ollama smoke（手动，条件执行，默认跳过）：
 
@@ -357,13 +361,65 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\perf-concurren
 - 口径：10k 是**每套策略**，两套合计 20k；入库 30s 是**每套策略**，两套合计 <60s。详见 [docs/05-non-functional.md](docs/05-non-functional.md) 2.1/2.2。
 - synthetic chunks 从真实 chunk 向量池循环取样，只衡量 SQL/HTTP/RRF/embedding 延迟，不代表检索质量；本机数字不承诺跨机复现。
 
-## MCP 低层 Spike
+## MCP（Phase 5，生产）
 
-Phase 2 只在 test scope 验证 Spring AI 1.1.8 的低层 `SyncToolSpecification` 注册，**没有生产 `/mcp`**：
+### 连接方式
 
-- 结论：`tool-callback-converter=false` 有效；但必须暴露**一个 `List<SyncToolSpecification>` bean**，两个独立 bean 不会被 auto-config 收集。
-- 证据：`McpRegistrationSpikeTest` 用 `McpSyncServer.listTools()` 断言两个 tool；详见 [docs/acceptance/phase2-mcp-spike.md](docs/acceptance/phase2-mcp-spike.md)。
-- Phase 5 仍需补 Bearer、mandate、审计、HTTP `tools/list` 与 Inspector 验收。
+- 端点：`http://127.0.0.1:8080/mcp`（Streamable HTTP；POST JSON-RPC + GET SSE + DELETE）。
+- 所有请求必须带：
+
+```http
+Authorization: Bearer <MCP_AUTH_TOKEN>
+```
+
+- 无/错 token、服务端未配置 token → HTTP **401**：
+
+```json
+{"code":"ERR-MCP_UNAUTHORIZED","message":"MCP token 缺失或错误","traceId":"..."}
+```
+
+- `MCP_AUTH_TOKEN` 与 `ADMIN_TOKEN` 完全分开；未配置时服务可启动，但 `/mcp` 全 401（fail closed）。
+- 默认只监听 `127.0.0.1`；不要直接把 `/mcp` 暴露公网。
+
+### 协议版本
+
+- MCP SDK 0.18.3 默认客户端请求 **2025-11-25**，服务端按请求回显；**实测默认协商为 2025-11-25**。
+- 客户端仅声明 `2025-06-18` 时，服务端也回显 2025-06-18（`docs/12` 的 v1 目标版本可用）。
+- **不承诺 2026-07-28**。
+
+### tools
+
+`tools/list` 恰好两个，均为只读、且每次调用必须带 `mandateId`：
+
+| tool | 必填 | 说明 |
+|---|---|---|
+| `search_knowledge` | `mandateId`, `query` | 检索；可选 `topK`（1~20，默认 5）、`docIds`（≤50）、`version`、`asOf`、`includeSuperseded`、`chunkStrategy`、`detectConflicts`；最多返回 10 条 |
+| `get_document` | `mandateId`, `docId` | 只返回文档元数据，不返回全文 |
+
+- 不注册 resources/prompts/completions；`tool-callback-converter=false`，应用里的 `@Tool` 不会被自动发布。
+- 业务错误是 tool error（`CallToolResult.isError=true` + `{"code":"ERR-...","message":"..."}`），**不是 HTTP 403**。
+- 未知 tool → JSON-RPC `-32601`；坏参数 → `-32602`；内部异常 → `-32603`（不暴露堆栈）。
+
+### 最小调用流程
+
+```powershell
+# 1) 管理员创建/批准 WorkItem，拿到 mandateId（Phase 4）
+# 2) MCP Inspector 连接
+$env:MCP_AUTH_TOKEN = "local-dev-token-not-committed"
+mvn spring-boot:run
+npx @modelcontextprotocol/inspector
+# Transport: Streamable HTTP
+# URL: http://localhost:8080/mcp
+# Header: Authorization: Bearer $env:MCP_AUTH_TOKEN
+# 先 initialize，再：
+#   tools/call search_knowledge {"mandateId":"...","query":"高血压诊断标准","topK":5}
+#   tools/call get_document     {"mandateId":"...","docId":"..."}
+```
+
+- 无 token → 401；有 token 但无 `mandateId` → tool error `ERR-MANDATE_REQUIRED`（不是 HTTP 403）。
+- 审计：每次 `tools/call` 写 `mcp_audit_log`；不含 query 原文，只存参数 SHA-256 与 token SHA-256 前 12 位。
+- 真实 HTTP 证据：`mvn -Dtest=McpIntegrationTest test`（MCP Java client；替代手工 Inspector）。
+- 低层注册结论仍见 [docs/acceptance/phase2-mcp-spike.md](docs/acceptance/phase2-mcp-spike.md)：必须一个 `List<SyncToolSpecification>` bean。
 
 ## 已知限制与文档冲突
 
@@ -376,10 +432,15 @@ Phase 2 只在 test scope 验证 Spring AI 1.1.8 的低层 `SyncToolSpecificatio
 7. **企业内控 heading 无 clause_id**：该文档 11 条题只能按 `pageRange` 匹配，粒度比 clause 粗；这是数据/解析事实，不是 gold 放宽。
 8. **10 并发 p95 未稳定达标**：错误率 0%，p50≈130-157ms，但三次 60s 的 p95 为 808/552/1129ms。根因主要是 Ollama embedding 长尾（直接 10 并发 p99≈3.0s），GC 最大 pause 45ms、Hikari 无失败。要硬保证需缓存/限流/专用推理，本轮不做。
 9. **性能口径**：10k/策略是本地 Docker + Ollama 实测；不承诺在其它机器复现同一数字，但脚本可复现测量方法。p99 受 PostgreSQL checkpoint/autovacuum 与 Ollama 影响，报告已记录。
-10. **Phase 3 范围（历史）**：Phase 3 未包含 WorkItem/Approval/Mandate、生产 MCP、前端、聊天、agent 编排、评测 UI；Phase 4 已补治理 API，生产 MCP 与 mandate 强制校验仍留 Phase 5。
+10. **Phase 3/4 范围（历史）**：Phase 3 未包含 WorkItem/Approval/Mandate、生产 MCP、前端、聊天、agent 编排、评测 UI；Phase 4 已补治理 API； Phase 5 已补生产 MCP、mandate 强制校验与审计（本分支，未合并 main）。
 11. **`docs/02-api-contract.md` 2.5 旧措辞**：该节写“`requestedDocIds` 为空/不传表示申请全部文档”，与 Phase 4 任务书及 [docs/03-data-model.md](docs/03-data-model.md) 的 `NULL=全部，[]=无` 冲突。本实现按任务书 + data model，`null`=全部、`[]`=无，并用集成测试覆盖；`docs/02` 未改动，留给验收方决定是否同步契约文字。
 12. **`allowedTools=[]`**：允许管理员显式批准 0 个工具（单调缩小，不扩大权限；mandate 实际不可用），未额外定义为 400。
-13. **治理数据保留**：v1 不自动清理 `work_item`/`mandate`；`mcp_audit_log` 写入与审计保留属 Phase 5。
+13. **治理数据保留**：v1 不自动清理 `work_item`/`mandate`/`mcp_audit_log`；审计建议保留 30 天，由运维处理。
+14. **MCP 协议版本**：SDK 0.18.3 默认客户端请求 2025-11-25，服务端实际回显 2025-11-25；仅请求 2025-06-18 时回显 2025-06-18。不承诺 2026-07-28。
+15. **未知 tool 的 code**：SDK 0.18.3 内部返回 `-32602`；本服务按 `docs/02`/任务书在 HTTP gate 返回 `-32601`。已知 tool 仍走 SDK schema/session 管线。
+16. **MCP topK/空范围的取舍**：`topK>10` 时检索后截断输出到 10 条，不把输入上限改成 10；`allowedDocIds=[]` 返回成功空结果（不调用检索、不泄露），不是 tool error。
+17. **mandateId 是 bearer secret**：v1 不绑定调用方身份，拿到 mandateId 可重放；多租户/多 session 隔离不做。
+18. **MCP 参数错误层级**：`docs/02` 3.2 写“参数错误 → tool error `ERR-VALIDATION`”，而 3.4 / `docs/12` 7.1 / Phase 5 任务书要求坏参数 → JSON-RPC `-32602`。本实现按后者；业务错误仍是 tool error，未改 `docs/02` 契约文字。
 
 ## 目录
 
@@ -394,8 +455,9 @@ src/main/java/com/lqx/ragmcp/
   parse/        # Block 模型、PDF/DOCX/MD/TXT 解析
   config/       # 配置属性
   eval/         # QA dataset/gold matcher/scorer/eval service
+  mcp/          # Phase 5 MCP：Bearer filter、低层 tool 注册、mandate tool 服务、audit
 src/main/resources/db/migration/V1__init.sql
-src/test/java/  # 单元 + Testcontainers 集成 + 条件真实 Ollama smoke + MCP spike
+src/test/java/  # 单元 + Testcontainers 集成 + 条件真实 Ollama smoke + MCP 真实 HTTP client
 scripts/        # accept-phase1.ps1 / eval.ps1 / validate-gold.ps1 / perf.ps1 / perf-concurrency.ps1 / smoke-phase2.ps1
 eval/           # qa.jsonl + qa.smoke.jsonl + report.md/json
 docs/acceptance/phase2-report.md
@@ -403,5 +465,6 @@ docs/acceptance/phase3-report.md
 docs/acceptance/phase3-perf.json
 docs/acceptance/phase3-concurrency.json
 docs/acceptance/phase4-report.md
+docs/acceptance/phase5-report.md
 ```
 
