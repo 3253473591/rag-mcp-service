@@ -18,6 +18,9 @@ public class SearchProperties {
      */
     private boolean hnswIterativeScan = true;
 
+    /** Phase 7 score-based abstention guard ({@code app.search.abstain.*}). */
+    private AbstainProperties abstain = new AbstainProperties();
+
     public int getCandidateLimit() {
         return candidateLimit;
     }
@@ -40,5 +43,13 @@ public class SearchProperties {
 
     public void setHnswIterativeScan(boolean hnswIterativeScan) {
         this.hnswIterativeScan = hnswIterativeScan;
+    }
+
+    public AbstainProperties getAbstain() {
+        return abstain;
+    }
+
+    public void setAbstain(AbstainProperties abstain) {
+        this.abstain = abstain;
     }
 }
