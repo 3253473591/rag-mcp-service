@@ -33,6 +33,28 @@ spring:
       embedding:
         options:
           model: ${OLLAMA_EMBEDDING_MODEL:bge-m3}
+    mcp:
+      server:
+        enabled: true
+        name: rag-mcp-service
+        version: 0.1.0
+        # docs/12-mcp-implementation.md: Streamable HTTP on POST/GET/DELETE /mcp.
+        protocol: STREAMABLE
+        type: SYNC
+        stdio: false
+        request-timeout: 30s
+        # Critical: never auto-publish application @Tool beans as MCP tools.
+        tool-callback-converter: false
+        # Extra defense: do not scan @McpTool annotations either.
+        annotation-scanner:
+          enabled: false
+        capabilities:
+          tool: true
+          resource: false
+          prompt: false
+          completion: false
+        streamable-http:
+          mcp-endpoint: /mcp
 
 management:
   endpoints:
@@ -49,6 +71,10 @@ app:
   admin:
     # Phase 4: WorkItem approve/deny require X-Admin-Token. Empty means "reject all" (fail closed).
     token: ${ADMIN_TOKEN:}
+  mcp:
+    # Phase 5: /mcp requires Authorization: Bearer <MCP_AUTH_TOKEN>. Empty means "reject all".
+    # Deliberately separate from ADMIN_TOKEN. Never log the token; audit stores SHA-256[0..12].
+    auth-token: ${MCP_AUTH_TOKEN:}
   upload:
     max-file-size-bytes: 20971520
     max-pdf-pages: 500

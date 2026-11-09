@@ -81,6 +81,10 @@ public class ApiException extends RuntimeException {
         return new ApiException(ErrorCode.DB_UNAVAILABLE, "数据库暂时不可用，请稍后重试");
     }
 
+    public static ApiException mcpUnauthorized() {
+        return new ApiException(ErrorCode.MCP_UNAUTHORIZED, "MCP token 缺失或错误");
+    }
+
     public static ApiException adminUnauthorized() {
         return new ApiException(ErrorCode.ADMIN_UNAUTHORIZED, "管理员 token 缺失或错误");
     }

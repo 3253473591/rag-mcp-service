@@ -82,6 +82,14 @@ public class WorkItemRepository {
         return rows.stream().findFirst();
     }
 
+    /** Phase 5 MCP lookup: the mandateId carried by every tools/call is the capability token. */
+    public Optional<MandateRecord> findMandateById(UUID mandateId) {
+        List<MandateRecord> rows = jdbc.query(
+                "SELECT " + MANDATE_COLUMNS + " FROM mandate WHERE id = ?::uuid",
+                mandateMapper(), mandateId.toString());
+        return rows.stream().findFirst();
+    }
+
     /**
      * Conditional transition PENDING -> APPROVED. The status predicate makes concurrent approvals
      * race-safe under READ COMMITTED: exactly one caller updates a row.
