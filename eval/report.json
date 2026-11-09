@@ -1,8 +1,8 @@
 {
-    "timestamp":  "2026-11-09T21:05:39.3614553+08:00",
+    "timestamp":  "2026-11-09T23:57:28.5311692+08:00",
     "dataset":  "eval/qa.jsonl",
     "datasetSha256":  "1487e261b728debd22a876d31016f376efeb40932d8888d45d2d15b91a15af4c",
-    "gitCommit":  "3d87217e62647a6c13b2336fa16c30e42a376985",
+    "gitCommit":  "a9a82ac65ac980844b69309b73a36d9384404d77",
     "gitDirty":  false,
     "embedding":  "bge-m3",
     "embeddingDimension":  1024,
@@ -30,15 +30,19 @@
                            "hitAt3":  0.7429,
                            "hitAt5":  0.7429,
                            "mrr":  0.7143,
-                           "p50Ms":  57,
-                           "p95Ms":  139,
-                           "clientP50Ms":  63.6,
-                           "clientP95Ms":  173.58,
+                           "p50Ms":  125,
+                           "p95Ms":  191,
+                           "clientP50Ms":  138.36,
+                           "clientP95Ms":  208.55,
                            "errors":  0,
                            "answeredCount":  35,
                            "unansweredCount":  5,
-                           "falsePositiveRate":  1,
-                           "noAnswerAccuracy":  0,
+                           "falsePositiveRate":  0.2,
+                           "noAnswerAccuracy":  0.8,
+                           "abstainedAnswerable":  0,
+                           "abstainedUnanswerable":  4,
+                           "noMatch":  3,
+                           "tooNoisy":  1,
                            "hit5ThresholdMet":  false,
                            "mrrThresholdMet":  true
                        },
@@ -55,15 +59,19 @@
                            "hitAt3":  0.9143,
                            "hitAt5":  0.9714,
                            "mrr":  0.8748,
-                           "p50Ms":  25,
-                           "p95Ms":  37,
-                           "clientP50Ms":  30.59,
-                           "clientP95Ms":  43.29,
+                           "p50Ms":  28,
+                           "p95Ms":  68,
+                           "clientP50Ms":  32.93,
+                           "clientP95Ms":  78.02,
                            "errors":  0,
                            "answeredCount":  35,
                            "unansweredCount":  5,
-                           "falsePositiveRate":  1,
-                           "noAnswerAccuracy":  0,
+                           "falsePositiveRate":  0.2,
+                           "noAnswerAccuracy":  0.8,
+                           "abstainedAnswerable":  0,
+                           "abstainedUnanswerable":  4,
+                           "noMatch":  3,
+                           "tooNoisy":  1,
                            "hit5ThresholdMet":  true,
                            "mrrThresholdMet":  true
                        }
@@ -77,10 +85,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  86.11,
-                        "serverMs":  61,
+                        "latencyMs":  29.67,
+                        "serverMs":  21,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.75309999268657613,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 4  高血压诊断与评估 \u003e 4.2  高血压诊断标准 \u003e 4.2.1  诊断标准 \u003e 第4页",
                         "topResults":  [
                                            {
@@ -117,10 +128,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  204.03,
-                        "serverMs":  185,
+                        "latencyMs":  132.66,
+                        "serverMs":  125,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.72128692415405227,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 4  高血压诊断与评估 \u003e 4.2  高血压诊断标准 \u003e 4.2.1  诊断标准 \u003e 第4页",
                         "topResults":  [
                                            {
@@ -157,10 +171,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  181.62,
-                        "serverMs":  159,
+                        "latencyMs":  169.2,
+                        "serverMs":  160,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.743441651931904,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 4  高血压诊断与评估 \u003e 4.2  高血压诊断标准 \u003e 4.2.1  诊断标准 \u003e 第4页",
                         "topResults":  [
                                            {
@@ -197,10 +214,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  121.01,
-                        "serverMs":  113,
+                        "latencyMs":  141.3,
+                        "serverMs":  132,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.72389877464800489,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 4  高血压诊断与评估 \u003e 4.2  高血压诊断标准 \u003e 4.2.2  诊断流程 \u003e 第4页",
                         "topResults":  [
                                            {
@@ -237,10 +257,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  173.58,
-                        "serverMs":  139,
+                        "latencyMs":  138.49,
+                        "serverMs":  130,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.68730218713231883,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 4  高血压诊断与评估 \u003e 4.2  高血压诊断标准 \u003e 4.2.3  血压分类 \u003e 第4页",
                         "topResults":  [
                                            {
@@ -277,10 +300,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  73.47,
-                        "serverMs":  67,
+                        "latencyMs":  85.68,
+                        "serverMs":  77,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.7071698976463211,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 4  高血压诊断与评估 \u003e 4.2  高血压诊断标准 \u003e 4.2.3  血压分类 \u003e 第4页",
                         "topResults":  [
                                            {
@@ -317,10 +343,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  75.14,
-                        "serverMs":  69,
+                        "latencyMs":  62.63,
+                        "serverMs":  55,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.66028964405490509,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 4  高血压诊断与评估 \u003e 4.3  初诊评估 \u003e 第5页",
                         "topResults":  [
                                            {
@@ -357,10 +386,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  86.99,
-                        "serverMs":  81,
+                        "latencyMs":  81.87,
+                        "serverMs":  75,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.72847921682403416,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 5  高血压治疗 \u003e 5.1  治疗原则 \u003e 第5页",
                         "topResults":  [
                                            {
@@ -397,10 +429,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  67.68,
-                        "serverMs":  62,
+                        "latencyMs":  78.29,
+                        "serverMs":  72,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.73233056068420932,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 5  高血压治疗 \u003e 5.3  生活方式干预 \u003e 第5页",
                         "topResults":  [
                                            {
@@ -437,10 +472,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  66.39,
-                        "serverMs":  60,
+                        "latencyMs":  111.22,
+                        "serverMs":  103,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.74391563818576467,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 5  高血压治疗 \u003e 5.4  降压药物治疗 \u003e 5.4.1  启动药物治疗时机 \u003e 第6页",
                         "topResults":  [
                                            {
@@ -477,10 +515,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  61.08,
-                        "serverMs":  55,
+                        "latencyMs":  148.61,
+                        "serverMs":  142,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.74304179805767523,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 1  基层高血压管理基本要求 \u003e 1.3  保障基本药物 \u003e 第2页",
                         "topResults":  [
                                            {
@@ -517,10 +558,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  64.62,
-                        "serverMs":  59,
+                        "latencyMs":  146.43,
+                        "serverMs":  138,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.7745012564962,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 5  高血压治疗 \u003e 5.4  降压药物治疗 \u003e 5.4.3  药物治疗方案 \u003e 第8页",
                         "topResults":  [
                                            {
@@ -557,10 +601,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  87.98,
-                        "serverMs":  82,
+                        "latencyMs":  208.55,
+                        "serverMs":  191,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.76365889853100288,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 5  高血压治疗 \u003e 5.4  降压药物治疗 \u003e 5.4.7  特殊情况的处理 \u003e 第9页",
                         "topResults":  [
                                            {
@@ -597,10 +644,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  57.54,
-                        "serverMs":  51,
+                        "latencyMs":  138.36,
+                        "serverMs":  126,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.73843322715469073,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 8  高血压长期随访管理 \u003e 8.2  随访内容 \u003e 第13页",
                         "topResults":  [
                                            {
@@ -637,10 +687,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  59.27,
-                        "serverMs":  53,
+                        "latencyMs":  145.02,
+                        "serverMs":  131,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.71840071559014862,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 8  高血压长期随访管理 \u003e 8.2  随访内容 \u003e 第13页",
                         "topResults":  [
                                            {
@@ -677,10 +730,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  57.57,
-                        "serverMs":  52,
+                        "latencyMs":  142.74,
+                        "serverMs":  131,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.78621194609190137,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 9  筛查与预防 \u003e 9.1  筛查方式 \u003e 第13页",
                         "topResults":  [
                                            {
@@ -717,10 +773,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  63.73,
-                        "serverMs":  57,
+                        "latencyMs":  228,
+                        "serverMs":  198,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.64753571005804411,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 10  健康教育 \u003e 10.2  教育内容 \u003e 第13页",
                         "topResults":  [
                                            {
@@ -757,10 +816,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  67.02,
-                        "serverMs":  61,
+                        "latencyMs":  235.12,
+                        "serverMs":  212,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.7429783923574429,
                         "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第一章 总 则 \u003e 第四条 企业建立与实施内部控制，应当遵循下列原则： \u003e 第2页",
                         "topResults":  [
                                            {
@@ -797,10 +859,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  62.89,
-                        "serverMs":  57,
+                        "latencyMs":  200.41,
+                        "serverMs":  183,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.77809653021056369,
                         "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第一章 总 则 \u003e 第四条 企业建立与实施内部控制，应当遵循下列原则： \u003e 第2页",
                         "topResults":  [
                                            {
@@ -837,10 +902,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  61.39,
-                        "serverMs":  56,
+                        "latencyMs":  135.27,
+                        "serverMs":  124,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.794328026736288,
                         "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第一章 总 则 \u003e 第五条 企业建立与实施有效的内部控制，应当包括下列要素： \u003e 第2页",
                         "topResults":  [
                                            {
@@ -877,10 +945,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  68.29,
-                        "serverMs":  63,
+                        "latencyMs":  119.96,
+                        "serverMs":  113,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.7328994074164068,
                         "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第三章 风险评估 \u003e 第二十三条 企业识别外部风险，应当关注下列因素： \u003e 第4页",
                         "topResults":  [
                                            {
@@ -917,10 +988,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  50.45,
-                        "serverMs":  45,
+                        "latencyMs":  121.47,
+                        "serverMs":  113,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.77939750779822747,
                         "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第三章 风险评估 \u003e 第二十三条 企业识别外部风险，应当关注下列因素： \u003e 第4页",
                         "topResults":  [
                                            {
@@ -957,10 +1031,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  60.03,
-                        "serverMs":  54,
+                        "latencyMs":  144.37,
+                        "serverMs":  135,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.76977647251602976,
                         "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第三章 风险评估 \u003e 第二十三条 企业识别外部风险，应当关注下列因素： \u003e 第4页",
                         "topResults":  [
                                            {
@@ -997,10 +1074,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  63.6,
-                        "serverMs":  55,
+                        "latencyMs":  114.36,
+                        "serverMs":  109,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.71846011368098284,
                         "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第一章 总 则 \u003e 第四条 企业建立与实施内部控制，应当遵循下列原则： \u003e 第2页",
                         "topResults":  [
                                            {
@@ -1037,10 +1117,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  64.83,
-                        "serverMs":  59,
+                        "latencyMs":  128.27,
+                        "serverMs":  119,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.66781636092869712,
                         "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四章 控制活动 \u003e 第三十条 授权审批控制要求企业根据常规授权和特别授权的规定，明确各岗位办理业务和事项的权限 \u003e 第5页",
                         "topResults":  [
                                            {
@@ -1077,10 +1160,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  76.71,
-                        "serverMs":  71,
+                        "latencyMs":  146.56,
+                        "serverMs":  139,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.64140622573906436,
                         "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四章 控制活动 \u003e 第三十一条 会计系统控制要求企业严格执行国家统一的会计准则制度，加强会计基础工作，明确会计 \u003e 第6页",
                         "topResults":  [
                                            {
@@ -1117,10 +1203,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  71.4,
-                        "serverMs":  60,
+                        "latencyMs":  127.97,
+                        "serverMs":  117,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.70937047861678171,
                         "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第六章 内部监督 \u003e 第四十四条 企业应当根据本规范及其配套办法，制定内部控制监督制度，明确内部审计机构（或经授 \u003e 第7页",
                         "topResults":  [
                                            {
@@ -1157,10 +1246,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  56.52,
-                        "serverMs":  50,
+                        "latencyMs":  142.06,
+                        "serverMs":  129,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.63143718872598431,
                         "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第六章 内部监督 \u003e 第四十四条 企业应当根据本规范及其配套办法，制定内部控制监督制度，明确内部审计机构（或经授 \u003e 第7页",
                         "topResults":  [
                                            {
@@ -1197,10 +1289,13 @@
                         "results":  4,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  44.1,
-                        "serverMs":  39,
+                        "latencyMs":  150.32,
+                        "serverMs":  137,
                         "asOf":  "2024-06-01",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.73298064077135949,
                         "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 4.2 高血压诊断标准 \u003e 4.2.1 诊断标准 \u003e 第1页",
                         "topResults":  [
                                            {
@@ -1237,10 +1332,13 @@
                         "results":  4,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  45.19,
-                        "serverMs":  40,
+                        "latencyMs":  135.32,
+                        "serverMs":  125,
                         "asOf":  "2024-06-01",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.706447688803827,
                         "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 4.2 高血压诊断标准 \u003e 4.2.1 诊断标准 \u003e 第1页",
                         "topResults":  [
                                            {
@@ -1277,10 +1375,13 @@
                         "results":  4,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  41.02,
-                        "serverMs":  36,
+                        "latencyMs":  168.69,
+                        "serverMs":  162,
                         "asOf":  "2024-06-01",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.69089279066775144,
                         "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 4.2 高血压诊断标准 \u003e 4.2.1 诊断标准 \u003e 第1页",
                         "topResults":  [
                                            {
@@ -1317,10 +1418,13 @@
                         "results":  4,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  44.67,
-                        "serverMs":  40,
+                        "latencyMs":  133.51,
+                        "serverMs":  122,
                         "asOf":  "2024-06-01",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.70048381380981783,
                         "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 4.2 高血压诊断标准 \u003e 4.2.2 诊断流程 \u003e 第1页",
                         "topResults":  [
                                            {
@@ -1357,10 +1461,13 @@
                         "results":  4,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  46.13,
-                        "serverMs":  41,
+                        "latencyMs":  147.12,
+                        "serverMs":  133,
                         "asOf":  "2024-06-01",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.59155817434397973,
                         "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 第1页",
                         "topResults":  [
                                            {
@@ -1397,10 +1504,13 @@
                         "results":  4,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  46.1,
-                        "serverMs":  41,
+                        "latencyMs":  130.03,
+                        "serverMs":  120,
                         "asOf":  "2024-06-01",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.55644850577153215,
                         "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 第1页",
                         "topResults":  [
                                            {
@@ -1437,10 +1547,13 @@
                         "results":  4,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  82.47,
-                        "serverMs":  78,
+                        "latencyMs":  143.03,
+                        "serverMs":  134,
                         "asOf":  "2024-06-01",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.667048315195804,
                         "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 4.2 高血压诊断标准 \u003e 4.2.2 诊断流程 \u003e 第1页",
                         "topResults":  [
                                            {
@@ -1474,39 +1587,19 @@
                         "id":  "N01",
                         "answerable":  false,
                         "rank":  0,
-                        "results":  5,
+                        "results":  0,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  62.04,
-                        "serverMs":  57,
+                        "latencyMs":  122.85,
+                        "serverMs":  117,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
-                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第二章 内部环境 \u003e 第十八条 企业应当加强文化建设，培育积极向上的价值观和社会责任感，倡导诚实守信、爱岗敬业、 \u003e 第4页",
+                        "abstained":  true,
+                        "abstainReason":  "NO_MATCH",
+                        "topScore":  0.46869269573225147,
+                        "topCitation":  "",
                         "topResults":  [
-                                           {
-                                               "docKey":  "enterprise-internal-control",
-                                               "docVersion":  "2026",
-                                               "clauseId":  "第十八条",
-                                               "pageNo":  4,
-                                               "pageEnd":  4,
-                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第二章 内部环境 \u003e 第十八条 企业应当加强文化建设，培育积极向上的价值观和社会责任感，倡导诚实守信、爱岗敬业、 \u003e 第4页"
-                                           },
-                                           {
-                                               "docKey":  "enterprise-internal-control",
-                                               "docVersion":  "2026",
-                                               "clauseId":  "第十六条",
-                                               "pageNo":  3,
-                                               "pageEnd":  4,
-                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第二章 内部环境 \u003e 第十六条 企业应当制定和实施有利于企业可持续发展的人力资源政策。人力资源政策应当包括下列内 \u003e 第3页"
-                                           },
-                                           {
-                                               "docKey":  "enterprise-internal-control",
-                                               "docVersion":  "2026",
-                                               "clauseId":  "第二十六条",
-                                               "pageNo":  5,
-                                               "pageEnd":  5,
-                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第三章 风险评估 \u003e 第二十六条 企业应当综合运用风险规避、风险降低、风险分担和风险承受等风险应对策略，实现对风 \u003e 第5页"
-                                           }
+
                                        ]
                     },
                     {
@@ -1514,39 +1607,19 @@
                         "id":  "N02",
                         "answerable":  false,
                         "rank":  0,
-                        "results":  5,
+                        "results":  0,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  59.52,
-                        "serverMs":  55,
+                        "latencyMs":  175.55,
+                        "serverMs":  166,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
-                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第五章 信息与沟通 \u003e 第四十二条 企业应当建立反舞弊机制，坚持惩防并举、重在预防的原则，明确反舞弊工作的重点领 \u003e 第7页",
+                        "abstained":  true,
+                        "abstainReason":  "NO_MATCH",
+                        "topScore":  0.41310394973569187,
+                        "topCitation":  "",
                         "topResults":  [
-                                           {
-                                               "docKey":  "enterprise-internal-control",
-                                               "docVersion":  "2026",
-                                               "clauseId":  "第四十二条",
-                                               "pageNo":  7,
-                                               "pageEnd":  7,
-                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第五章 信息与沟通 \u003e 第四十二条 企业应当建立反舞弊机制，坚持惩防并举、重在预防的原则，明确反舞弊工作的重点领 \u003e 第7页"
-                                           },
-                                           {
-                                               "docKey":  "enterprise-internal-control",
-                                               "docVersion":  "2026",
-                                               "clauseId":  "第四十条",
-                                               "pageNo":  7,
-                                               "pageEnd":  7,
-                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第五章 信息与沟通 \u003e 第四十条 企业应当将内部控制相关信息在企业内部各管理级次、责任单位、业务环节之间，以及企业 \u003e 第7页"
-                                           },
-                                           {
-                                               "docKey":  "enterprise-internal-control",
-                                               "docVersion":  "2026",
-                                               "clauseId":  "第二十五条",
-                                               "pageNo":  5,
-                                               "pageEnd":  5,
-                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第三章 风险评估 \u003e 第二十五条 企业应当根据风险分析的结果，结合风险承受度，权衡风险与收益，确定风险应对策略。 \u003e 第5页"
-                                           }
+
                                        ]
                     },
                     {
@@ -1554,39 +1627,19 @@
                         "id":  "N03",
                         "answerable":  false,
                         "rank":  0,
-                        "results":  5,
+                        "results":  0,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  60.49,
-                        "serverMs":  55,
+                        "latencyMs":  151.26,
+                        "serverMs":  103,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
-                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 4  高血压诊断与评估 \u003e 4.1  血压测量 \u003e 4.1.1  诊室血压测量 \u003e 4.1.1.2  测量方法 \u003e 第3页",
+                        "abstained":  true,
+                        "abstainReason":  "TOO_NOISY",
+                        "topScore":  0.59695709816835463,
+                        "topCitation":  "",
                         "topResults":  [
-                                           {
-                                               "docKey":  "hypertension-guideline",
-                                               "docVersion":  "2025",
-                                               "clauseId":  "4.1.1.2",
-                                               "pageNo":  3,
-                                               "pageEnd":  3,
-                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 4  高血压诊断与评估 \u003e 4.1  血压测量 \u003e 4.1.1  诊室血压测量 \u003e 4.1.1.2  测量方法 \u003e 第3页"
-                                           },
-                                           {
-                                               "docKey":  "hypertension-guideline",
-                                               "docVersion":  "2025",
-                                               "clauseId":  "4.1.1.1",
-                                               "pageNo":  3,
-                                               "pageEnd":  3,
-                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 4  高血压诊断与评估 \u003e 4.1  血压测量 \u003e 4.1.1  诊室血压测量 \u003e 4.1.1.1  测量仪器 \u003e 第3页"
-                                           },
-                                           {
-                                               "docKey":  "hypertension-guideline",
-                                               "docVersion":  "2025",
-                                               "clauseId":  "4.1.1.2",
-                                               "pageNo":  3,
-                                               "pageEnd":  3,
-                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 4  高血压诊断与评估 \u003e 4.1  血压测量 \u003e 4.1.1  诊室血压测量 \u003e 4.1.1.2  测量方法 \u003e 第3页"
-                                           }
+
                                        ]
                     },
                     {
@@ -1594,39 +1647,19 @@
                         "id":  "N04",
                         "answerable":  false,
                         "rank":  0,
-                        "results":  5,
+                        "results":  0,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  61.65,
-                        "serverMs":  56,
+                        "latencyMs":  123.3,
+                        "serverMs":  115,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
-                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第二章 内部环境 \u003e 第十八条 企业应当加强文化建设，培育积极向上的价值观和社会责任感，倡导诚实守信、爱岗敬业、 \u003e 第4页",
+                        "abstained":  true,
+                        "abstainReason":  "NO_MATCH",
+                        "topScore":  0.51202509165558785,
+                        "topCitation":  "",
                         "topResults":  [
-                                           {
-                                               "docKey":  "enterprise-internal-control",
-                                               "docVersion":  "2026",
-                                               "clauseId":  "第十八条",
-                                               "pageNo":  4,
-                                               "pageEnd":  4,
-                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第二章 内部环境 \u003e 第十八条 企业应当加强文化建设，培育积极向上的价值观和社会责任感，倡导诚实守信、爱岗敬业、 \u003e 第4页"
-                                           },
-                                           {
-                                               "docKey":  "enterprise-internal-control",
-                                               "docVersion":  "2026",
-                                               "clauseId":  null,
-                                               "pageNo":  1,
-                                               "pageEnd":  1,
-                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 企业内部控制制度（公开文本样例） \u003e 第1页"
-                                           },
-                                           {
-                                               "docKey":  "enterprise-internal-control",
-                                               "docVersion":  "2026",
-                                               "clauseId":  "第三十五条",
-                                               "pageNo":  6,
-                                               "pageEnd":  7,
-                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四章 控制活动 \u003e 第三十五条 绩效考评控制要求企业建立和实施绩效考评制度，科学设置考核指标体系，对企业内部各 \u003e 第6页"
-                                           }
+
                                        ]
                     },
                     {
@@ -1637,10 +1670,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  64.2,
-                        "serverMs":  58,
+                        "latencyMs":  113.36,
+                        "serverMs":  90,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.65013345181146664,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第2页",
                         "topResults":  [
                                            {
@@ -1677,10 +1713,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  34.96,
-                        "serverMs":  27,
+                        "latencyMs":  35.3,
+                        "serverMs":  28,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.78016354978581992,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 4  高血压诊断与评估 \u003e 4.2  高血压诊断标准 \u003e 4.2.1  诊断标准 \u003e 第4页",
                         "topResults":  [
                                            {
@@ -1717,10 +1756,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  31.83,
-                        "serverMs":  26,
+                        "latencyMs":  30.7,
+                        "serverMs":  25,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.75616680563502514,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 4  高血压诊断与评估 \u003e 4.2  高血压诊断标准 \u003e 4.2.1  诊断标准 \u003e 第4页",
                         "topResults":  [
                                            {
@@ -1757,10 +1799,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  31.07,
-                        "serverMs":  25,
+                        "latencyMs":  31.2,
+                        "serverMs":  26,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.71194267579989134,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 4  高血压诊断与评估 \u003e 4.2  高血压诊断标准 \u003e 4.2.1  诊断标准 \u003e 第4页",
                         "topResults":  [
                                            {
@@ -1797,10 +1842,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  31.89,
-                        "serverMs":  24,
+                        "latencyMs":  36.59,
+                        "serverMs":  31,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.73814097753709651,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 4  高血压诊断与评估 \u003e 4.2  高血压诊断标准 \u003e 4.2.2  诊断流程 \u003e 第4页",
                         "topResults":  [
                                            {
@@ -1837,10 +1885,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  32.29,
-                        "serverMs":  27,
+                        "latencyMs":  29.77,
+                        "serverMs":  24,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.65110884017406645,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 5  高血压治疗 \u003e 5.4  降压药物治疗 \u003e 5.4.7  特殊情况的处理 \u003e 第9页",
                         "topResults":  [
                                            {
@@ -1877,10 +1928,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  30.93,
+                        "latencyMs":  31.08,
                         "serverMs":  25,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.75885868072518392,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 4  高血压诊断与评估 \u003e 4.2  高血压诊断标准 \u003e 4.2.3  血压分类 \u003e 第4页",
                         "topResults":  [
                                            {
@@ -1917,10 +1971,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  32.17,
-                        "serverMs":  26,
+                        "latencyMs":  31.36,
+                        "serverMs":  25,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.70975579939267264,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 5  高血压治疗 \u003e 5.1  治疗原则 \u003e 第5页",
                         "topResults":  [
                                            {
@@ -1957,10 +2014,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  33.6,
-                        "serverMs":  28,
+                        "latencyMs":  44.71,
+                        "serverMs":  39,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.75757614590870348,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 5  高血压治疗 \u003e 5.2  降压目标 \u003e 第5页",
                         "topResults":  [
                                            {
@@ -1997,10 +2057,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  32.12,
-                        "serverMs":  26,
+                        "latencyMs":  70.69,
+                        "serverMs":  66,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.75225257873535689,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 5  高血压治疗 \u003e 5.3  生活方式干预 \u003e 第5页",
                         "topResults":  [
                                            {
@@ -2037,10 +2100,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  27.14,
-                        "serverMs":  23,
+                        "latencyMs":  75.74,
+                        "serverMs":  65,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.751801558429522,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 5  高血压治疗 \u003e 5.4  降压药物治疗 \u003e 5.4.1  启动药物治疗时机 \u003e 第6页",
                         "topResults":  [
                                            {
@@ -2077,10 +2143,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  28.07,
-                        "serverMs":  22,
+                        "latencyMs":  78.02,
+                        "serverMs":  68,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.76153536072166006,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 1  基层高血压管理基本要求 \u003e 1.3  保障基本药物 \u003e 第2页",
                         "topResults":  [
                                            {
@@ -2117,10 +2186,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  28.58,
-                        "serverMs":  23,
+                        "latencyMs":  66.54,
+                        "serverMs":  58,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.72777368823553912,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 5  高血压治疗 \u003e 5.4  降压药物治疗 \u003e 5.4.3  药物治疗方案 \u003e 第6页",
                         "topResults":  [
                                            {
@@ -2157,10 +2229,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  28.48,
-                        "serverMs":  23,
+                        "latencyMs":  84.02,
+                        "serverMs":  72,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.70027415742614219,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 7  转诊 \u003e 第13页",
                         "topResults":  [
                                            {
@@ -2197,10 +2272,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  27.84,
-                        "serverMs":  24,
+                        "latencyMs":  63.31,
+                        "serverMs":  56,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.7699534708344814,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 8  高血压长期随访管理 \u003e 8.1  随访频率 \u003e 第13页",
                         "topResults":  [
                                            {
@@ -2237,10 +2315,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  30.21,
-                        "serverMs":  26,
+                        "latencyMs":  79.26,
+                        "serverMs":  68,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.69768456248233457,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 8  高血压长期随访管理 \u003e 8.2  随访内容 \u003e 第13页",
                         "topResults":  [
                                            {
@@ -2277,10 +2358,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  29.34,
-                        "serverMs":  24,
+                        "latencyMs":  77.93,
+                        "serverMs":  68,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.746794208693171,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 9  筛查与预防 \u003e 9.1  筛查方式 \u003e 第13页",
                         "topResults":  [
                                            {
@@ -2317,10 +2401,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  34.6,
-                        "serverMs":  29,
+                        "latencyMs":  62.97,
+                        "serverMs":  56,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.69463934834484853,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 10  健康教育 \u003e 10.1  基本要求 \u003e 第13页",
                         "topResults":  [
                                            {
@@ -2357,10 +2444,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  45.48,
-                        "serverMs":  39,
+                        "latencyMs":  64.04,
+                        "serverMs":  56,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.765823317291039,
                         "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第一章 总 则 \u003e 第三条 本规范所称内部控制，是由企业董事会、监事会、经理层和全体员工实施的、旨在实现控制目 \u003e 第2页",
                         "topResults":  [
                                            {
@@ -2397,10 +2487,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  29.54,
-                        "serverMs":  24,
+                        "latencyMs":  66.93,
+                        "serverMs":  55,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.73723784567908812,
                         "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第一章 总 则 \u003e 第四条 企业建立与实施内部控制，应当遵循下列原则： \u003e 第2页",
                         "topResults":  [
                                            {
@@ -2437,10 +2530,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  30.59,
-                        "serverMs":  25,
+                        "latencyMs":  75.44,
+                        "serverMs":  67,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.7328691245785558,
                         "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第一章 总 则 \u003e 第五条 企业建立与实施有效的内部控制，应当包括下列要素： \u003e 第2页",
                         "topResults":  [
                                            {
@@ -2477,10 +2573,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  30.16,
-                        "serverMs":  24,
+                        "latencyMs":  60.52,
+                        "serverMs":  54,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.73139185157029474,
                         "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第三章 风险评估 \u003e 第二十四条 企业应当采用定性与定量相结合的方法，按照风险发生的可能性及其影响程度等，对识别 \u003e 第5页",
                         "topResults":  [
                                            {
@@ -2517,10 +2616,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  42.49,
-                        "serverMs":  37,
+                        "latencyMs":  46.12,
+                        "serverMs":  38,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.669401943683629,
                         "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第三章 风险评估 \u003e 第二十二条 企业识别内部风险，应当关注下列因素： \u003e 第4页",
                         "topResults":  [
                                            {
@@ -2557,10 +2659,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  29.35,
-                        "serverMs":  24,
+                        "latencyMs":  49.43,
+                        "serverMs":  42,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.66275982248318976,
                         "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第三章 风险评估 \u003e 第二十二条 企业识别内部风险，应当关注下列因素： \u003e 第4页",
                         "topResults":  [
                                            {
@@ -2597,10 +2702,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  28.32,
-                        "serverMs":  23,
+                        "latencyMs":  34.08,
+                        "serverMs":  28,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.71546653761070922,
                         "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第一章 总 则 \u003e 第五条 企业建立与实施有效的内部控制，应当包括下列要素： \u003e 第2页",
                         "topResults":  [
                                            {
@@ -2637,10 +2745,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  28.27,
-                        "serverMs":  23,
+                        "latencyMs":  32.8,
+                        "serverMs":  27,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.63651910698876635,
                         "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四章 控制活动 \u003e 第三十条 授权审批控制要求企业根据常规授权和特别授权的规定，明确各岗位办理业务和事项的权限 \u003e 第6页",
                         "topResults":  [
                                            {
@@ -2677,10 +2788,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  27.38,
-                        "serverMs":  23,
+                        "latencyMs":  32.93,
+                        "serverMs":  28,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.64669716715270165,
                         "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四章 控制活动 \u003e 第三十三条 预算控制要求企业实施全面预算管理制度，明确各责任单位在预算管理中的职责权限，规 \u003e 第6页",
                         "topResults":  [
                                            {
@@ -2717,10 +2831,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  26.48,
-                        "serverMs":  22,
+                        "latencyMs":  31.48,
+                        "serverMs":  25,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.733824485496504,
                         "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第六章 内部监督 \u003e 第四十四条 企业应当根据本规范及其配套办法，制定内部控制监督制度，明确内部审计机构（或经授 \u003e 第7页",
                         "topResults":  [
                                            {
@@ -2757,10 +2874,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  32.51,
-                        "serverMs":  27,
+                        "latencyMs":  36.18,
+                        "serverMs":  28,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.70059342976847838,
                         "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第六章 内部监督 \u003e 第四十五条 企业应当制定内部控制缺陷认定标准，对监督过程中发现的内部控制缺陷，应当分析缺陷 \u003e 第8页",
                         "topResults":  [
                                            {
@@ -2797,10 +2917,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  15.9,
-                        "serverMs":  11,
+                        "latencyMs":  13.33,
+                        "serverMs":  8,
                         "asOf":  "2024-06-01",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.734310313124091,
                         "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 4.2 高血压诊断标准 \u003e 4.2.1 诊断标准 \u003e 第1页",
                         "topResults":  [
                                            {
@@ -2837,10 +2960,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  15.66,
-                        "serverMs":  10,
+                        "latencyMs":  16.62,
+                        "serverMs":  8,
                         "asOf":  "2024-06-01",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.69856066167806918,
                         "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 4.2 高血压诊断标准 \u003e 4.2.1 诊断标准 \u003e 第1页",
                         "topResults":  [
                                            {
@@ -2877,10 +3003,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  14.73,
-                        "serverMs":  9,
+                        "latencyMs":  13.03,
+                        "serverMs":  8,
                         "asOf":  "2024-06-01",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.68852994774193,
                         "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 4.2 高血压诊断标准 \u003e 4.2.1 诊断标准 \u003e 第1页",
                         "topResults":  [
                                            {
@@ -2917,10 +3046,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  22.26,
-                        "serverMs":  17,
+                        "latencyMs":  14.87,
+                        "serverMs":  10,
                         "asOf":  "2024-06-01",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.69134666595896854,
                         "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 4.2 高血压诊断标准 \u003e 4.2.2 诊断流程 \u003e 第1页",
                         "topResults":  [
                                            {
@@ -2957,10 +3089,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  41.56,
-                        "serverMs":  34,
+                        "latencyMs":  13.5,
+                        "serverMs":  9,
                         "asOf":  "2024-06-01",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.63442711996224943,
                         "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 5.2 降压目标 \u003e 第2页",
                         "topResults":  [
                                            {
@@ -2997,10 +3132,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  27.54,
-                        "serverMs":  22,
+                        "latencyMs":  13.3,
+                        "serverMs":  9,
                         "asOf":  "2024-06-01",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.5835880289323323,
                         "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 8.1 随访频率 \u003e 第2页",
                         "topResults":  [
                                            {
@@ -3037,10 +3175,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  37.74,
-                        "serverMs":  31,
+                        "latencyMs":  11.32,
+                        "serverMs":  6,
                         "asOf":  "2024-06-01",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.56732563473805131,
                         "topCitation":  "《hypertension-2024》v2024（2024-01-01 生效） \u003e 测试用摘编 \u003e 4.2 高血压诊断标准 \u003e 4.2.2 诊断流程 \u003e 第1页",
                         "topResults":  [
                                            {
@@ -3074,39 +3215,19 @@
                         "id":  "N01",
                         "answerable":  false,
                         "rank":  0,
-                        "results":  5,
+                        "results":  0,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  43.29,
-                        "serverMs":  37,
+                        "latencyMs":  28.75,
+                        "serverMs":  24,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
-                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第二章 内部环境 \u003e 第十六条 企业应当制定和实施有利于企业可持续发展的人力资源政策。人力资源政策应当包括下列内 \u003e 第3页",
+                        "abstained":  true,
+                        "abstainReason":  "NO_MATCH",
+                        "topScore":  0.46098665544278761,
+                        "topCitation":  "",
                         "topResults":  [
-                                           {
-                                               "docKey":  "enterprise-internal-control",
-                                               "docVersion":  "2026",
-                                               "clauseId":  "第十六条",
-                                               "pageNo":  3,
-                                               "pageEnd":  4,
-                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第二章 内部环境 \u003e 第十六条 企业应当制定和实施有利于企业可持续发展的人力资源政策。人力资源政策应当包括下列内 \u003e 第3页"
-                                           },
-                                           {
-                                               "docKey":  "enterprise-internal-control",
-                                               "docVersion":  "2026",
-                                               "clauseId":  "第三十五条",
-                                               "pageNo":  6,
-                                               "pageEnd":  6,
-                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四章 控制活动 \u003e 第三十五条 绩效考评控制要求企业建立和实施绩效考评制度，科学设置考核指标体系，对企业内部各 \u003e 第6页"
-                                           },
-                                           {
-                                               "docKey":  "hypertension-guideline",
-                                               "docVersion":  "2025",
-                                               "clauseId":  "6.4.1",
-                                               "pageNo":  12,
-                                               "pageEnd":  12,
-                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 6  高血压与中医药 \u003e 6.4  传统运动方式 \u003e 6.4.1  太极拳 \u003e 第12页"
-                                           }
+
                                        ]
                     },
                     {
@@ -3114,39 +3235,19 @@
                         "id":  "N02",
                         "answerable":  false,
                         "rank":  0,
-                        "results":  5,
+                        "results":  0,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  33.47,
-                        "serverMs":  27,
+                        "latencyMs":  30.71,
+                        "serverMs":  25,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
-                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四章 控制活动 \u003e 第三十六条 企业应当根据内部控制目标，结合风险应对策略，综合运用控制措施，对各种业务和事项 \u003e 第6页",
+                        "abstained":  true,
+                        "abstainReason":  "NO_MATCH",
+                        "topScore":  0.44986403295372468,
+                        "topCitation":  "",
                         "topResults":  [
-                                           {
-                                               "docKey":  "enterprise-internal-control",
-                                               "docVersion":  "2026",
-                                               "clauseId":  "第三十六条",
-                                               "pageNo":  6,
-                                               "pageEnd":  6,
-                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四章 控制活动 \u003e 第三十六条 企业应当根据内部控制目标，结合风险应对策略，综合运用控制措施，对各种业务和事项 \u003e 第6页"
-                                           },
-                                           {
-                                               "docKey":  "enterprise-internal-control",
-                                               "docVersion":  "2026",
-                                               "clauseId":  "第四十七条",
-                                               "pageNo":  8,
-                                               "pageEnd":  8,
-                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第六章 内部监督 \u003e 第四十七条 企业应当以书面或者其他适当的形式，妥善保存内部控制建立与实施过程中的相关记录或 \u003e 第8页"
-                                           },
-                                           {
-                                               "docKey":  "enterprise-internal-control",
-                                               "docVersion":  "2026",
-                                               "clauseId":  "第二十九条",
-                                               "pageNo":  5,
-                                               "pageEnd":  5,
-                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四章 控制活动 \u003e 第二十九条 不相容职务分离控制要求企业全面系统地分析、梳理业务流程中所涉及的不相容职务，实 \u003e 第5页"
-                                           }
+
                                        ]
                     },
                     {
@@ -3154,39 +3255,19 @@
                         "id":  "N03",
                         "answerable":  false,
                         "rank":  0,
-                        "results":  5,
+                        "results":  0,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  38.1,
-                        "serverMs":  33,
+                        "latencyMs":  28.21,
+                        "serverMs":  24,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
-                        "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 4  高血压诊断与评估 \u003e 4.1  血压测量 \u003e 4.1.1  诊室血压测量 \u003e 4.1.1.2  测量方法 \u003e 第3页",
+                        "abstained":  true,
+                        "abstainReason":  "TOO_NOISY",
+                        "topScore":  0.60940360462451137,
+                        "topCitation":  "",
                         "topResults":  [
-                                           {
-                                               "docKey":  "hypertension-guideline",
-                                               "docVersion":  "2025",
-                                               "clauseId":  "4.1.1.2",
-                                               "pageNo":  3,
-                                               "pageEnd":  3,
-                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 4  高血压诊断与评估 \u003e 4.1  血压测量 \u003e 4.1.1  诊室血压测量 \u003e 4.1.1.2  测量方法 \u003e 第3页"
-                                           },
-                                           {
-                                               "docKey":  "hypertension-guideline",
-                                               "docVersion":  "2025",
-                                               "clauseId":  "8.1",
-                                               "pageNo":  13,
-                                               "pageEnd":  13,
-                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 8  高血压长期随访管理 \u003e 8.1  随访频率 \u003e 第13页"
-                                           },
-                                           {
-                                               "docKey":  "hypertension-guideline",
-                                               "docVersion":  "2025",
-                                               "clauseId":  "4.2.1",
-                                               "pageNo":  4,
-                                               "pageEnd":  4,
-                                               "citation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 4  高血压诊断与评估 \u003e 4.2  高血压诊断标准 \u003e 4.2.1  诊断标准 \u003e 第4页"
-                                           }
+
                                        ]
                     },
                     {
@@ -3194,39 +3275,19 @@
                         "id":  "N04",
                         "answerable":  false,
                         "rank":  0,
-                        "results":  5,
+                        "results":  0,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  41.93,
-                        "serverMs":  37,
+                        "latencyMs":  28.49,
+                        "serverMs":  24,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
-                        "topCitation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四章 控制活动 \u003e 第三十五条 绩效考评控制要求企业建立和实施绩效考评制度，科学设置考核指标体系，对企业内部各 \u003e 第6页",
+                        "abstained":  true,
+                        "abstainReason":  "NO_MATCH",
+                        "topScore":  0.49566340239687079,
+                        "topCitation":  "",
                         "topResults":  [
-                                           {
-                                               "docKey":  "enterprise-internal-control",
-                                               "docVersion":  "2026",
-                                               "clauseId":  "第三十五条",
-                                               "pageNo":  6,
-                                               "pageEnd":  6,
-                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第四章 控制活动 \u003e 第三十五条 绩效考评控制要求企业建立和实施绩效考评制度，科学设置考核指标体系，对企业内部各 \u003e 第6页"
-                                           },
-                                           {
-                                               "docKey":  "enterprise-internal-control",
-                                               "docVersion":  "2026",
-                                               "clauseId":  "第十六条",
-                                               "pageNo":  3,
-                                               "pageEnd":  4,
-                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第二章 内部环境 \u003e 第十六条 企业应当制定和实施有利于企业可持续发展的人力资源政策。人力资源政策应当包括下列内 \u003e 第3页"
-                                           },
-                                           {
-                                               "docKey":  "enterprise-internal-control",
-                                               "docVersion":  "2026",
-                                               "clauseId":  "第十七条",
-                                               "pageNo":  4,
-                                               "pageEnd":  4,
-                                               "citation":  "《enterprise-policy-2026》v2026（2026-01-01 生效） \u003e 第二章 内部环境 \u003e 第十七条 企业应当将职业道德修养和专业胜任能力作为选拔和聘用员工的重要标准，切实加强员工培 \u003e 第4页"
-                                           }
+
                                        ]
                     },
                     {
@@ -3237,10 +3298,13 @@
                         "results":  5,
                         "error":  false,
                         "errorMessage":  "",
-                        "latencyMs":  43.37,
-                        "serverMs":  35,
+                        "latencyMs":  27.9,
+                        "serverMs":  23,
                         "asOf":  "2026-11-09",
                         "includeSuperseded":  false,
+                        "abstained":  false,
+                        "abstainReason":  "",
+                        "topScore":  0.67458873987197876,
                         "topCitation":  "《hypertension-2025》v2025（2025-01-01 生效） \u003e 第2页",
                         "topResults":  [
                                            {
