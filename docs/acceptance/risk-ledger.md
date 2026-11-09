@@ -1,15 +1,16 @@
 # 风险台账（跨 Phase 追踪）
 
 - 更新：2026-11-09
-- 当前 `main`：Phase 6 签收后（见 git log）
+- 当前 `main`：Phase 6 签收后（见 git log）；Phase 6b 在 `phase6b` 分支待验收
 - Phase 6：`phase6` 已验收（P0，带 residual）并合并 `main`；R1–R4 状态见下
+- Phase 6b：仅 R1；`phase6b` 分支，3 次 60s p95 全部 <800ms，待验收方决定是否合并
 - 用途：把“已解决 / 部分改善 / 仍待修”说清楚，避免把测量、定位或文档口径当成已修复。
 
 ## 状态总表
 
 | # | 风险 | 状态 | 证据 / 位置 | 下一步 |
 |---|---|---|---|---|
-| R1 | 10 并发 p95 不稳定 | **部分改善，未达标** | Phase 3 A/B/C/D p95=808.59/552.07/1129.14/826.31ms；Phase 6 一次 60s 复测 p50=262.12、p95=**1780.18**、p99=5050.61ms；验收方独立复跑 requests=972、errors=0、p50=259.05、p95=**2243.04**、p99=4545.93ms（[phase6-concurrency.json](phase6-concurrency.json)） | 需要专用推理/限流隔离/更多预热；query 缓存对唯一 query 基准无效，本轮未加 |
+| R1 | 10 并发 p95 不稳定 | **已达标（本机 3/3），残余长尾** | Phase 6b：query 批处理（8 / 5ms）+ 最多 3 个并发 batch + 有界队列/缓存；三次独立 60s p95=**445.29 / 500.12 / 468.59ms**、errors=0、cacheHits=0/8004（[phase6b-concurrency.json](phase6b-concurrency.json)）；40 QA 指标与 Phase 6 一致（fixed 0.7429/0.6867、heading 0.9429/0.8319） | p99=554.84/692.77/588.81ms；run3 max=4405ms，单次长尾仍在；数字依赖本机 Ollama/GPU，见 [phase6b-report.md](phase6b-report.md) |
 | R2 | fixed hit@5=0.3429 偏低 | **显著改善，未完全闭环** | Phase 6：`page_end` + fixed 主导 section clause 元数据 + pageRange 相交匹配；fixed hit@5 **0.7429**、MRR **0.6867**；heading hit@5 0.9429、MRR 0.8319；gold 未改。但 fixed Q18 top-1 是第四条（错误），因 page-only gold 被算 hit | fixed 指标仍含 pageRange 粗匹配；要声明 clause 级正确需逐条升级 enterprise gold 或加严格匹配；fixed 仍低于 heading |
 | R3 | 2025 双栏 clausePath 噪声 | **部分修复** | 双栏 gutter 重排 + heading 候选清洗；`90 mmHg`/`3 d`/`20 g` clausePath 计数为 0；真实 2025 抽样 5 条见 [phase6-report.md](phase6-report.md) 第 3 节 | 表格/流程图仍可能跨栏交错，**未修全文顺序**；不宣称 content 已完全正确 |
 | R4 | 企业 heading 无 clause_id | **已修（gold 未改）** | 中文 `第X条` 识别；企业 heading 48/49 有 clause_id（唯一 NULL 为封面标题），clause_path 带章；DB/SQL 见 phase6-report 第 2/6 节 | enterprise 11 条 QA 仍用 pageRange（dataset hash 未改）；Q18 本轮 top-1 为第三条，但 page-only 仍可能命中同页错误条款，后续 dataset revision 再逐条升级 |
@@ -25,11 +26,12 @@
 - 已修（metadata；仍有 page-only/语义残余）：R4（1 项）
 - 显著改善、未完全闭环：R2（1 项）
 - 部分修复：R3（1 项）
-- 部分改善、未达标：R1（1 项）
+- 已达标（本机 3/3，残余长尾）：R1（1 项）
 
 ## 原则
 
 - “已测量”不等于“已修复”；“改了口径”也不等于“性能达标”。
 - R2/R3/R4 不得通过改 gold、放宽匹配或删除 QA 来“解决”；Phase 6 未改 `eval/qa.jsonl`，dataset hash 仍为 `1487e...`。
-- R1 若要硬保证 p95<800ms，需要缓存/限流/隔离 embedding；Phase 6 的 10 并发复测 p95=1780.18ms，验收方复跑 2243.04ms，不能宣称达标。
+- R1 的 Phase 6b 达标指三次独立 60s 的 p95<800ms（445.29/500.12/468.59ms）且 errors=0；不是对所有机器/所有负载的硬保证。正式基准的 cacheHits=0/8004，缓存未被用来伪造唯一 query 数字；重复 query 缓存实验（99/100 命中）单独记录，不能当作并发基准。
+- R1 仍有残余：p99 554.84/692.77/588.81ms，run3 单次 max=4405ms；不得把 p95 达标说成“所有长尾都已消除”。
 - R2 的 0.7429 不是 clause 级语义正确率：enterprise 仍是 pageRange gold，fixed Q18 top-1 为错误条款却被计 hit；报告已标注。

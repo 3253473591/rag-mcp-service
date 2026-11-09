@@ -1,0 +1,483 @@
+{
+    "phase":  "6b",
+    "timestamp":  "2026-11-09T20:07:51.7576788+08:00",
+    "codeCommit":  "92109d1ab8a046c9145386d8d8efa266b4f12a16",
+    "branch":  "phase6b",
+    "method":  "Three independent 60s runs; each run used a freshly started JVM (empty query cache and reset metrics), 10 concurrent PowerShell workers, 10k synthetic chunks per strategy (plus the real 248 chunks), 50 warm-up requests excluded from the measured window, chunkStrategy=heading, searchStrategy=hybrid, topK=5. Results are NOT cherry-picked; all three runs are included.",
+    "config":  {
+                   "concurrency":  10,
+                   "durationSeconds":  60,
+                   "chunksPerStrategy":  10000,
+                   "totalSyntheticChunks":  20000,
+                   "warmupRequests":  50,
+                   "chunkStrategy":  "heading",
+                   "searchStrategy":  "hybrid",
+                   "queryBatchSize":  8,
+                   "queryBatchWindowMs":  5,
+                   "queryCacheSize":  1000,
+                   "queryCacheTtlSeconds":  300,
+                   "queryQueueCapacity":  200,
+                   "queryMaxConcurrentBatches":  3,
+                   "queryWaitTimeoutMs":  130000,
+                   "embeddingModel":  "bge-m3",
+                   "embeddingDimension":  1024,
+                   "pgvectorVersion":  "0.8.7"
+               },
+    "runs":  [
+                 {
+                     "run":  1,
+                     "summary":  {
+                                     "timestamp":  "2026-11-09T20:02:52.5831844+08:00",
+                                     "gitCommit":  "92109d1ab8a046c9145386d8d8efa266b4f12a16",
+                                     "pgvectorVersion":  "0.8.7",
+                                     "baseUrl":  "http://127.0.0.1:8080",
+                                     "concurrency":  10,
+                                     "durationSeconds":  60,
+                                     "chunkStrategy":  "heading",
+                                     "searchStrategy":  "hybrid",
+                                     "warmupRequests":  50,
+                                     "chunksPerStrategy":  10000,
+                                     "totalSyntheticChunks":  20000,
+                                     "requests":  2724,
+                                     "successes":  2724,
+                                     "errors":  0,
+                                     "errorRate":  0,
+                                     "clientP50Ms":  201.46,
+                                     "clientP95Ms":  445.29,
+                                     "clientP99Ms":  554.84,
+                                     "clientMaxMs":  776.51,
+                                     "serverP50Ms":  196,
+                                     "serverP95Ms":  438,
+                                     "serverP99Ms":  541,
+                                     "serverMaxMs":  666,
+                                     "avgResults":  5,
+                                     "minResults":  5,
+                                     "maxResults":  5,
+                                     "embeddingMetrics":  {
+                                                              "requests":  2724,
+                                                              "cacheHits":  0,
+                                                              "cacheMisses":  2724,
+                                                              "cacheHitRate":  0,
+                                                              "batches":  1577,
+                                                              "avgBatchSize":  1.727,
+                                                              "failures":  0,
+                                                              "rejected":  0,
+                                                              "waitTimeouts":  0
+                                                          },
+                                     "workers":  [
+                                                     {
+                                                         "worker":  1,
+                                                         "requests":  275,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  442.71,
+                                                         "serverP95Ms":  437,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  10,
+                                                         "requests":  279,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  433.08,
+                                                         "serverP95Ms":  424,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  2,
+                                                         "requests":  271,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  439.71,
+                                                         "serverP95Ms":  436,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  3,
+                                                         "requests":  269,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  451.82,
+                                                         "serverP95Ms":  447,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  4,
+                                                         "requests":  269,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  462.92,
+                                                         "serverP95Ms":  458,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  5,
+                                                         "requests":  266,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  461.44,
+                                                         "serverP95Ms":  451,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  6,
+                                                         "requests":  264,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  423.73,
+                                                         "serverP95Ms":  416,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  7,
+                                                         "requests":  262,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  448.69,
+                                                         "serverP95Ms":  445,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  8,
+                                                         "requests":  270,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  445.29,
+                                                         "serverP95Ms":  439,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  9,
+                                                         "requests":  299,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  432.82,
+                                                         "serverP95Ms":  418,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     }
+                                                 ],
+                                     "note":  "10 concurrent PowerShell worker processes, each with a reusable HttpClient; errors exclude non-2xx and exceptions. clientMs is end-to-end; serverMs is app tookMs (query embedding + SQL + RRF). Synthetic vectors are cycled from the real chunk pool; this measures latency, not retrieval quality."
+                                 }
+                 },
+                 {
+                     "run":  2,
+                     "summary":  {
+                                     "timestamp":  "2026-11-09T20:05:18.8595402+08:00",
+                                     "gitCommit":  "92109d1ab8a046c9145386d8d8efa266b4f12a16",
+                                     "pgvectorVersion":  "0.8.7",
+                                     "baseUrl":  "http://127.0.0.1:8080",
+                                     "concurrency":  10,
+                                     "durationSeconds":  60,
+                                     "chunkStrategy":  "heading",
+                                     "searchStrategy":  "hybrid",
+                                     "warmupRequests":  50,
+                                     "chunksPerStrategy":  10000,
+                                     "totalSyntheticChunks":  20000,
+                                     "requests":  2565,
+                                     "successes":  2565,
+                                     "errors":  0,
+                                     "errorRate":  0,
+                                     "clientP50Ms":  194.21,
+                                     "clientP95Ms":  500.12,
+                                     "clientP99Ms":  692.77,
+                                     "clientMaxMs":  1259.72,
+                                     "serverP50Ms":  189,
+                                     "serverP95Ms":  488,
+                                     "serverP99Ms":  663,
+                                     "serverMaxMs":  942,
+                                     "avgResults":  5,
+                                     "minResults":  5,
+                                     "maxResults":  5,
+                                     "embeddingMetrics":  {
+                                                              "requests":  2565,
+                                                              "cacheHits":  0,
+                                                              "cacheMisses":  2565,
+                                                              "cacheHitRate":  0,
+                                                              "batches":  1564,
+                                                              "avgBatchSize":  1.64,
+                                                              "failures":  0,
+                                                              "rejected":  0,
+                                                              "waitTimeouts":  0
+                                                          },
+                                     "workers":  [
+                                                     {
+                                                         "worker":  1,
+                                                         "requests":  252,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  513.97,
+                                                         "serverP95Ms":  510,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  10,
+                                                         "requests":  272,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  503.02,
+                                                         "serverP95Ms":  495,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  2,
+                                                         "requests":  249,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  500.95,
+                                                         "serverP95Ms":  493,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  3,
+                                                         "requests":  244,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  509.58,
+                                                         "serverP95Ms":  494,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  4,
+                                                         "requests":  243,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  478.91,
+                                                         "serverP95Ms":  470,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  5,
+                                                         "requests":  239,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  518.92,
+                                                         "serverP95Ms":  513,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  6,
+                                                         "requests":  241,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  511.24,
+                                                         "serverP95Ms":  501,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  7,
+                                                         "requests":  241,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  513.13,
+                                                         "serverP95Ms":  498,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  8,
+                                                         "requests":  282,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  470.79,
+                                                         "serverP95Ms":  455,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  9,
+                                                         "requests":  302,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  474.5,
+                                                         "serverP95Ms":  466,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     }
+                                                 ],
+                                     "note":  "10 concurrent PowerShell worker processes, each with a reusable HttpClient; errors exclude non-2xx and exceptions. clientMs is end-to-end; serverMs is app tookMs (query embedding + SQL + RRF). Synthetic vectors are cycled from the real chunk pool; this measures latency, not retrieval quality."
+                                 }
+                 },
+                 {
+                     "run":  3,
+                     "summary":  {
+                                     "timestamp":  "2026-11-09T20:07:25.8033273+08:00",
+                                     "gitCommit":  "92109d1ab8a046c9145386d8d8efa266b4f12a16",
+                                     "pgvectorVersion":  "0.8.7",
+                                     "baseUrl":  "http://127.0.0.1:8080",
+                                     "concurrency":  10,
+                                     "durationSeconds":  60,
+                                     "chunkStrategy":  "heading",
+                                     "searchStrategy":  "hybrid",
+                                     "warmupRequests":  50,
+                                     "chunksPerStrategy":  10000,
+                                     "totalSyntheticChunks":  20000,
+                                     "requests":  2715,
+                                     "successes":  2715,
+                                     "errors":  0,
+                                     "errorRate":  0,
+                                     "clientP50Ms":  175,
+                                     "clientP95Ms":  468.59,
+                                     "clientP99Ms":  588.81,
+                                     "clientMaxMs":  4405.15,
+                                     "serverP50Ms":  169,
+                                     "serverP95Ms":  458,
+                                     "serverP99Ms":  568,
+                                     "serverMaxMs":  4400,
+                                     "avgResults":  5,
+                                     "minResults":  5,
+                                     "maxResults":  5,
+                                     "embeddingMetrics":  {
+                                                              "requests":  2715,
+                                                              "cacheHits":  0,
+                                                              "cacheMisses":  2715,
+                                                              "cacheHitRate":  0,
+                                                              "batches":  1500,
+                                                              "avgBatchSize":  1.81,
+                                                              "failures":  0,
+                                                              "rejected":  0,
+                                                              "waitTimeouts":  0
+                                                          },
+                                     "workers":  [
+                                                     {
+                                                         "worker":  1,
+                                                         "requests":  284,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  466.65,
+                                                         "serverP95Ms":  459,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  10,
+                                                         "requests":  260,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  468.85,
+                                                         "serverP95Ms":  460,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  2,
+                                                         "requests":  283,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  435.2,
+                                                         "serverP95Ms":  424,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  3,
+                                                         "requests":  282,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  460.93,
+                                                         "serverP95Ms":  453,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  4,
+                                                         "requests":  278,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  444.98,
+                                                         "serverP95Ms":  436,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  5,
+                                                         "requests":  270,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  477.23,
+                                                         "serverP95Ms":  457,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  6,
+                                                         "requests":  269,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  471.35,
+                                                         "serverP95Ms":  459,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  7,
+                                                         "requests":  263,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  486.5,
+                                                         "serverP95Ms":  478,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  8,
+                                                         "requests":  251,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  466.76,
+                                                         "serverP95Ms":  454,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     },
+                                                     {
+                                                         "worker":  9,
+                                                         "requests":  275,
+                                                         "errors":  0,
+                                                         "clientP95Ms":  464.07,
+                                                         "serverP95Ms":  437,
+                                                         "messages":  [
+
+                                                                      ]
+                                                     }
+                                                 ],
+                                     "note":  "10 concurrent PowerShell worker processes, each with a reusable HttpClient; errors exclude non-2xx and exceptions. clientMs is end-to-end; serverMs is app tookMs (query embedding + SQL + RRF). Synthetic vectors are cycled from the real chunk pool; this measures latency, not retrieval quality."
+                                 }
+                 }
+             ],
+    "summary":  {
+                    "runCount":  3,
+                    "totalRequests":  8004,
+                    "totalErrors":  0,
+                    "errorRate":  0,
+                    "minP50Ms":  175,
+                    "maxP95Ms":  500.12,
+                    "minP95Ms":  445.29,
+                    "maxP99Ms":  692.77,
+                    "allP95Below800":  true,
+                    "allErrorRatesBelow1Pct":  true,
+                    "cacheHits":  0,
+                    "cacheMisses":  8004,
+                    "cacheHitRate":  0,
+                    "totalBatches":  4641,
+                    "overallAvgBatchSize":  1.725,
+                    "phase6P95Ms":  1780.18,
+                    "phase6AcceptanceP95Ms":  2243.04
+                },
+    "note":  "Per-run cacheHits is 0 because perf-concurrency.ps1 uses a unique query for every request and each run starts with a fresh JVM. The cache therefore cannot make this benchmark look faster. See phase6b-cache-experiment.json for the repeated-query experiment where it does hit."
+}

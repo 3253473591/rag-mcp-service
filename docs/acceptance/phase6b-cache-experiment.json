@@ -1,0 +1,20 @@
+{
+    "timestamp":  "2026-11-09T20:08:25.7836025+08:00",
+    "gitCommit":  "92109d1ab8a046c9145386d8d8efa266b4f12a16",
+    "baseUrl":  "http://127.0.0.1:8080",
+    "query":  "query cache experiment 2026-11-09T20:08:17.5832426+08:00",
+    "iterations":  100,
+    "note":  "Repeated identical query; first call is a miss, the rest should hit the bounded query cache. Not evidence for the unique-query 10-concurrency benchmark.",
+    "requests":  100,
+    "cacheHits":  99,
+    "cacheMisses":  1,
+    "cacheHitRate":  0.99,
+    "embeddingBatches":  1,
+    "errors":  0,
+    "clientP50Ms":  62.4,
+    "clientP95Ms":  107.7,
+    "clientP99Ms":  115.29,
+    "serverP50Ms":  49,
+    "serverP95Ms":  86,
+    "serverP99Ms":  93
+}

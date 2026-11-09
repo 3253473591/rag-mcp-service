@@ -3,6 +3,7 @@
 企业知识库 RAG 检索服务（Java/Spring Boot + PostgreSQL/pgvector + MCP + 治理层）。
 
 - 当前状态：**Phase 6（R1-R4 收尾）已验收（P0，带 residual）**，已合并 `main`；Phase 1/2/3/4/5 已验收。
+- Phase 6b（R1，`phase6b` 分支，待验收方决定合并）：检索 query 批处理（8 条 / 5ms 窗口）+ 最多 3 个并发 batch + 有界队列/缓存；3 次独立 60s、10 并发 p95=**445.29 / 500.12 / 468.59ms**，errors=0，cacheHits=0/8004（未用缓存伪造基准）；40 QA 指标与 Phase 6 一致。详见 [phase6b-report](docs/acceptance/phase6b-report.md)。
 - Phase 6 交付：中文“第X条”条款 heading 与 `clause_id`；PDF 双栏阅读顺序 + heading 候选清洗；`page_end` 页面跨度 + fixed chunk 主导 section 元数据 + eval pageRange 相交匹配；10 并发残余风险如实复测。详见 [phase6-report](docs/acceptance/phase6-report.md)。
 - Phase 5 交付：生产 `spring-ai-starter-mcp-server-webmvc`、Streamable HTTP `/mcp`、Bearer 401、两个低层 tool（`search_knowledge` / `get_document`）、mandate（存在/过期/工具/topK/docIds/文档范围）、`mcp_audit_log`（query 只存哈希）、未知 tool `-32601`、坏参数 `-32602`、内部错误 `-32603`。真实 MCP Java client 集成测试覆盖 initialize/tools/list/tools/call；默认协商协议版本实测为 **2025-11-25**，2025-06-18 客户端请求也按 2025-06-18 回显。
 - Phase 4 交付（已验收）：`POST/GET /api/v1/work-items`、带 `X-Admin-Token` 的 approve/deny；审批只能缩小工具/文档/topK 范围；显式 `allowedDocIds` 语义；重复审批 409；管理员 token 常量时间比较、未配置时 401；approve 事务写 `work_item` + `mandate`。
@@ -287,6 +288,8 @@ Phase 4 **不写** `mcp_audit_log`、不做 MCP 端点/mandate 强制校验/过�
 
 - 抽象 `EmbeddingService`：生产实现是 `SpringAiEmbeddingService`，委托 Spring AI `EmbeddingModel`（Ollama `bge-m3`）；测试使用确定性 fake（1024 维），CI 不依赖 Ollama。
 - 批量 32（配置 `app.embedding.batch-size`，上限 32）；失败重试 2 次（500ms/1000ms）；单批超时 120s → 504；不可用/维度错误/零向量 → 503。
+- Phase 6b：检索 query 走独立的 `QueryEmbeddingService`（`QueryEmbeddingBatcher`），并发 query 在 5ms 窗口内合并（默认最多 8 条/次），最多 3 个 batch 同时在 Ollama 上执行，队列满/已关闭直接 503；失败/超时按 503/504 传播。文档入库仍走 `EmbeddingService`，批量 32 的语义不变。
+- Phase 6b query 缓存：默认 1000 条、TTL 300s，key = model + NFKC 规范化 query；只缓存成功、非零、维度正确的向量，读写都做 defensive copy；`query-cache-size=0` 或 TTL=0 关闭。唯一 query 基准不会命中（正式 3 次 0/8004）。
 - 校验维度 1024、拒绝零向量；`kb_document.embedding_model='bge-m3'`；两套 chunk 都写向量。
 
 ## 版本语义（Phase 1 部分）
@@ -306,7 +309,7 @@ mvn test          # 单元 + Testcontainers 集成；默认不跑真实 Ollama
 - 集成测试用 Testcontainers `pgvector/pgvector:pg16` + `@TestConfiguration` fake `EmbeddingService`，不依赖本机 Ollama。
 - Phase 4 治理测试 33 个：`MandatePolicyTest` 13（缩小规则/显式文档语义/Phase 5 只读校验）、`AdminAuthTest` 3（常量时间比较/fail closed）、`GovernanceIntegrationTest` 16（T-GOV-01~07 + 边界 + 事务回滚）、`GovernanceAdminUnconfiguredIntegrationTest` 1（未配置 token 仍启动且 401）。
 - Phase 5 MCP 测试 22 个：`McpAuthTest` 4（Bearer 解析/常量时间/fingerprint）、`McpToolServiceTest` 3（业务错误/-32602/-32603 不泄露）、`McpIntegrationTest` 14（真实 Streamable HTTP initialize/tools/list/tools/call + mandate 矩阵 + audit + 未知 tool/坏参数）、`McpUnconfiguredTokenIntegrationTest` 1（token 未配置仍启动但 401）。
-- 全量 `mvn test`：**188 tests，0 failures/errors，1 skipped**（手动真实 Ollama smoke）。
+- 全量 `mvn test`：**222 tests，0 failures/errors，1 skipped**（手动真实 Ollama smoke）。Phase 6b 新增 `QueryEmbeddingBatcherTest`（10）与 `QueryEmbeddingCacheTest`（5），覆盖合并调用、缓存命中/TTL/容量、失败/超时传播、队列满、关闭不挂死。
 - 格式 fixture 位于 `src/test/resources/fixtures/`（验收 kit 提供，`FormatFixturesTest` 守护，可直接用于 Gate 2 上传）；集成测试的 PDF/DOCX 仍在运行时用 PDFBox/POI 生成，`docs/samples/*.pdf` 不提交。
 - 真实 Ollama smoke（手动，条件执行，默认跳过）：
 
@@ -361,7 +364,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\perf-concurren
 - 2026-11-09 最终 3 轮 p95/p99：fixed 42.72/97.19、64.62/91.87、120.88/136.88ms；heading 33.28/39.51、121.71/131.54、88.21/93.50ms；全部 <250ms/<800ms/<1500ms，0 errors。详见 [phase3-perf.json](docs/acceptance/phase3-perf.json)。
 - **关键修复**：原先 `kb_chunk JOIN kb_document ORDER BY embedding <=> ?` 被 PostgreSQL 规划成 nested loop + 全量 top-N sort，HNSW 实际没被使用；10k 时串行尚可、10 并发会打满 DB。现在先在 SQL 层解析 eligible docIds，再在 `kb_chunk` 上走 HNSW（`document_id IN (...) AND chunk_strategy=?`），最后只为候选取文档元数据；`EXPLAIN` 走 `idx_kb_chunk_embedding`。embedding 并发池也从固定 2 改为可配置 `app.embedding.max-concurrent-calls=10`。
 - 10 并发 60s Phase 3 实测四次：requests 2076/2851/1803/2166，errors 0（错误率 0%），p50 157/136/130/119ms，p95 **808.59 / 552.07 / 1129.14 / 826.31ms**，p99 1233.82/991.34/4679.77/2118.88ms。**错误率达标，p95 未稳定 <800ms**；长尾与直接对 Ollama `/api/embed` 做 10 并发的 p99≈3.0s 同量级，GC 最大 pause 45ms、Hikari 无失败，判定为 embedding 排队/长尾而非 SQL/GC。详见 [phase3-concurrency.json](docs/acceptance/phase3-concurrency.json) 与 [phase3-report.md](docs/acceptance/phase3-report.md) 第 5 节。
-- 10 并发 60s Phase 6 复测一次：requests=1057，errors=0，p50=262.12ms，p95=**1780.18ms**，p99=5050.61ms，max=7935.39ms。**仍未达标，且比 Phase 3 更差**；本轮没有加 cache 伪造结果。证据：[phase6-concurrency.json](docs/acceptance/phase6-concurrency.json)。
+- 10 并发 60s Phase 6 复测一次：requests=1057，errors=0，p50=262.12ms，p95=**1780.18ms**，p99=5050.61ms，max=7935.39ms。Phase 6 未达标；本轮没有加 cache 伪造结果。证据：[phase6-concurrency.json](docs/acceptance/phase6-concurrency.json)。
+- 10 并发 60s Phase 6b 三次（每次重启应用，空缓存、指标归零；10k/策略、50 warm-up、heading/hybrid）：requests=2724/2565/2715，errors=0，p50=201.46/194.21/175.00ms，p95=**445.29/500.12/468.59ms**，p99=554.84/692.77/588.81ms，max=776.51/1259.72/4405.15ms，cacheHits=0/8004。三次全部 p95<800ms；run3 仍有单次 4.4s 长尾。证据：[phase6b-concurrency.json](docs/acceptance/phase6b-concurrency.json)，报告：[phase6b-report.md](docs/acceptance/phase6b-report.md)。
+- Phase 6b 的 query 缓存对唯一 query 基准没有帮助（实测 0 命中）；单独用 100 次同一 query 验证缓存有效：99 hits / 1 miss、1 次 embedding、errors=0（[phase6b-cache-experiment.json](docs/acceptance/phase6b-cache-experiment.json)）。`perf-concurrency.ps1` 现在会读取 `rag.query.embedding.*` 指标并写入报告的 `embeddingMetrics`。
 - `hnsw-iterative-scan=false` 实测没有收益（heading p95=473ms、p99=1032ms，默认 true 为 33~122/39~137ms），且存在 under-return 风险，保持默认 true。
 - 口径：10k 是**每套策略**，两套合计 20k；入库 30s 是**每套策略**，两套合计 <60s。详见 [docs/05-non-functional.md](docs/05-non-functional.md) 2.1/2.2。
 - synthetic chunks 从真实 chunk 向量池循环取样，只衡量 SQL/HTTP/RRF/embedding 延迟，不代表检索质量；本机数字不承诺跨机复现。
@@ -435,7 +440,7 @@ npx @modelcontextprotocol/inspector
 5. **fixed chunk 的 clause/page 元数据是启发式**：Phase 6 起 fixed chunk 会继承覆盖区间内主导 section 的 `clause_id`/`clause_path`，并记录 `page_no..page_end`；但一个 600-token 窗口跨多个 heading 时只有一个 section 能胜出，fixed hit@5=0.7429 仍低于 heading 0.9429。未改 gold。
 6. **PDF 双栏只修到 clausePath/主正文顺序**：Phase 6 按 gutter 重排左右栏并清洗 heading 候选，`90 mmHg`/`3 d`/`20 g` 不再成为 clausePath；表格/流程图仍可能跨栏交错，**没有**还原全文顺序。Q05 等少数题仍可能取到错误 section；不宣称 R3 全文已修。
 7. **企业内控 heading 有 clause_id，但 QA gold 仍是 pageRange**：企业 heading 48/49 有 `clause_id`（唯一 NULL 是封面标题），但 11 条 enterprise QA 没有逐条升级为 clauseId，dataset hash 保持 `1487e...`；Q18 本轮 top-1 是“第三条（目标）”，但 page-only 匹配仍可能命中同页错误条款。这是 page-only gold 的已知粗粒度，不是 R4 未修。
-8. **10 并发 p95 未达标**：Phase 6 一次 60s 复测 requests=1057、errors=0、p50=262.12ms、p95=1780.18ms、p99=5050.61ms，差于 Phase 3 的 A/B/C/D（808/552/1129/826ms）。根因仍是 Ollama embedding 排队/长尾；query 缓存对 `perf-concurrency.ps1` 的唯一 query 基准无效，本轮没有加缓存伪造 p95。要硬保证需专用推理/限流隔离/更多预热。
+8. **10 并发 p95**：Phase 6 的一次 60s 复测 p95=1780.18ms（验收方 2243.04ms）未达标。Phase 6b 增加检索 query 批处理/有界并发/缓存后，本机三次独立 60s p95=445.29/500.12/468.59ms，errors=0，达到 <800ms；但 p99=554.84/692.77/588.81ms、run3 max=4405.15ms，单次长尾仍存在，数字依赖本机 Ollama/GPU。正式基准 cacheHits=0/8004；重复 query 的 99/100 命中是独立实验，不能用来宣称并发基准更快。
 9. **性能口径**：10k/策略是本地 Docker + Ollama 实测；不承诺在其它机器复现同一数字，但脚本可复现测量方法。p99 受 PostgreSQL checkpoint/autovacuum 与 Ollama 影响，报告已记录。
 10. **Phase 3/4 范围（历史）**：Phase 3 未包含 WorkItem/Approval/Mandate、生产 MCP、前端、聊天、agent 编排、评测 UI；Phase 4 已补治理 API； Phase 5 已补生产 MCP、mandate 强制校验与审计（本分支，未合并 main）。
 11. **`docs/02-api-contract.md` 2.5 旧措辞**：该节写“`requestedDocIds` 为空/不传表示申请全部文档”，与 Phase 4 任务书及 [docs/03-data-model.md](docs/03-data-model.md) 的 `NULL=全部，[]=无` 冲突。本实现按任务书 + data model，`null`=全部、`[]`=无，并用集成测试覆盖；`docs/02` 未改动，留给验收方决定是否同步契约文字。
@@ -463,7 +468,7 @@ src/main/java/com/lqx/ragmcp/
   mcp/          # Phase 5 MCP：Bearer filter、低层 tool 注册、mandate tool 服务、audit
 src/main/resources/db/migration/V1__init.sql
 src/test/java/  # 单元 + Testcontainers 集成 + 条件真实 Ollama smoke + MCP 真实 HTTP client
-scripts/        # accept-phase1.ps1 / eval.ps1 / validate-gold.ps1 / perf.ps1 / perf-concurrency.ps1 / smoke-phase2.ps1
+scripts/        # accept-phase1.ps1 / eval.ps1 / validate-gold.ps1 / perf.ps1 / perf-concurrency.ps1 / perf-query-cache.ps1 / smoke-phase2.ps1
 eval/           # qa.jsonl + qa.smoke.jsonl + report.md/json
 docs/acceptance/phase2-report.md
 docs/acceptance/phase3-report.md
@@ -471,5 +476,7 @@ docs/acceptance/phase3-perf.json
 docs/acceptance/phase3-concurrency.json
 docs/acceptance/phase4-report.md
 docs/acceptance/phase5-report.md
+docs/acceptance/phase6-report.md
+docs/acceptance/phase6b-report.md
 ```
 
