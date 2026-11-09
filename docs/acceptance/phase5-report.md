@@ -1,7 +1,7 @@
 # Phase 5 验收报告：生产 MCP（/mcp + Bearer + mandate + audit）
 
 - 日期：2026-11-09
-- 分支：`phase5`（基于 `main` @ `032f50f`；**未合并 main**）
+- 分支：`phase5`（基于 `main` @ `032f50f`；验收后合并 `main`）
 - 实现 commit：`cfbae8a`（`feat(phase5): production MCP endpoint with bearer, mandate and audit`）
 - 结论：P0 已实现；`mvn test` **188 tests / 0 failures / 0 errors / 1 skipped**（skip 为手动真实 Ollama smoke，不是被禁用的失败测试）。
 - 范围：生产 `spring-ai-starter-mcp-server-webmvc` + Streamable HTTP `/mcp`；Bearer 鉴权；两个低层 tool（`search_knowledge` / `get_document`）；mandate 强制校验；`mcp_audit_log` 审计；MCP 协议/错误层测试。
@@ -308,7 +308,7 @@ npx @modelcontextprotocol/inspector
 
 1. **SDK 默认协议版本是 2025-11-25**：`docs/12` 原写“v1 目标 2025-06-18”。实测 2025-06-18 客户端可正常协商，默认 SDK client 请求 2025-11-25；README 记录实际版本，不承诺 2026-07-28。
 2. **未知 tool 的 JSON-RPC code**：MCP SDK 0.18.3 内部返回 `-32602`；本服务按契约在 HTTP gate 返回 `-32601`。已知 tool 仍走 SDK 管线。
-3. **参数错误的层级冲突**：`docs/02` 3.2 写“参数错误返回 tool error `ERR-VALIDATION`”，而 `docs/02` 3.4 / `docs/12` 7.1 与 Phase 5 任务书要求坏参数走 JSON-RPC `-32602`。本期按任务书 + `docs/12` 7.1 采用 `-32602`；业务错误（mandate/文档不存在等）仍是 tool error。未改 `docs/02` 的契约语义，留给验收方决定是否统一文字。
+3. **参数错误的层级冲突已统一**：`docs/02` 3.2 原写“参数错误返回 tool error `ERR-VALIDATION`”，而 `docs/02` 3.4 / `docs/12` 7.1 要求坏参数走 JSON-RPC `-32602`。本期按 `-32602` 实现；**验收方已同步修改 docs/02 3.2**：schema/类型错误 `-32602`，业务错误才是 tool error `ERR-*`。
 4. **topK > 10 选择截断输出**：`topK` 输入仍可到 20（受 `maxTopK` 限制），检索后截断到 10 条；没有把输入上限改成 10。
 5. **allowedDocIds=[] 选择空结果**：返回成功空结果而不是 tool error；不调用检索，不泄露。
 6. **mandateId 视为 bearer secret**：v1 不绑定调用方身份；拿到 mandateId 的人可重放（docs/08 威胁模型已声明）。不做多租户/多 session 隔离。
@@ -350,3 +350,31 @@ npx @modelcontextprotocol/inspector
 ```
 
 未提交真实 token / PII / 样例 PDF；`.env` 不提交。
+
+---
+
+## 14. 验收方独立复核（2026-11-09）
+
+| 项 | 结果 |
+|---|---|
+| `mvn clean test` | **188 / 0 / 0 / 1**，BUILD SUCCESS；1 skipped 为条件真实 Ollama smoke。首次未 clean 的 189 是已删除 Phase 2 spike 测试的旧 surefire 报告残留，clean 后确认 188。 |
+| 无/错 Bearer | 均 HTTP **401** `ERR-MCP_UNAUTHORIZED`，body 为统一错误体 |
+| initialize | 显式请求 `2025-06-18` 时服务端回显 `2025-06-18`；返回 `Mcp-Session-Id` |
+| tools/list | 恰好两个：`search_knowledge`、`get_document`；capabilities 无 resources/prompts/completions |
+| 合法 search | `isError=false`，返回 5 条，全部 `docId=e8c5...`（mandate 只允许该文档） |
+| 无 mandate | HTTP 200 + tool error `isError=true` `ERR-MANDATE_REQUIRED`（不是 403） |
+| 越权 docIds | tool error `ERR-MANDATE_SCOPE`，不返回数据 |
+| allowedDocIds=[] | 成功空结果 `{"results":[]}`，未调用检索、不泄露 |
+| get_document | 返回元数据（不含全文）；范围外 → `ERR-MANDATE_SCOPE` |
+| 未知 tool | JSON-RPC **-32601**；坏参数 topK=0 → **-32602** |
+| 审计 | 8 行（成功/失败都有）：work_item_id/mandate_id/fingerprint/args_hash/status/error_code/latency_ms；fingerprint=`359b051c2dfa`（token SHA-256 前 12）；无 token/query 明文 |
+| 日志 | app 日志未出现测试 token |
+| 结论 | **P0 通过**；Phase 5 可合并 `main` |
+
+### 14.1 残余风险
+
+1. **SDK 默认协商 2025-11-25**：手动显式请求 2025-06-18 可正常使用；README/报告记录实际版本，不承诺 2026-07-28。
+2. `topK>10` 检索后截断；`allowedDocIds=[]` 返回空结果而非 tool error；两者均已记录。
+3. `mandateId` 是 bearer secret，不绑定调用方身份；重放风险在 docs/08 威胁模型内。
+4. Inspector 未手工跑；真实 MCP Java client 已覆盖 initialize/tools/list/tools/call。
+5. R1/R2/R3/R4 仍留 Phase 6，不属于 Phase 5 范围。

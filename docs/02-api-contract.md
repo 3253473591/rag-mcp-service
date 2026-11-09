@@ -564,7 +564,7 @@ Header：`X-Admin-Token: <ADMIN_TOKEN>`
 - `mandateId` 必须存在、未过期、允许 `search_knowledge`；`topK` ≤ mandate.maxTopK；`docIds` 必须是 mandate.allowedDocIds 的子集。
 - 默认只返回 ACTIVE；`asOf` 缺省今天；`includeSuperseded=true` 才允许旧版（只要求 `effectiveFrom <= asOf`，忽略 `effectiveTo`）。
 - `detectConflicts` 为 P1 可选；P0 阶段忽略该参数并返回 `conflicts: []`。
-- 参数错误返回 tool error（`isError: true`），内容为 `{"code":"ERR-VALIDATION","message":"..."}`。
+- 参数不符合 schema/类型错误返回 JSON-RPC `-32602`；业务错误（mandate/文档不存在等）返回 tool error（`isError: true`）+ `{"code":"ERR-...","message":"..."}`。
 - 越权/过期返回 `ERR-MANDATE_SCOPE` / `ERR-MANDATE_EXPIRED`。
 
 ### 3.3 Tool：`get_document`
