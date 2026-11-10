@@ -6,6 +6,7 @@ import com.lqx.ragmcp.api.dto.SearchResponse;
 import com.lqx.ragmcp.api.dto.SearchResultItem;
 import com.lqx.ragmcp.api.error.ApiException;
 import com.lqx.ragmcp.config.AbstainProperties;
+import com.lqx.ragmcp.config.RerankProperties;
 import com.lqx.ragmcp.config.SearchProperties;
 import com.lqx.ragmcp.embedding.QueryEmbeddingService;
 import org.slf4j.Logger;
@@ -13,7 +14,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * POST /api/v1/search orchestration: validate -> query embedding -> vector/keyword candidates
@@ -71,13 +75,39 @@ public class SearchService {
         }
 
         String normalizedQuery = SectionTitleMatcher.normalizeQuestion(query.query());
-        List<RrfFusion.ScoredCandidate> fused =
-                RrfFusion.fuse(vectorCandidates, keywordCandidates, query.topK(),
-                        candidate -> SectionTitleMatcher.boost(normalizedQuery, candidate.clausePath()),
-                        1.0d, properties.getKeywordWeight());
+        RerankProperties rerankConfig = properties.getRerank();
+        boolean rerankEnabled = rerankConfig.isEnabled();
+        // The rerank window is never smaller than topK: every returned result must be ordered by the
+        // score the API documents. When rerank is off this collapses to the Phase 8 behaviour.
+        int rerankWindow = Math.max(query.topK(), rerankConfig.getTopN());
+        int fusionLimit = rerankEnabled ? rerankWindow : query.topK();
+        // With rerank on, the title signal is applied inside the rerank score. Applying it to the
+        // fusion ordering as well would count the same evidence twice and make "all weights zero"
+        // differ from the plain RRF order.
+        List<RrfFusion.ScoredCandidate> fused = RrfFusion.fuse(
+                vectorCandidates, keywordCandidates, fusionLimit,
+                rerankEnabled
+                        ? candidate -> 0.0d
+                        : candidate -> SectionTitleMatcher.boost(normalizedQuery, candidate.clausePath()),
+                1.0d, properties.getKeywordWeight());
 
-        List<SearchResultItem> mapped = fused.stream()
-                .map(scored -> toResponse(scored.candidate(), scored.score()))
+        final List<CandidateReranker.Result> ordered;
+        if (rerankEnabled) {
+            List<String> queryTerms = KeywordTerms.extract(
+                    KeywordEscaper.keywordText(query.query(), properties.getKeywordMaxChars()),
+                    properties.getKeywordMaxTerms());
+            ordered = CandidateReranker.rerank(fused, cosineByChunkId(vectorCandidates),
+                    queryTerms, normalizedQuery, rerankConfig, rerankWindow);
+        } else {
+            ordered = fused.stream()
+                    .map(scored -> new CandidateReranker.Result(
+                            scored.candidate(), scored.score(), scored.score()))
+                    .toList();
+        }
+
+        List<SearchResultItem> mapped = ordered.stream()
+                .limit(query.topK())
+                .map(result -> toResponse(result, rerankEnabled ? result.rerankScore() : null))
                 .toList();
 
         // The decision is made only here, from the vector route's cosine scores. It is not exposed
@@ -98,10 +128,10 @@ public class SearchService {
         }
 
         long tookMs = Math.max(0L, (System.nanoTime() - startedAt) / 1_000_000L);
-        log.info("search completed strategy={} chunkStrategy={} mode={} topK={} results={} "
+        log.info("search completed strategy={} chunkStrategy={} mode={} topK={} rerank={} results={} "
                         + "abstained={} reason={} topScore={} candidateCount={} tookMs={}",
                 query.strategy().apiValue(), query.chunkStrategy().dbValue(), query.versionMode(),
-                query.topK(), results.size(), decision.abstained(), decision.reason(),
+                query.topK(), rerankEnabled, results.size(), decision.abstained(), decision.reason(),
                 decision.topScore(), decision.candidateCount(), tookMs);
 
         return new SearchResponse(query.query(), query.asOf(),
@@ -155,7 +185,26 @@ public class SearchService {
         return vector;
     }
 
-    private static SearchResultItem toResponse(SearchCandidate candidate, double score) {
+    /**
+     * Cosine similarity is only defined for candidates returned by the vector route. A fused
+     * candidate that only the keyword route found has no semantic evidence, so it is simply
+     * absent from this map (the reranker then contributes {@code 0} for it).
+     */
+    private static Map<UUID, Double> cosineByChunkId(List<SearchCandidate> vectorCandidates) {
+        if (vectorCandidates == null || vectorCandidates.isEmpty()) {
+            return Map.of();
+        }
+        Map<UUID, Double> scores = new HashMap<>(vectorCandidates.size());
+        for (SearchCandidate candidate : vectorCandidates) {
+            if (candidate != null && candidate.chunkId() != null) {
+                scores.put(candidate.chunkId(), candidate.routeScore());
+            }
+        }
+        return scores;
+    }
+
+    private static SearchResultItem toResponse(CandidateReranker.Result result, Double rerankScore) {
+        SearchCandidate candidate = result.candidate();
         return new SearchResultItem(
                 candidate.chunkId().toString(),
                 candidate.docId().toString(),
@@ -169,7 +218,8 @@ public class SearchService {
                 candidate.clausePath(),
                 candidate.pageNo(),
                 candidate.pageEnd(),
-                score,
+                result.rrfScore(),
+                rerankScore,
                 truncate(candidate.content()),
                 CitationFormatter.format(candidate));
     }
