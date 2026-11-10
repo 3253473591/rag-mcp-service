@@ -1,0 +1,125 @@
+name: Eval gate
+
+# Runs the real retrieval evaluation on a real embedding model.
+#
+# Why not on every push: it needs Postgres+pgvector, a running app, and Ollama with bge-m3
+# (~1.2 GB). Nightly + manual dispatch keeps the signal honest without making every PR wait
+# for a model download. scripts/eval.ps1 exits 2 when any answerable question is abstained,
+# so a regression in the abstention guard fails this job.
+on:
+  workflow_dispatch:
+  schedule:
+    # 17:30 UTC daily = 01:30 Asia/Shanghai
+    - cron: '30 17 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eval-gate
+  cancel-in-progress: false
+
+jobs:
+  eval:
+    name: eval (bge-m3, 40 QA)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: ragdb
+          POSTGRES_USER: rag
+          POSTGRES_PASSWORD: rag_local_pw
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U rag -d ragdb"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      RAG_DB_URL: jdbc:postgresql://127.0.0.1:5432/ragdb
+      RAG_DB_USER: rag
+      RAG_DB_PASSWORD: rag_local_pw
+      OLLAMA_EMBEDDING_MODEL: bge-m3
+      EVAL_ASOF: '2026-11-09' # pinned so the gold set and version windows stay stable
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: cache ollama models
+        uses: actions/cache@v4
+        with:
+          path: ~/.ollama
+          key: ollama-bge-m3-v1
+
+      - name: install ollama
+        run: |
+          curl -fsSL https://ollama.com/download/ollama-linux-amd64.tgz -o /tmp/ollama.tgz
+          sudo tar -C /usr -xzf /tmp/ollama.tgz
+          ollama --version
+
+      - name: start ollama and pull bge-m3
+        run: |
+          nohup ollama serve > /tmp/ollama.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -sf http://127.0.0.1:11434/api/tags > /dev/null; then break; fi
+            sleep 1
+          done
+          ollama pull bge-m3
+          curl -sf http://127.0.0.1:11434/api/tags | head -c 400
+
+      - name: build jar
+        run: mvn -B -ntp -DskipTests package
+
+      - name: start application
+        run: |
+          JAR=$(find target -maxdepth 1 -name '*.jar' ! -name '*original*' | head -1)
+          echo "starting $JAR"
+          nohup java -jar "$JAR" > /tmp/app.log 2>&1 &
+          for i in $(seq 1 90); do
+            if curl -sf http://127.0.0.1:8080/actuator/health | grep -q '"UP"'; then
+              echo "app is up"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "application failed to start"
+          tail -n 200 /tmp/app.log
+          exit 1
+
+      - name: seed sample corpus
+        run: pwsh -NoProfile -File scripts/seed-samples.ps1 -BaseUrl http://127.0.0.1:8080
+
+      - name: eval gate
+        run: |
+          pwsh -NoProfile -File scripts/eval.ps1 \
+            -AsOf "$EVAL_ASOF" \
+            -ReportPath eval/ci-report.md \
+            -ReportJson eval/ci-report.json
+          echo "eval gate passed (exit $?)"
+
+      - name: collect logs
+        if: always()
+        run: |
+          cp /tmp/app.log ./app.log 2>/dev/null || true
+          cp /tmp/ollama.log ./ollama.log 2>/dev/null || true
+
+      - name: upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report
+          path: |
+            eval/ci-report.md
+            eval/ci-report.json
+            app.log
+            ollama.log
+          if-no-files-found: ignore
