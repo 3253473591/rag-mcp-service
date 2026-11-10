@@ -61,13 +61,20 @@ public class SearchService {
 
         List<SearchCandidate> keywordCandidates = List.of();
         if (query.strategy().usesKeyword()) {
-            keywordCandidates = searchRepository.keywordSearch(query, properties.getCandidateLimit());
+            // The hybrid route requires a chunk to hit several query terms, otherwise one generic
+            // term floods RRF with equally-scored chunks; an explicit keyword search keeps 1.
+            int minTermHits = query.strategy() == SearchStrategy.HYBRID
+                    ? properties.getKeywordMinTermHits()
+                    : 1;
+            keywordCandidates = searchRepository.keywordSearch(
+                    query, properties.getCandidateLimit(), minTermHits);
         }
 
         String normalizedQuery = SectionTitleMatcher.normalizeQuestion(query.query());
         List<RrfFusion.ScoredCandidate> fused =
                 RrfFusion.fuse(vectorCandidates, keywordCandidates, query.topK(),
-                        candidate -> SectionTitleMatcher.boost(normalizedQuery, candidate.clausePath()));
+                        candidate -> SectionTitleMatcher.boost(normalizedQuery, candidate.clausePath()),
+                        1.0d, properties.getKeywordWeight());
 
         List<SearchResultItem> mapped = fused.stream()
                 .map(scored -> toResponse(scored.candidate(), scored.score()))

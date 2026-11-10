@@ -137,6 +137,21 @@ WHERE c.content ILIKE ? ESCAPE '\'
 
 `ILIKE` 能走 `gin_trgm_ops`；`similarity(c.content, ?)` 仍可用于排序。query > 200 字符时，关键词分支只取前 200 字符或抽关键词，避免 trigram 退化。
 
+#### 3.2.1 词项拆分（Phase 8）
+
+**原实现有 bug**：匹配用的是**整句** `ILIKE '%问题原文%'`。中文自然语言问句（例如 `高血压的诊断标准是什么？`）不会逐字出现在任何 chunk 里，实测 `eval/qa.jsonl` 40 条 **全部 0 命中**，`strategy=hybrid` 实际退化成单路向量检索。
+
+现在先抽词项再 OR 匹配（`KeywordTerms`）：
+
+- 去掉疑问词（是什么/有哪些/如何/多少/的/吗 …）、按标点与「的/是/和/与/在/为」等虚词切分；
+- 只留 CJK ≥2 字、ASCII ≥3 字且不在英文停用词的片段，最长 12 字，去重后最多 `app.search.keyword-max-terms`（默认 8）个；
+- 额外保留一条「去掉疑问词后的整句」，用于命中原文短语；
+- 每个词项单独转义后拼成 `(content ILIKE ? ESCAPE '\' OR ...)`，排序按 `term_hits DESC, similarity DESC`。
+
+覆盖率：35/40（未命中的 5 条正好是 4 条不可回答题 + Q24）。
+
+**融合策略**（`app.search.keyword-min-term-hits`、`keyword-weight`）：单个泛词（「标准」「要求」）会命中几十个 chunk，等权进 RRF 会把正确的向量首条挤下去。因此 hybrid 要求 chunk **至少命中 2 个不同词项**（显式 `strategy=keyword` 仍为 1）。实测取舍见 [docs/acceptance/phase8-keyword.md](acceptance/phase8-keyword.md)：`hit@5`/`hit@3` 不变，`hit@1` 0.8286 → 0.7714（2 道题降为第 2 名），`KEYWORD_WEIGHT=0.01` 可完全回到向量排序。
+
 ### 3.3 RRF
 
 ```text

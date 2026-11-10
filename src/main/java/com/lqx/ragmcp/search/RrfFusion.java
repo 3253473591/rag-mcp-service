@@ -44,9 +44,27 @@ public final class RrfFusion {
                                              List<SearchCandidate> keyword,
                                              int topK,
                                              ToDoubleFunction<SearchCandidate> headingBoost) {
+        return fuse(vector, keyword, topK, headingBoost, 1.0d, 1.0d);
+    }
+
+    /**
+     * Weighted RRF: route {@code i} contributes {@code weight_i / (K + rank_i)}.
+     *
+     * <p>Weights exist because the two routes are not equally precise for Chinese natural-language
+     * questions. Once the keyword route matches an OR of short terms instead of the whole question,
+     * a single generic term can match dozens of chunks; at equal weight those matches tie with a
+     * vector rank-1 (both {@code 1/61}) and the tie-break becomes arbitrary. A keyword weight below
+     * 1 keeps lexical matches as a boost/rescue signal instead of an equal-ranking vote.</p>
+     */
+    public static List<ScoredCandidate> fuse(List<SearchCandidate> vector,
+                                             List<SearchCandidate> keyword,
+                                             int topK,
+                                             ToDoubleFunction<SearchCandidate> headingBoost,
+                                             double vectorWeight,
+                                             double keywordWeight) {
         Map<UUID, Accumulator> byChunk = new LinkedHashMap<>();
-        addRoute(byChunk, vector);
-        addRoute(byChunk, keyword);
+        addRoute(byChunk, vector, vectorWeight);
+        addRoute(byChunk, keyword, keywordWeight);
 
         Comparator<Accumulator> order = Comparator
                 .comparingDouble((Accumulator acc) -> totalScore(acc, headingBoost)).reversed()
@@ -69,8 +87,9 @@ public final class RrfFusion {
         return accumulator.score() + headingBoost.applyAsDouble(accumulator.candidate());
     }
 
-    private static void addRoute(Map<UUID, Accumulator> byChunk, List<SearchCandidate> route) {
-        if (route == null || route.isEmpty()) {
+    private static void addRoute(Map<UUID, Accumulator> byChunk, List<SearchCandidate> route,
+                                 double weight) {
+        if (route == null || route.isEmpty() || weight <= 0.0d) {
             return;
         }
         Set<UUID> seenInRoute = new LinkedHashSet<>();
@@ -83,7 +102,7 @@ public final class RrfFusion {
                 continue;
             }
             rank++;
-            double contribution = 1.0d / (K + rank);
+            double contribution = weight / (K + rank);
             Accumulator accumulator = byChunk.computeIfAbsent(candidate.chunkId(),
                     id -> new Accumulator(candidate));
             accumulator.add(contribution);

@@ -145,27 +145,66 @@ public class SearchRepository {
         return rows;
     }
 
-    public List<SearchCandidate> keywordSearch(SearchQuery query, int limit) {
+    /**
+     * Lexical route over an OR of extracted terms.
+     *
+     * @param minTermHits how many distinct terms a chunk must contain. The hybrid route passes
+     *                    {@code app.search.keyword-min-term-hits} (&gt;1 when several terms exist):
+     *                    a single generic term ("标准", "要求") matches dozens of chunks and, fused at
+     *                    equal weight, displaces correct vector hits. The explicit
+     *                    {@code strategy=keyword} route passes 1 so a user asking for lexical search
+     *                    gets lexical search. Clamped to the number of terms.
+     */
+    public List<SearchCandidate> keywordSearch(SearchQuery query, int limit, int minTermHits) {
         String keywordText = KeywordEscaper.keywordText(query.query(), properties.getKeywordMaxChars());
-        String pattern = KeywordEscaper.toPattern(keywordText);
+        List<String> terms = KeywordTerms.extract(keywordText, properties.getKeywordMaxTerms());
+        if (terms.isEmpty()) {
+            log.debug("keyword search skipped: no usable terms queryChars={}", keywordText.length());
+            return List.of();
+        }
+        List<String> patterns = new ArrayList<>(terms.size());
+        for (String term : terms) {
+            patterns.add(KeywordEscaper.toPattern(term));
+        }
+        int requiredHits = Math.max(1, Math.min(minTermHits, terms.size()));
 
         List<Object> args = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT ")
+        StringBuilder sql = new StringBuilder("SELECT * FROM (SELECT ")
                 .append(CANDIDATE_COLUMNS)
+                .append(", (");
+        for (int i = 0; i < patterns.size(); i++) {
+            if (i > 0) {
+                sql.append(" + ");
+            }
+            // term_hits counts how many distinct query terms the chunk contains; the whole question
+            // no longer has to appear verbatim (docs/11-retrieval-and-eval-spec.md 3.2).
+            sql.append("CASE WHEN c.content ILIKE ? ESCAPE '\\' THEN 1 ELSE 0 END");
+            args.add(patterns.get(i));
+        }
+        sql.append(") AS term_hits")
                 .append(", similarity(c.content, ?) AS route_score")
                 .append(" FROM kb_chunk c JOIN kb_document d ON d.id = c.document_id")
                 .append(" WHERE c.chunk_strategy = ?");
         args.add(keywordText);
         args.add(query.chunkStrategy().dbValue());
         appendFilters(sql, args, query);
-        sql.append(" AND c.content ILIKE ? ESCAPE '\\'")
-                .append(" ORDER BY route_score DESC, c.document_id, c.chunk_strategy,")
-                .append(" c.chunk_index, c.id LIMIT ?");
-        args.add(pattern);
+        sql.append(" AND (");
+        for (int i = 0; i < patterns.size(); i++) {
+            if (i > 0) {
+                sql.append(" OR ");
+            }
+            sql.append("c.content ILIKE ? ESCAPE '\\'");
+            args.add(patterns.get(i));
+        }
+        sql.append(")) t WHERE t.term_hits >= ?")
+                .append(" ORDER BY t.term_hits DESC, t.route_score DESC, t.document_id,")
+                .append(" t.chunk_strategy, t.chunk_index, t.chunk_id LIMIT ?");
+        args.add(requiredHits);
         args.add(limit);
 
         List<SearchCandidate> rows = jdbc.query(sql.toString(), candidateMapper, args.toArray());
-        log.debug("keyword search candidates={} limit={} mode={}", rows.size(), limit, query.versionMode());
+        log.debug("keyword search terms={} requiredHits={} candidates={} limit={} mode={}",
+                terms.size(), requiredHits, rows.size(), limit, query.versionMode());
         return rows;
     }
 

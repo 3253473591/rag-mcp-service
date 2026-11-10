@@ -258,6 +258,24 @@ class SearchIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void tIntSearch10_naturalLanguageQuestionMatchesKeywordTermsNotTheWholeString() throws Exception {
+        UUID docId = insertDocument("kw-terms", "差旅报销制度", "2025", "ACTIVE",
+                LocalDate.of(2025, 1, 1), null);
+        UUID chunkId = insertChunk(docId, "heading", 0, "差旅报销制度规定十个工作日。", null, null, null);
+
+        // Phase 8 regression guard: this question never appears verbatim in the corpus, so the old
+        // whole-question ILIKE returned 0 rows. The term route must find it.
+        JsonNode response = search(Map.of(
+                "query", "差旅报销的时限是多少？",
+                "strategy", "keyword",
+                "asOf", "2026-11-09"), 200);
+
+        assertThat(response.get("results")).isNotEmpty();
+        assertThat(resultDocIds(response)).contains(docId);
+        assertThat(findResult(response, chunkId)).isNotNull();
+    }
+
+    @Test
     void embeddingFailureReturns503AndKeywordOnlyStillWorks() throws Exception {
         FakeEmbeddingService.FAIL_NEXT.set(true);
         searchExpectError(Map.of("query", "q", "strategy", "vector", "asOf", "2026-11-09"),

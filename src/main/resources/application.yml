@@ -102,6 +102,15 @@ app:
     candidate-limit: 30
     # Keyword branch uses at most the first 200 chars for ILIKE/similarity.
     keyword-max-chars: 200
+    # Phase 8: split a question into at most N lexical terms, one ILIKE branch each.
+    # A whole-question ILIKE matched 0 of the 40 eval questions; OR-ing terms fixed that.
+    keyword-max-terms: ${KEYWORD_MAX_TERMS:8}
+    # RRF weight of the keyword route (Phase 8). 1.0 = equal vote with the vector route, which
+    # measurably regressed hit@1 (0.8286 -> 0.7429) because generic terms tie with a vector rank-1.
+    keyword-weight: ${KEYWORD_WEIGHT:1.0}
+    # Hybrid requires a chunk to contain this many distinct query terms before it enters RRF.
+    # 1 generic term ("标准"/"要求") matches dozens of chunks and displaces correct vector hits.
+    keyword-min-term-hits: ${KEYWORD_MIN_TERM_HITS:2}
     # pgvector >= 0.8: mitigate HNSW under-return when metadata filters are present.
     hnsw-iterative-scan: true
     # Phase 7 score-based abstention (docs/11-retrieval-and-eval-spec.md 3.4).
