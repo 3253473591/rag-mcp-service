@@ -90,13 +90,35 @@ class SchemaIntegrationTest extends AbstractIntegrationTest {
                 """, String.class);
         assertThat(pageEndNullable).isEqualTo("YES");
 
-        // Phase 10: kb_page is the page layer; V3 migration.
+        // Phase 10: kb_page is the page layer; Phase 11 (V4) adds kind + llm_model.
         List<String> pageColumns = jdbc.queryForList(
                 "SELECT column_name FROM information_schema.columns WHERE table_name = 'kb_page'",
                 String.class);
         assertThat(pageColumns).contains("document_id", "page_key", "clause_path",
                 "leaf_clause_id", "clause_ids", "title", "page_index", "part", "body",
-                "token_count", "page_no", "page_end", "source_chunk_ids", "embedding");
+                "token_count", "page_no", "page_end", "source_chunk_ids", "embedding",
+                "kind", "llm_model");
+
+        String kindDefault = jdbc.queryForObject("""
+                SELECT column_default FROM information_schema.columns
+                WHERE table_name = 'kb_page' AND column_name = 'kind'
+                """, String.class);
+        assertThat(kindDefault).contains("aggregate");
+        String kindNullable = jdbc.queryForObject("""
+                SELECT is_nullable FROM information_schema.columns
+                WHERE table_name = 'kb_page' AND column_name = 'kind'
+                """, String.class);
+        assertThat(kindNullable).isEqualTo("NO");
+        String llmModelNullable = jdbc.queryForObject("""
+                SELECT is_nullable FROM information_schema.columns
+                WHERE table_name = 'kb_page' AND column_name = 'llm_model'
+                """, String.class);
+        assertThat(llmModelNullable).isEqualTo("YES");
+        String kindCheck = jdbc.queryForObject("""
+                SELECT pg_get_constraintdef(oid) FROM pg_constraint
+                WHERE conname = 'ck_kb_page_kind'
+                """, String.class);
+        assertThat(kindCheck).contains("aggregate").contains("wiki");
 
         String pageEmbeddingType = jdbc.queryForObject("""
                 SELECT format_type(atttypid, atttypmod) FROM pg_attribute
@@ -109,7 +131,7 @@ class SchemaIntegrationTest extends AbstractIntegrationTest {
                 WHERE conname = 'uk_kb_page_document_key'
                 """, String.class);
         assertThat(pageUnique).contains("UNIQUE").contains("document_id").contains("page_key")
-                .contains("part");
+                .contains("part").contains("kind");
 
         String pageCascade = jdbc.queryForObject("""
                 SELECT confdeltype FROM pg_constraint
