@@ -48,9 +48,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 @TestPropertySource(properties = {
         "spring.ai.mcp.server.enabled=true",
         "app.mcp.auth-token=test-mcp-token",
-        "app.admin.token=test-admin-token",
-        // Fake embeddings have no semantic cosine; score-based abstention is unit-tested.
-        "app.search.abstain.enabled=false"
+        "app.admin.token=test-admin-token"
 })
 @Import({FakeEmbeddingConfig.class, McpTestToolsConfig.class})
 class McpIntegrationTest {
