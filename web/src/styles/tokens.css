@@ -1,0 +1,50 @@
+/**
+ * Design tokens for the rag-mcp evidence console.
+ * Seven colours only. Do not introduce additional hues; derive hierarchy from
+ * weight, spacing, rules and opacity on these values.
+ */
+:root {
+  --paper: #e8eae4;
+  --ink: #15191a;
+  --stamp: #a3222a;
+  --steel: #5a6b6c;
+  --rule: #c3cbc4;
+  --verified: #2c5545;
+  --surface: #f1f2ee;
+
+  --font-display: 'Archivo', 'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC',
+    sans-serif;
+  --font-body: 'IBM Plex Sans', 'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC',
+    sans-serif;
+  --font-serif: 'IBM Plex Serif', 'Songti SC', 'STSong', 'SimSun', serif;
+  --font-mono: 'IBM Plex Mono', 'Cascadia Mono', Consolas, monospace;
+
+  --shell: 1280px;
+  --gutter: 32px;
+  --rail: 320px;
+  --measure: 72ch;
+
+  --step-0: 0.9375rem;
+  --step-1: 1.0625rem;
+  --step-2: 1.375rem;
+  --step-3: clamp(1.75rem, 2.4vw, 2.125rem);
+  --step-4: clamp(2.25rem, 4vw, 3.25rem);
+
+  --line-tight: 1.15;
+  --line-body: 1.65;
+  --line-quote: 1.75;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (max-width: 768px) {
+  :root {
+    --gutter: 20px;
+  }
+}
+
+@media (max-width: 420px) {
+  :root {
+    --gutter: 16px;
+  }
+}
