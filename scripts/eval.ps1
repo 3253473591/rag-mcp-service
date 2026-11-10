@@ -377,6 +377,10 @@ $lines += @(
     'p50/p95 are the app-reported server-side retrieval time (`tookMs`, includes query',
     'embedding + SQL + RRF). Client wall-clock p50/p95 (including PowerShell/HTTP) is in',
     '`report.json` as `clientP50Ms`/`clientP95Ms`.',
+    '',
+    'Gate: this script exits 1 on any retrieval error, and exits 2 when any answerable',
+    'question was abstained (`answerableAbstained > 0`). False abstention is a regression;',
+    'see docs/acceptance/phase7-abstain.md before changing `app.search.abstain.*`.',
     ''
 )
 $failed = @($allDetails | Where-Object { $_.error -eq $true })
@@ -418,4 +422,16 @@ Write-Host "json:   $ReportJson"
 $httpClient.Dispose()
 $totalErrors = ($strategyReports | Measure-Object -Property errors -Sum).Sum
 if ($totalErrors -gt 0) { exit 1 }
+
+# Phase 7 gate: abstaining on an answerable question is a regression, not a tuning knob.
+# docs/05-non-functional.md 2.5 requires answerableAbstained == 0; the abstain thresholds
+# (app.search.abstain.*) are calibrated against the current corpus + embedding, so a corpus
+# change that pushes real answers below min-top-score would otherwise pass silently.
+$totalAbstainedAnswerable = ($strategyReports | Measure-Object -Property abstainedAnswerable -Sum).Sum
+if ($totalAbstainedAnswerable -gt 0) {
+    Write-Host ("FAIL: {0} answerable question(s) were abstained (false abstention)." -f $totalAbstainedAnswerable)
+    Write-Host "Abstain thresholds are corpus/embedding specific; re-calibrate with scripts/calibrate-abstain.ps1"
+    Write-Host "and see docs/acceptance/phase7-abstain.md before changing app.search.abstain.*."
+    exit 2
+}
 exit 0

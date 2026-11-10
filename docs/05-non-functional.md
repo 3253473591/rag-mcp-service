@@ -138,6 +138,10 @@ Phase 7 实测（2026-11-09，当前库 248 chunks = fixed 102 + heading 146，3
 剩余 1 条（N05，2026 新增药物）与可回答题余弦分布重叠，按“优先保召回”的取舍保留为已记录误报。
 阈值扫描、两条原因的实测样例和限制见 [docs/acceptance/phase7-abstain.md](acceptance/phase7-abstain.md)。
 
+`answerableAbstained` 是**回归门禁**：任何可回答题被拒答都视为阈值漂移或语料变更引入的缺陷，
+`scripts/eval.ps1` 会以退出码 2 失败（检索错误仍是退出码 1）。调整 `app.search.abstain.*` 之前
+必须重跑 `scripts/calibrate-abstain.ps1`。
+
 公式、QA schema、gold 匹配口径见 [11-retrieval-and-eval-spec.md](11-retrieval-and-eval-spec.md)。
 
 ---

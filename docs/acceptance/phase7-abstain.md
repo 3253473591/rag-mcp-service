@@ -339,6 +339,37 @@ BUILD SUCCESS
    因此在 `AbstractIntegrationTest` / `McpIntegrationTest` 中设置
    `app.search.abstain.enabled=false`；守卫逻辑由单元测试覆盖，真实阈值由本报告的评测覆盖。
 
+### 6.1 误拒门禁（验收复核阶段补入）
+
+第 6 节第 1 条的教训是“阈值/环境漂移会静默改变结论”，所以 `scripts/eval.ps1` 增加了一个退出码：
+
+- 检索错误（embedding/DB/HTTP）→ 退出码 **1**（原有行为）。
+- 任一可回答题被拒答（`answerableAbstained > 0`）→ 退出码 **2**，并打印重新标定的指引。
+
+理由是：`minTopScore=0.55` 与最低可回答题（fixed Q34）的 `0.5564` 只差 0.0064，
+换语料/换 embedding 后最先被误杀的正是这类题；如果没有门禁，`hit@5` 会掉而人未必看得见。
+
+**负向验证（故意把阈值调到不可能的值）：**
+
+```text
+$env:ABSTAIN_MIN_TOP_SCORE='0.9'   # 重启应用
+$ powershell -File .\scripts\eval.ps1 -AsOf 2026-11-09
+fixed:   hit@1=0 hit@3=0 hit@5=0 MRR=0 ...
+heading: hit@1=0 hit@3=0 hit@5=0 MRR=0 ...
+FAIL: 70 answerable question(s) were abstained (false abstention).
+EXITCODE=2
+```
+
+**正向验证（默认阈值）：**
+
+```text
+EXITCODE=0
+fixed:   hit@5=0.7429 MRR=0.7143
+heading: hit@5=0.9714 MRR=0.8748
+```
+
+两条都复现过，说明门禁既能拦误拒、也不会把正常结果判成失败。
+
 ## 7. 复现命令
 
 ```powershell
