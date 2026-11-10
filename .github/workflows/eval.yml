@@ -106,6 +106,12 @@ jobs:
             -ReportJson eval/ci-report.json
           echo "eval gate passed (exit $?)"
 
+      - name: collect logs
+        if: always()
+        run: |
+          cp /tmp/app.log ./app.log 2>/dev/null || true
+          cp /tmp/ollama.log ./ollama.log 2>/dev/null || true
+
       - name: upload reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -114,6 +120,6 @@ jobs:
           path: |
             eval/ci-report.md
             eval/ci-report.json
-            /tmp/app.log
-            /tmp/ollama.log
+            app.log
+            ollama.log
           if-no-files-found: ignore
