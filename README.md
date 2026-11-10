@@ -3,6 +3,7 @@
 企业知识库 RAG 检索服务（Java/Spring Boot + PostgreSQL/pgvector + MCP + 治理层）。
 
 - 当前状态：**Phase 6/6b/6c 已验收（R1 本机 p95 达标；R3 Q04 已闭环；R2/R4 residual）**，已合并 `main`；Phase 1/2/3/4/5 已验收。
+- Phase 10（页面层 A/B）交付：`kb_page`（V3 迁移）+ 确定性 chunk→page 聚合 + `POST /api/v1/pages/search` + `POST /api/v1/admin/pages/rebuild` + `scripts/eval-pages.ps1`。同一 40 QA、同一 asOf/topK：按产品 `GoldMatcher` 口径 chunk 0.8286/0.9429/0.9714/0.8819，page 0.8286/0.9429/0.9714/0.8867 —— **页面粒度没有可测收益，也没有可测损失**；strict 无回退口径下 page 为 0.7429/0.9143/0.9714/0.8367，差距来自 root/hub 页缺 clauseId 这一设计缺陷，不是粒度效应（见文档 §8 验收复核）。页面层未接入主检索。
 - Phase 6b（R1）已验收：检索 query 批处理（8 条 / 5ms 窗口）+ 最多 3 个并发 batch + 有界队列/缓存；实现方 3 次 + 验收方 3 次 60s、10 并发 p95 全部 <800ms（验收方 498.53/368.39/408.52ms），cacheHits=0（未用缓存伪造基准）；40 QA 指标与 Phase 6 一致。详见 [phase6b-report](docs/acceptance/phase6b-report.md)。
 - Phase 6c（R3/Q04）已验收：`SectionTitleMatcher` 叶子标题 boost；Q04 heading/fixed top-1 均为 `4.2.2 诊断流程`；heading 40 QA hit@5 **0.9714 (34/35)**、MRR 0.8748；boost 只影响排序，`score` 仍为原始 RRF。详见 [phase6c-report](docs/acceptance/phase6c-report.md)。
 - Phase 6 交付：中文“第X条”条款 heading 与 `clause_id`；PDF 双栏阅读顺序 + heading 候选清洗；`page_end` 页面跨度 + fixed chunk 主导 section 元数据 + eval pageRange 相交匹配；10 并发残余风险如实复测。详见 [phase6-report](docs/acceptance/phase6-report.md)。
@@ -275,6 +276,22 @@ Invoke-RestMethod -Method Post `
 `ERR-ADMIN_UNAUTHORIZED(401)`、`ERR-WORKITEM_NOT_FOUND(404)`、`ERR-APPROVAL_INVALID(409)`；参数/缩小范围失败沿用 `ERR-VALIDATION(400)`。错误体仍为 `{code,message,traceId,details}`。
 
 Phase 4 **不写** `mcp_audit_log`、不做 MCP 端点/mandate 强制校验/过期拒绝；这些属于 Phase 5。
+
+## API（Phase 10）：页面层（A/B，不接入主检索）
+
+页面层把同一文档的 `chunk_strategy=heading` chunk 按叶子 `clause_path` 聚合成可读页面（确定性规则，无 LLM）。**`POST /api/v1/search` 的契约与排序完全不变**；页面端点只用于回答"页面粒度是否比 chunk 粒度更好"。
+
+| 端点 | 鉴权 | 说明 |
+|---|---|---|
+| `POST /api/v1/pages/search` | 无 | 请求体是 `SearchRequest` 子集：`query/topK/asOf/includeSuperseded/docIds/version`；纯向量（余弦），版本/生效期/docIds 过滤全部在 SQL 层；响应含 `pageId/pageKey/title/clausePath/leafClauseId/clauseIds/pageRange/score/content/citation/document` |
+| `POST /api/v1/admin/pages/rebuild` | `X-Admin-Token` | 对全部文档（或 body `{"docIds":[...]}`）重建页面；幂等：每文档先删后插；返回每文档 chunk 数 / 叶子小节数 / 页面数 / 平均 token |
+| `GET /api/v1/admin/pages/stats` | `X-Admin-Token` | 只读页面统计（验收报告用） |
+
+- 迁移 `V3__add_kb_page.sql`（V2 已被 Phase 6 的 chunk `page_end` 占用）：`kb_page` 含 `page_key`、`leaf_clause_id`、`clause_ids`、`source_chunk_ids`、`page_no/page_end`、`embedding VECTOR(1024)`，`UNIQUE(document_id,page_key,part)`。
+- 页面数上限：`app.pages.max-tokens`（默认 1200）；正文超过时按 chunk 边界切成 `part=1..n`，每段独立成行/embedding。
+- 上传成功后**同步、best effort** 聚合：失败只记 ERROR 日志，绝不让上传失败；修复入口是 rebuild。重复上传（同 checksum）按原契约不重建。
+- 配置：`app.pages.max-tokens`、`app.pages.max-content-chars`、`app.pages.ingest-on-upload`（环境变量 `PAGES_MAX_TOKENS` / `PAGES_MAX_CONTENT_CHARS` / `PAGES_INGEST_ON_UPLOAD`）。
+- A/B 结果与口径见 [docs/acceptance/phase10-pages.md](docs/acceptance/phase10-pages.md)：按产品 `GoldMatcher` 口径两路**持平**（0.8286/0.9429/0.9714，MRR 页面 +0.0048）；strict 无回退口径下页面 hit@1 0.7429，差在 root/hub 页缺 `clauseId`（设计缺陷），不是粒度效应。运行 `scripts/eval-pages.ps1`。
 
 ## 切分口径
 

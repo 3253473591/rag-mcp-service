@@ -17,7 +17,7 @@ class SchemaIntegrationTest extends AbstractIntegrationTest {
     void tIntDb01_flywayV1CreatesTablesExtensionsAndIndexes() {
         List<String> tables = jdbc.queryForList(
                 "SELECT tablename FROM pg_tables WHERE schemaname = 'public'", String.class);
-        assertThat(tables).contains("kb_document", "kb_chunk", "work_item", "mandate",
+        assertThat(tables).contains("kb_document", "kb_chunk", "kb_page", "work_item", "mandate",
                 "mcp_audit_log", "eval_run");
 
         List<String> extensions = jdbc.queryForList(
@@ -89,6 +89,39 @@ class SchemaIntegrationTest extends AbstractIntegrationTest {
                 WHERE table_name = 'kb_chunk' AND column_name = 'page_end'
                 """, String.class);
         assertThat(pageEndNullable).isEqualTo("YES");
+
+        // Phase 10: kb_page is the page layer; V3 migration.
+        List<String> pageColumns = jdbc.queryForList(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'kb_page'",
+                String.class);
+        assertThat(pageColumns).contains("document_id", "page_key", "clause_path",
+                "leaf_clause_id", "clause_ids", "title", "page_index", "part", "body",
+                "token_count", "page_no", "page_end", "source_chunk_ids", "embedding");
+
+        String pageEmbeddingType = jdbc.queryForObject("""
+                SELECT format_type(atttypid, atttypmod) FROM pg_attribute
+                WHERE attrelid = 'kb_page'::regclass AND attname = 'embedding'
+                """, String.class);
+        assertThat(pageEmbeddingType).isEqualTo("vector(1024)");
+
+        String pageUnique = jdbc.queryForObject("""
+                SELECT pg_get_constraintdef(oid) FROM pg_constraint
+                WHERE conname = 'uk_kb_page_document_key'
+                """, String.class);
+        assertThat(pageUnique).contains("UNIQUE").contains("document_id").contains("page_key")
+                .contains("part");
+
+        String pageCascade = jdbc.queryForObject("""
+                SELECT confdeltype FROM pg_constraint
+                WHERE conrelid = 'kb_page'::regclass AND confrelid = 'kb_document'::regclass
+                """, String.class);
+        assertThat(pageCascade).isEqualTo("c");
+
+        List<String> pageIndexes = jdbc.queryForList(
+                "SELECT indexdef FROM pg_indexes WHERE tablename = 'kb_page'", String.class);
+        assertThat(pageIndexes).anySatisfy(def -> assertThat(def)
+                .contains("hnsw").contains("vector_cosine_ops"));
+        assertThat(pageIndexes).anySatisfy(def -> assertThat(def).contains("(document_id)"));
 
         List<String> evalColumns = jdbc.queryForList(
                 "SELECT column_name FROM information_schema.columns WHERE table_name = 'eval_run'",

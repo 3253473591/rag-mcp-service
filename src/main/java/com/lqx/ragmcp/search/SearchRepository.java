@@ -240,42 +240,12 @@ public class SearchRepository {
     }
 
     private void appendFilters(StringBuilder sql, List<Object> args, SearchQuery query) {
-        switch (query.versionMode()) {
-            case DEFAULT -> sql.append(" AND d.status = 'ACTIVE'");
-            case HISTORICAL, INCLUDE_SUPERSEDED ->
-                    sql.append(" AND d.status IN ('ACTIVE','SUPERSEDED')");
-        }
-
-        if (query.versionMode() == SearchVersionMode.INCLUDE_SUPERSEDED) {
-            sql.append(" AND d.effective_from <= ?::date");
-            args.add(query.asOf().toString());
-        } else {
-            sql.append(" AND d.effective_from <= ?::date")
-                    .append(" AND (d.effective_to IS NULL OR ?::date <= d.effective_to)");
-            args.add(query.asOf().toString());
-            args.add(query.asOf().toString());
-        }
-
-        if (query.version() != null) {
-            sql.append(" AND d.version = ?");
-            args.add(query.version());
-        }
-
-        if (!query.docIds().isEmpty()) {
-            sql.append(" AND d.id IN (");
-            appendUuidPlaceholders(sql, args, query.docIds());
-            sql.append(')');
-        }
+        // Phase 10: shared with the page route so both routes apply identical SQL filters.
+        DocumentFilterSql.appendFilters(sql, args, query);
     }
 
     private static void appendUuidPlaceholders(StringBuilder sql, List<Object> args, List<UUID> ids) {
-        for (int i = 0; i < ids.size(); i++) {
-            if (i > 0) {
-                sql.append(", ");
-            }
-            sql.append("?::uuid");
-            args.add(ids.get(i).toString());
-        }
+        DocumentFilterSql.appendUuidPlaceholders(sql, args, ids);
     }
 
     private static SearchCandidate mapCandidate(ResultSet rs) throws SQLException {

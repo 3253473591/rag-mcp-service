@@ -8,6 +8,7 @@ import com.lqx.ragmcp.chunk.ChunkingService;
 import com.lqx.ragmcp.config.UploadProperties;
 import com.lqx.ragmcp.embedding.EmbeddingService;
 import com.lqx.ragmcp.parse.DocumentParserRegistry;
+import com.lqx.ragmcp.page.PageIngestionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -44,7 +45,8 @@ class DocumentServiceValidationTest {
         TransactionTemplate transactionTemplate = mock(TransactionTemplate.class);
         UploadProperties uploadProperties = new UploadProperties();
         service = new DocumentService(repository, registry, chunkingService, embeddingService,
-                uploadProperties, transactionTemplate, new ObjectMapper());
+                mock(PageIngestionService.class), uploadProperties, transactionTemplate,
+                new ObjectMapper());
     }
 
     @Test
@@ -88,8 +90,8 @@ class DocumentServiceValidationTest {
         smallLimit.setMaxFileSizeBytes(4);
         DocumentService smallLimitService = new DocumentService(repository,
                 mock(DocumentParserRegistry.class), mock(ChunkingService.class),
-                mock(EmbeddingService.class), smallLimit, mock(TransactionTemplate.class),
-                new ObjectMapper());
+                mock(EmbeddingService.class), mock(PageIngestionService.class), smallLimit,
+                mock(TransactionTemplate.class), new ObjectMapper());
         MockMultipartFile file = new MockMultipartFile("file", "big.txt", "text/plain",
                 "12345".getBytes());
 

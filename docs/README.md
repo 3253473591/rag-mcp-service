@@ -32,6 +32,7 @@
 | — | [acceptance/phase6-report.md](acceptance/phase6-report.md) | Phase 6 验收报告（R4/R2/R3 改善；R1 residual） |
 | — | [acceptance/phase6b-report.md](acceptance/phase6b-report.md) | Phase 6b 验收报告（R1 query 批处理/缓存，本机 6/6 p95 达标） |
 | — | [acceptance/phase6c-report.md](acceptance/phase6c-report.md) | Phase 6c 验收报告（Q04 诊断流程修复；R3 信息正确性闭环） |
+| — | [acceptance/phase10-pages.md](acceptance/phase10-pages.md) | Phase 10 页面层 A/B（chunk vs page，loose/strict 并列；strict 更差，未接入主检索） |
 | — | [acceptance/risk-ledger.md](acceptance/risk-ledger.md) | 跨 Phase 风险台账（已闭环/部分改善/待修） |
 | — | [acceptance/phase1-report-template.md](acceptance/phase1-report-template.md) | Phase 1 验收报告模板 |
 

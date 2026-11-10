@@ -39,8 +39,8 @@ class SearchServiceTest {
         queryEmbeddingService = mock(QueryEmbeddingService.class);
         repository = mock(SearchRepository.class);
         properties = new SearchProperties();
-        service = new SearchService(queryEmbeddingService, repository, properties,
-                new AbstainGuard(properties), new AnswerFallback());
+        service = new SearchService(new QueryVectorProvider(queryEmbeddingService), repository,
+                properties, new AbstainGuard(properties), new AnswerFallback());
     }
 
     @Test
