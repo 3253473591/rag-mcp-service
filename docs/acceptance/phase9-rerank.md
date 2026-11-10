@@ -192,12 +192,12 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\eval.ps1 -AsOf 202
 | heading | hit@3 | 0.9143 | **0.9429** | ≥0.9143 | 通过 |
 | heading | hit@5 | 0.9714 | **0.9714** | ≥0.9714 | 通过 |
 | heading | MRR | 0.8510 | **0.8819** | ≥0.8748 | 通过 |
-| heading | p95 | 128ms | **94ms** | ≤300ms | 通过 |
+| heading | p95 | 128ms | **30ms** | ≤300ms | 通过 |
 | fixed | hit@1 | 0.6857 | **0.7143** | ≥0.6857 | 通过 |
 | fixed | hit@3 | 0.7429 | 0.7429 | — | — |
 | fixed | hit@5 | 0.7429 | **0.7714** | ≥0.7429 | 通过 |
 | fixed | MRR | 0.7095 | **0.7343** | ≥0.7095 | 通过 |
-| fixed | p95 | 145ms | **78ms** | — | — |
+| fixed | p95 | 145ms | **26ms** | — | — |
 
 不可回答题：
 
@@ -304,8 +304,9 @@ Q12（`heading`）第 1 名 `5.4.3.1` 的 `rerankScore=0.225670`，第 2 名标�
    且都不在正确 top5；若未来依赖词法救回长尾，应把 `wv` 调低或给词法候选一个中性底分。
 5. **信号相关性高**：余弦与 `score`、标题与 clause 都高度相关；Q13/Q15 这类题在现有信号上
    线性不可分。没有 cross-encoder 时，0.8286 是这套语料 + 这套信号的上限附近。
-6. **p95 有运行方差**：同一次全量评测 heading p95=94ms，单独先跑 heading 的一次是 186ms，
-   都 ≤300ms；rerank 本身只是 ≤20 个候选的线性打分 + 稳定排序，不增加 SQL/模型调用。
+6. **p95 有运行方差**：干净树上的最终评测 heading p95=30ms、fixed=26ms；同一构建的另两次
+   全量/单策略运行分别是 94ms 与 186ms（Ollama/JIT/DB 缓存冷热差异），都 ≤300ms；
+   rerank 本身只是 ≤20 个候选的线性打分 + 稳定排序，不增加 SQL/模型调用。
 7. **`enabled=false` 时行为完全回退到 Phase 8**（标题 boost 重新进入融合、无 `rerankScore`），
    这是刻意的回滚开关；集成测试默认关闭 rerank，因此 `mvn test` 不覆盖线上默认路径的排序，
    只覆盖契约与开关两条路径（线上默认值由 `application.yml` + 本报告的真实 eval 覆盖）。
