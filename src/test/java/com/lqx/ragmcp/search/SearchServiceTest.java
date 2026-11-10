@@ -49,7 +49,7 @@ class SearchServiceTest {
                 UUID.randomUUID(), UUID.randomUUID(), "doc-key", "2025", "ACTIVE",
                 LocalDate.of(2025, 1, 1), null, "标题", "3.2", "第三章", 12, 12,
                 "x".repeat(2500), "heading", 0, 0.4);
-        when(repository.keywordSearch(any(), anyInt())).thenReturn(List.of(candidate));
+        when(repository.keywordSearch(any(), anyInt(), anyInt())).thenReturn(List.of(candidate));
 
         SearchResponse response = service.search(new SearchRequest(
                 "关键词", 5, null, null, "2026-11-09", null, null, "keyword", true), TODAY);
@@ -120,13 +120,13 @@ class SearchServiceTest {
                 "00000000-0000-0000-0000-000000000002",
                 "00000000-0000-0000-0000-000000000102", "3.2", "第三章 > 3.2", 0, "内容 B", 0.7);
         when(repository.vectorSearch(any(), any(), anyInt())).thenReturn(List.of(a));
-        when(repository.keywordSearch(any(), anyInt())).thenReturn(List.of(b));
+        when(repository.keywordSearch(any(), anyInt(), anyInt())).thenReturn(List.of(b));
 
         SearchResponse response = service.search(new SearchRequest(
                 "q", 5, null, null, "2026-11-09", null, null, "hybrid", null), TODAY);
 
         verify(repository).vectorSearch(any(), any(), anyInt());
-        verify(repository).keywordSearch(any(), anyInt());
+        verify(repository).keywordSearch(any(), anyInt(), anyInt());
         assertThat(response.results()).hasSize(2);
         assertThat(response.abstained()).isFalse();
         assertThat(response.diagnostics().topScore()).isEqualTo(0.8);
@@ -148,7 +148,7 @@ class SearchServiceTest {
                 "4.2.2", "4  高血压诊断与评估 > 4.2  高血压诊断标准 > 4.2.2  诊断流程", 1,
                 "当首诊诊室血压≥140/90 mmHg 时，应明确诊断或转诊。", 0.80);
         when(repository.vectorSearch(any(), any(), anyInt())).thenReturn(List.of(wrong, right));
-        when(repository.keywordSearch(any(), anyInt())).thenReturn(List.of());
+        when(repository.keywordSearch(any(), anyInt(), anyInt())).thenReturn(List.of());
 
         SearchResponse response = service.search(new SearchRequest(
                 "高血压的诊断流程是什么？", 5, null, null, "2026-11-09",
@@ -169,7 +169,7 @@ class SearchServiceTest {
                         "00000000-0000-0000-0000-000000000101", null, null, 0, "无关 A", 0.40),
                 candidate("00000000-0000-0000-0000-000000000002",
                         "00000000-0000-0000-0000-000000000102", null, null, 0, "无关 B", 0.38)));
-        when(repository.keywordSearch(any(), anyInt())).thenReturn(List.of());
+        when(repository.keywordSearch(any(), anyInt(), anyInt())).thenReturn(List.of());
 
         SearchResponse response = service.search(vectorRequest("公司年假有多少天？"), TODAY);
 
@@ -189,7 +189,7 @@ class SearchServiceTest {
         when(queryEmbeddingService.embedQuery(any())).thenReturn(unitVector());
         when(repository.vectorSearch(any(), any(), anyInt()))
                 .thenReturn(denseCandidates(0.60, 0.002, 12));
-        when(repository.keywordSearch(any(), anyInt())).thenReturn(List.of());
+        when(repository.keywordSearch(any(), anyInt(), anyInt())).thenReturn(List.of());
 
         SearchResponse response = service.search(vectorRequest("患者张三最近的血压记录是多少？"), TODAY);
 
@@ -210,7 +210,7 @@ class SearchServiceTest {
         when(queryEmbeddingService.embedQuery(any())).thenReturn(unitVector());
         when(repository.vectorSearch(any(), any(), anyInt()))
                 .thenReturn(denseCandidates(0.70, 0.005, 12));
-        when(repository.keywordSearch(any(), anyInt())).thenReturn(List.of());
+        when(repository.keywordSearch(any(), anyInt(), anyInt())).thenReturn(List.of());
 
         SearchResponse response = service.search(vectorRequest("高血压的诊断标准是什么？"), TODAY);
 
@@ -229,7 +229,7 @@ class SearchServiceTest {
         when(repository.vectorSearch(any(), any(), anyInt())).thenReturn(List.of(
                 candidate("00000000-0000-0000-0000-000000000001",
                         "00000000-0000-0000-0000-000000000101", null, null, 0, "低分内容", 0.20)));
-        when(repository.keywordSearch(any(), anyInt())).thenReturn(List.of());
+        when(repository.keywordSearch(any(), anyInt(), anyInt())).thenReturn(List.of());
 
         SearchResponse response = service.search(vectorRequest("q"), TODAY);
 
@@ -243,7 +243,7 @@ class SearchServiceTest {
 
     @Test
     void emptyKeywordResultsStillCarryNoMatchMessage() {
-        when(repository.keywordSearch(any(), anyInt())).thenReturn(List.of());
+        when(repository.keywordSearch(any(), anyInt(), anyInt())).thenReturn(List.of());
 
         SearchResponse response = service.search(new SearchRequest(
                 "zzz-not-in-kb", 5, null, null, "2026-11-09", null, null, "keyword", null), TODAY);
@@ -266,7 +266,7 @@ class SearchServiceTest {
         when(queryEmbeddingService.dimension()).thenReturn(1024);
         when(queryEmbeddingService.embedQuery(any())).thenReturn(unitVector());
         when(repository.vectorSearch(any(), any(), anyInt())).thenReturn(List.of());
-        when(repository.keywordSearch(any(), anyInt())).thenReturn(List.of());
+        when(repository.keywordSearch(any(), anyInt(), anyInt())).thenReturn(List.of());
         responses.add(service.search(vectorRequest("q"), TODAY));
 
         when(repository.vectorSearch(any(), any(), anyInt())).thenReturn(List.of(
