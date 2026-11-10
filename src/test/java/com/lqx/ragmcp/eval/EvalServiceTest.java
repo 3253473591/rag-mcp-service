@@ -131,6 +131,6 @@ class EvalServiceTest {
     private static SearchResultItem result(String docKey, String clauseId, Integer pageNo) {
         return new SearchResultItem("chunk-1", "doc-1", docKey, "2024", "SUPERSEDED",
                 LocalDate.of(2024, 1, 1), LocalDate.of(2024, 12, 31), "title", clauseId,
-                "chapter > " + clauseId, pageNo, pageNo, 0.032, "content", "citation");
+                "chapter > " + clauseId, pageNo, pageNo, 0.032, null, "content", "citation");
     }
 }

@@ -135,6 +135,7 @@ class GoldMatcherTest {
                 pageNo,
                 pageEnd,
                 0.032,
+                null,
                 "content",
                 "citation");
     }
