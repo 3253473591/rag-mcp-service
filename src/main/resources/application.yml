@@ -126,6 +126,25 @@ app:
       min-dense-candidates: ${ABSTAIN_MIN_DENSE_CANDIDATES:8}
       # TOO_NOISY requires top-1 minus top-2 below this gap.
       min-score-gap: ${ABSTAIN_MIN_SCORE_GAP:0.02}
+    # Phase 9 deterministic rerank (docs/acceptance/phase9-rerank.md).
+    # RRF is a rank fusion and loses similarity magnitude; the rerank stage re-scores the fused head
+    # with absolute signals. Score = rrf + sum(weight * normalized feature); see RerankProperties.
+    rerank:
+      # false restores the Phase 8 order exactly and leaves rerankScore out of the response.
+      enabled: ${RERANK_ENABLED:true}
+      # Candidates re-ordered, never smaller than topK (topK <= 20).
+      top-n: ${RERANK_TOP_N:20}
+      # Weight of the absolute cosine similarity (clamped to [0,1]).
+      weight-vector-score: ${RERANK_WEIGHT_VECTOR_SCORE:0.25}
+      # Weight of the fraction of query terms contained in the candidate content.
+      weight-term-coverage: ${RERANK_WEIGHT_TERM_COVERAGE:0.01}
+      # Weight of the normalized SectionTitleMatcher boost.
+      weight-title-match: ${RERANK_WEIGHT_TITLE_MATCH:0.01}
+      # Weight of "clauseId present"; fragments without clause structure are penalized.
+      weight-clause: ${RERANK_WEIGHT_CLAUSE:0.02}
+      # Weight of the short-chunk ramp min(1, chars / min-content-chars).
+      weight-length: ${RERANK_WEIGHT_LENGTH:0.004}
+      min-content-chars: ${RERANK_MIN_CONTENT_CHARS:80}
 
 logging:
   level:

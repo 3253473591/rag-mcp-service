@@ -135,6 +135,10 @@ class SearchServiceTest {
 
     @Test
     void q04LikeQueryPromotesSectionWhoseLeafTitleIsNamedByTheQuestion() {
+        // This test covers the Phase 6c heading boost inside the fusion, i.e. the fallback path
+        // used when app.search.rerank.enabled=false. With rerank on, the title signal is applied
+        // by the rerank stage instead (see rerankEnabledOrdersByCosineWhileScoreStaysRawRrf).
+        properties.getRerank().setEnabled(false);
         when(queryEmbeddingService.dimension()).thenReturn(1024);
         when(queryEmbeddingService.embedQuery(any())).thenReturn(unitVector());
         SearchCandidate wrong = candidate(
@@ -277,6 +281,58 @@ class SearchServiceTest {
         for (SearchResponse response : responses) {
             assertResponseContract(response);
         }
+    }
+
+    @Test
+    void rerankEnabledOrdersByCosineWhileScoreStaysRawRrf() {
+        when(queryEmbeddingService.dimension()).thenReturn(1024);
+        when(queryEmbeddingService.embedQuery(any())).thenReturn(unitVector());
+        SearchCandidate lowerCosineFirst = candidate(
+                "00000000-0000-0000-0000-000000000001",
+                "00000000-0000-0000-0000-000000000101", "3.2", "第三章 > 3.2", 0, "内容 A", 0.60);
+        SearchCandidate higherCosineSecond = candidate(
+                "00000000-0000-0000-0000-000000000002",
+                "00000000-0000-0000-0000-000000000102", "3.2", "第三章 > 3.2", 1, "内容 B", 0.90);
+        when(repository.vectorSearch(any(), any(), anyInt()))
+                .thenReturn(List.of(lowerCosineFirst, higherCosineSecond));
+        when(repository.keywordSearch(any(), anyInt(), anyInt())).thenReturn(List.of());
+
+        SearchResponse response = service.search(vectorRequest("q"), TODAY);
+
+        assertThat(response.results()).extracting(SearchResultItem::chunkId)
+                .containsExactly(higherCosineSecond.chunkId().toString(),
+                        lowerCosineFirst.chunkId().toString());
+        // score is still the raw RRF value, so it is not monotone with the reranked order.
+        assertThat(response.results().get(1).score())
+                .isGreaterThan(response.results().get(0).score());
+        assertThat(response.results()).allSatisfy(
+                result -> assertThat(result.rerankScore()).isNotNull());
+        assertThat(response.results().get(0).rerankScore())
+                .isGreaterThan(response.results().get(1).rerankScore());
+    }
+
+    @Test
+    void rerankDisabledKeepsRrfOrderAndLeavesRerankScoreNull() {
+        properties.getRerank().setEnabled(false);
+        when(queryEmbeddingService.dimension()).thenReturn(1024);
+        when(queryEmbeddingService.embedQuery(any())).thenReturn(unitVector());
+        SearchCandidate lowerCosineFirst = candidate(
+                "00000000-0000-0000-0000-000000000001",
+                "00000000-0000-0000-0000-000000000101", "3.2", "第三章 > 3.2", 0, "内容 A", 0.60);
+        SearchCandidate higherCosineSecond = candidate(
+                "00000000-0000-0000-0000-000000000002",
+                "00000000-0000-0000-0000-000000000102", "3.2", "第三章 > 3.2", 1, "内容 B", 0.90);
+        when(repository.vectorSearch(any(), any(), anyInt()))
+                .thenReturn(List.of(lowerCosineFirst, higherCosineSecond));
+        when(repository.keywordSearch(any(), anyInt(), anyInt())).thenReturn(List.of());
+
+        SearchResponse response = service.search(vectorRequest("q"), TODAY);
+
+        assertThat(response.results()).extracting(SearchResultItem::chunkId)
+                .containsExactly(lowerCosineFirst.chunkId().toString(),
+                        higherCosineSecond.chunkId().toString());
+        assertThat(response.results()).allSatisfy(
+                result -> assertThat(result.rerankScore()).isNull());
     }
 
     /**

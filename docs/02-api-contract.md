@@ -391,7 +391,7 @@ Header：`X-Admin-Token: <ADMIN_TOKEN>`
   "asOf": "2026-11-09",
   "chunkStrategy": "heading",
   "strategy": "hybrid",
-  "tookMs": 24,
+  "tookMs": 41,
   "results": [
     {
       "chunkId": "c8a5fcb2-...",
@@ -406,7 +406,8 @@ Header：`X-Admin-Token: <ADMIN_TOKEN>`
       "clausePath": "4  高血压诊断与评估 > 4.2  高血压诊断标准 > 4.2.1  诊断标准",
       "pageNo": 4,
       "pageEnd": 4,
-      "score": 0.01639344262295082,
+      "score": 0.03278688524590164,
+      "rerankScore": 0.2684944393590233,
       "content": "……",
       "citation": "《hypertension-2025》v2025（2025-01-01 生效） > 4.2.1  诊断标准 > 第4页"
     }
@@ -484,8 +485,21 @@ Header：`X-Admin-Token: <ADMIN_TOKEN>`
   必须带非空 `message`，不会出现空数组 + 空消息。
 - `content` 超过 2000 字符时截断，末尾加 `…`。
 - `pageNo` 是 chunk 起始页；`pageEnd` 是包含结束页（`>= pageNo`，Phase 6 additive）。固定窗口 chunk 可能跨页，citation 仍以 `pageNo` 为起始页，不编造结束页。
-- `score` 为**原始 RRF 分**（典型 0.016~0.033，不是 0~1 概率）；公式见 [11-retrieval-and-eval-spec.md](11-retrieval-and-eval-spec.md)，不同策略之间不可直接比较。相关性阈值使用 `diagnostics.topScore`（余弦），不要拿 `score` 卡阈值。
-- 结果按 score 降序；同分按 `docId + chunkIndex` 稳定排序。
+- `score` 为**原始 RRF 分**（典型 0.016~0.033，不是 0~1 概率）；公式见 [11-retrieval-and-eval-spec.md](11-retrieval-and-eval-spec.md) 3.3，不同策略之间不可直接比较。Phase 9 起它**仍然只表示 RRF 分**，不会变成 rerank 分。
+- `rerankScore`（Phase 9 新增，可空）：rerank 开启时是**实际排序键**，为
+  `score + wv*cos + wt*termCoverage + wh*titleMatch + wc*clause + wl*length`（各特征归一化到
+  0~1，权重见 `app.search.rerank.*`）；`app.search.rerank.enabled=false` 时为 `null`，
+  排序与 Phase 8 完全一致。没有向量候选时 `cos=0`；实现与公式见
+  [11-retrieval-and-eval-spec.md](11-retrieval-and-eval-spec.md) 3.5 与
+  [acceptance/phase9-rerank.md](acceptance/phase9-rerank.md)。
+- 排序：`enabled=true` 时按 `rerankScore` 降序，同分保持融合顺序（确定性稳定排序）；
+  `enabled=false` 时按 `score` 降序，同分按 `docId + chunkIndex` 稳定排序。**不要用 `score`
+  验证新排序**，它可能低于后一名（示例中第 1 名 `score=0.03279`，而 keyword 救回的候选
+  `score` 更高但 `rerankScore` 更低）。
+- rerank 只影响排序，不改变候选集合（同一融合候选池），也不改变拒答判定（仍只看向量余弦
+  `diagnostics.topScore`）。开关与权重：`app.search.rerank.enabled`、`top-n`、
+  `weight-vector-score`、`weight-term-coverage`、`weight-title-match`、`weight-clause`、
+  `weight-length`、`min-content-chars`。
 - 默认只返回 `ACTIVE` 且 `asOf` 在生效区间内的文档；`DRAFT` 永不返回。
 - `asOf` 为过去日期时，返回当时有效的版本（允许 `SUPERSEDED`），仍看 `effective_to`。
 - `includeSuperseded=true` 时，在当前时点也允许 `SUPERSEDED`，只要求 `effective_from <= asOf`，忽略 `effective_to`，用于“旧版怎么规定”的对比。
@@ -615,7 +629,8 @@ Header：`X-Admin-Token: <ADMIN_TOKEN>`
       "clausePath": "4  高血压诊断与评估 > 4.2  高血压诊断标准 > 4.2.1  诊断标准",
       "pageNo": 4,
       "pageEnd": 4,
-      "score": 0.01639344262295082,
+      "score": 0.03278688524590164,
+      "rerankScore": 0.2684944393590233,
       "content": "……",
       "citation": "《hypertension-2025》v2025（2025-01-01 生效） > 4.2.1  诊断标准 > 第4页"
     }

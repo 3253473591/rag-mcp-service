@@ -215,6 +215,34 @@ NONE      : 其余情况
 [docs/acceptance/phase7-abstain.md](acceptance/phase7-abstain.md)。标定脚本：
 `scripts/calibrate-abstain.ps1`（需先以 `ABSTAIN_ENABLED=false` 启动应用采集原始余弦）。
 
+### 3.5 Rerank（Phase 9）
+
+RRF 是名次融合，只保留每路的名次，丢掉了相似度的绝对幅度。Phase 8 的词项路因此出现一个
+真实分歧：一个「命中 2 个词项、向量排名也靠前」的 chunk 会拿到与向量首条同级的贡献，融合后
+的正确 chunk 反而降到第 2 名（Q12 / Q15 / Q17）。rerank 阶段对融合后的头部候选重新打分：
+
+```text
+rerankScore(d) = score(d) + wv * cos(d) + wt * coverage(d) + wh * title(d)
+               + wc * clause(d) + wl * length(d)
+
+score(d)   = 原始 RRF 分（语义不变）
+cos(d)     = 向量路余弦，clamp 到 [0,1]；不在向量路的候选记 0（没有语义证据）
+coverage(d)= 候选 content 命中的 query 词项数 / KeywordTerms.extract 的词项数
+title(d)   = SectionTitleMatcher.boost(...) / MAX_BOOST
+clause(d)  = clauseId 非空 ? 1 : 0
+length(d)  = min(1, contentChars / minContentChars)
+```
+
+- 权重全部非负，配置在 `app.search.rerank.*`；`enabled=false` 时完全回到 Phase 8 的行为
+  （标题 boost 回到 RRF 内部，结果按 `score` 排序，不返回 `rerankScore`）。
+- `enabled=true` 时标题 boost 不再参与融合排序，标题只作为 rerank 的一个信号，避免重复计分。
+- 只重排融合后的头部 `topN`（实际窗口 `max(topK, topN)`），排序键 `rerankScore` 降序；
+  同分保持融合顺序（稳定排序），所以所有权重为 0 时等价于原 RRF 顺序。
+- 确定性：输入（融合候选、query、配置）相同则输出必然相同；无模型、无网络、无时间依赖。
+- 对外契约：`score` 仍是原始 RRF 分；新增可空字段 `rerankScore`，开启时是排序依据，
+  关闭时为 `null`。详见 [02-api-contract.md](02-api-contract.md) 2.9。
+- 标定、消融、前后指标与限制见 [acceptance/phase9-rerank.md](acceptance/phase9-rerank.md)。
+
 ---
 
 ## 4. 评测集

@@ -43,6 +43,9 @@ public class SearchProperties {
     /** Phase 7 score-based abstention guard ({@code app.search.abstain.*}). */
     private AbstainProperties abstain = new AbstainProperties();
 
+    /** Phase 9 deterministic rerank stage ({@code app.search.rerank.*}). */
+    private RerankProperties rerank = new RerankProperties();
+
     public int getCandidateLimit() {
         return candidateLimit;
     }
@@ -97,5 +100,13 @@ public class SearchProperties {
 
     public void setAbstain(AbstainProperties abstain) {
         this.abstain = abstain;
+    }
+
+    public RerankProperties getRerank() {
+        return rerank;
+    }
+
+    public void setRerank(RerankProperties rerank) {
+        this.rerank = rerank;
     }
 }
