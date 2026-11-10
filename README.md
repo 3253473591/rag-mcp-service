@@ -14,6 +14,26 @@
 - 验收证据：[docs/acceptance/phase5-report.md](docs/acceptance/phase5-report.md)、[phase4-report](docs/acceptance/phase4-report.md)、[phase3-report](docs/acceptance/phase3-report.md)、[phase2-report](docs/acceptance/phase2-report.md)、[检索 smoke](docs/acceptance/phase2-smoke.md)、[MCP spike](docs/acceptance/phase2-mcp-spike.md)、[eval report](eval/report.md)、[perf](docs/acceptance/phase3-perf.json)、[concurrency](docs/acceptance/phase3-concurrency.json)。
 - Phase 1 交付保持不变：Flyway V1 六张表、PDF/DOCX/Markdown/TXT 解析 + Block 模型、FixedWindow/HeadingAware 两套切分、Ollama bge-m3 1024 维 embedding（批量、重试）、文档上传/列表/详情/删除 API、SHA-256 幂等与版本治理字段。
 
+[![CI](https://github.com/3253473591/rag-mcp-service/actions/workflows/ci.yml/badge.svg)](https://github.com/3253473591/rag-mcp-service/actions/workflows/ci.yml)
+[![Eval gate](https://github.com/3253473591/rag-mcp-service/actions/workflows/eval.yml/badge.svg)](https://github.com/3253473591/rag-mcp-service/actions/workflows/eval.yml)
+
+## CI 与评测门禁
+
+| 工作流 | 触发 | 内容 |
+|---|---|---|
+| [`ci.yml`](.github/workflows/ci.yml) | push / PR | `mvn test`（309 个，含 Testcontainers 集成测试）+ 前端 `npm ci` / `typecheck` / `build` |
+| [`eval.yml`](.github/workflows/eval.yml) | 每日 17:30 UTC + 手动 | pgvector + Ollama `bge-m3` → `seed-samples.ps1` 灌 3 篇样例 → `eval.ps1` 跑 40 条 QA |
+
+评测门禁的失败语义：**任何可回答题被拒答 → 退出码 2**；检索错误（embedding/DB/HTTP）→ 退出码 1。评测算子钉在 `-AsOf 2026-11-09`，gold 与版本窗口不随运行日期漂移。
+
+本地复现同一条链路：
+
+```powershell
+mvn spring-boot:run                                  # 另开终端；需 Postgres(pgvector) + Ollama bge-m3
+pwsh scripts/seed-samples.ps1 -BaseUrl http://127.0.0.1:8080
+pwsh scripts/eval.ps1 -AsOf 2026-11-09
+```
+
 ## 技术栈
 
 | 项 | 版本 / 说明 |
