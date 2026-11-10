@@ -1,5 +1,7 @@
 package com.lqx.ragmcp.api;
 
+import com.lqx.ragmcp.api.dto.PageCompileWikiRequest;
+import com.lqx.ragmcp.api.dto.PageCompileWikiResponse;
 import com.lqx.ragmcp.api.dto.PageDocumentStats;
 import com.lqx.ragmcp.api.dto.PageRebuildRequest;
 import com.lqx.ragmcp.api.dto.PageRebuildResponse;
@@ -8,6 +10,7 @@ import com.lqx.ragmcp.api.error.ApiException;
 import com.lqx.ragmcp.governance.AdminAuth;
 import com.lqx.ragmcp.page.PageIngestionService;
 import com.lqx.ragmcp.page.PageRepository;
+import com.lqx.ragmcp.wiki.WikiCompiler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,18 +23,25 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Administrative page-layer endpoints (Phase 10). Both require {@code X-Admin-Token} and reuse
- * {@link AdminAuth}; an unset admin token fails closed with 401 like the governance endpoints.
+ * Administrative page-layer endpoints (Phase 10) plus the Phase 11 LLM wiki compiler. All require
+ * {@code X-Admin-Token} and reuse {@link AdminAuth}; an unset admin token fails closed with 401
+ * like the governance endpoints.
  */
 @RestController
 @RequestMapping("/api/v1/admin/pages")
 public class PageAdminController {
 
+    private static final int MAX_CONCURRENCY = 16;
+
     private final PageIngestionService pageIngestionService;
+    private final WikiCompiler wikiCompiler;
     private final AdminAuth adminAuth;
 
-    public PageAdminController(PageIngestionService pageIngestionService, AdminAuth adminAuth) {
+    public PageAdminController(PageIngestionService pageIngestionService,
+                               WikiCompiler wikiCompiler,
+                               AdminAuth adminAuth) {
         this.pageIngestionService = pageIngestionService;
+        this.wikiCompiler = wikiCompiler;
         this.adminAuth = adminAuth;
     }
 
@@ -46,6 +56,20 @@ public class PageAdminController {
             @RequestBody(required = false) PageRebuildRequest request) {
         adminAuth.requireAuthorized(adminToken);
         return pageIngestionService.rebuild(parseDocIds(request));
+    }
+
+    /**
+     * Phase 11: compile leaf sections into LLM wiki pages ({@code kb_page.kind='wiki'}) and report
+     * per-section success/failure/skip plus token usage. Requires a configured
+     * {@code DEEPSEEK_API_KEY}; without it the call fails closed with
+     * {@code ERR-LLM_NOT_CONFIGURED} and writes nothing.
+     */
+    @PostMapping("/compile-wiki")
+    public PageCompileWikiResponse compileWiki(
+            @RequestHeader(value = AdminAuth.HEADER, required = false) String adminToken,
+            @RequestBody(required = false) PageCompileWikiRequest request) {
+        adminAuth.requireAuthorized(adminToken);
+        return wikiCompiler.compile(parseDocIds(request), parseConcurrency(request));
     }
 
     /** Read-only page statistics used by the Phase 10 acceptance report. */
@@ -78,11 +102,19 @@ public class PageAdminController {
     }
 
     private static List<UUID> parseDocIds(PageRebuildRequest request) {
-        if (request == null || request.docIds() == null || request.docIds().isEmpty()) {
+        return parseDocIds(request == null ? null : request.docIds());
+    }
+
+    private static List<UUID> parseDocIds(PageCompileWikiRequest request) {
+        return parseDocIds(request == null ? null : request.docIds());
+    }
+
+    private static List<UUID> parseDocIds(List<String> rawDocIds) {
+        if (rawDocIds == null || rawDocIds.isEmpty()) {
             return List.of();
         }
-        List<UUID> docIds = new ArrayList<>(request.docIds().size());
-        for (String raw : request.docIds()) {
+        List<UUID> docIds = new ArrayList<>(rawDocIds.size());
+        for (String raw : rawDocIds) {
             if (raw == null || raw.isBlank()) {
                 throw ApiException.validationField("docIds", "docIds 必须是合法 UUID");
             }
@@ -93,5 +125,17 @@ public class PageAdminController {
             }
         }
         return docIds;
+    }
+
+    private static Integer parseConcurrency(PageCompileWikiRequest request) {
+        if (request == null || request.concurrency() == null) {
+            return null;
+        }
+        int concurrency = request.concurrency();
+        if (concurrency < 1 || concurrency > MAX_CONCURRENCY) {
+            throw ApiException.validationField("concurrency",
+                    "concurrency 必须在 1.." + MAX_CONCURRENCY + " 之间");
+        }
+        return concurrency;
     }
 }

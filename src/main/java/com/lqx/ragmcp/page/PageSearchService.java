@@ -6,6 +6,7 @@ import com.lqx.ragmcp.api.dto.PageSearchRequest;
 import com.lqx.ragmcp.api.dto.PageSearchResponse;
 import com.lqx.ragmcp.api.dto.PageSearchResult;
 import com.lqx.ragmcp.api.dto.SearchRequest;
+import com.lqx.ragmcp.api.error.ApiException;
 import com.lqx.ragmcp.config.PageProperties;
 import com.lqx.ragmcp.search.QueryVectorProvider;
 import com.lqx.ragmcp.search.SearchQuery;
@@ -48,15 +49,31 @@ public class PageSearchService {
 
     PageSearchResponse search(PageSearchRequest request, LocalDate today) {
         long startedAt = System.nanoTime();
+        String kind = normalizeKind(request == null ? null : request.kind());
         SearchQuery query = SearchRequestValidator.validate(toSearchRequest(request), today);
         float[] vector = queryVectorProvider.embedQuery(query.query());
-        List<PageCandidate> candidates = pageRepository.vectorSearch(query, vector, query.topK());
+        List<PageCandidate> candidates = pageRepository.vectorSearch(query, vector, query.topK(), kind);
         List<PageSearchResult> results = candidates.stream().map(this::toResult).toList();
         long tookMs = Math.max(0L, (System.nanoTime() - startedAt) / 1_000_000L);
-        log.info("page search completed mode={} topK={} results={} tookMs={}",
-                query.versionMode(), query.topK(), results.size(), tookMs);
+        log.info("page search completed kind={} mode={} topK={} results={} tookMs={}",
+                kind, query.versionMode(), query.topK(), results.size(), tookMs);
         return new PageSearchResponse(query.query(), query.asOf().toString(), query.topK(),
                 tookMs, results);
+    }
+
+    /**
+     * Default is {@code aggregate} so every existing client keeps its Phase 10 behaviour. The
+     * value is validated here and applied as a SQL predicate in {@code PageRepository}.
+     */
+    static String normalizeKind(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return PageRepository.KIND_AGGREGATE;
+        }
+        String kind = raw.trim();
+        if (PageRepository.KIND_AGGREGATE.equals(kind) || PageRepository.KIND_WIKI.equals(kind)) {
+            return kind;
+        }
+        throw ApiException.validationField("kind", "kind 只支持 aggregate 或 wiki");
     }
 
     private static SearchRequest toSearchRequest(PageSearchRequest request) {

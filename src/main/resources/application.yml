@@ -105,6 +105,23 @@ app:
     # Best effort after upload: page failures are logged, never fail the upload. Rebuild endpoint
     # POST /api/v1/admin/pages/rebuild is the repair path.
     ingest-on-upload: ${PAGES_INGEST_ON_UPLOAD:true}
+  wiki:
+    # Phase 11: LLM-compiled wiki pages (kb_page.kind='wiki'). The key is only ever read from the
+    # environment; an empty value makes POST /api/v1/admin/pages/compile-wiki fail closed with
+    # ERR-LLM_NOT_CONFIGURED. Never put a real key in this file.
+    api-key: ${DEEPSEEK_API_KEY:}
+    base-url: ${DEEPSEEK_BASE_URL:https://api.deepseek.com}
+    model: ${DEEPSEEK_MODEL:deepseek-flash}
+    # The model reasons before answering; a generous output budget is required.
+    max-tokens: ${WIKI_LLM_MAX_TOKENS:8192}
+    temperature: 0.2
+    timeout-seconds: ${WIKI_LLM_TIMEOUT_SECONDS:120}
+    # Transport retries for 429/5xx/IO with exponential backoff (honours Retry-After).
+    max-attempts: ${WIKI_LLM_MAX_ATTEMPTS:3}
+    retry-backoff-ms: ${WIKI_LLM_RETRY_BACKOFF_MS:1000}
+    # One parse retry when a 200 response is not the required JSON object.
+    parse-retries: 1
+    concurrency: ${WIKI_COMPILE_CONCURRENCY:4}
   search:
     # Both routes return top 30 before RRF (docs/11-retrieval-and-eval-spec.md 3.3).
     candidate-limit: 30
