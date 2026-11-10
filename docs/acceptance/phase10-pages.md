@@ -173,3 +173,27 @@ chunk 侧数字与 Phase 9 基线（0.8286/0.9429/0.9714/0.8819）逐位一致�
 - 全量 `mvn -o test`：**Tests run: 293, Failures: 0, Errors: 0, Skipped: 1**（基线 274 + 新增 19：`PageAggregatorTest` 7、`PageIngestionServiceTest` 3、`PageSearchIntegrationTest` 5、`PageRebuildIntegrationTest` 4）。
 - 覆盖点：聚合（clause 分组/排序/标题去编号/超长按 chunk 切分/单块硬切/无 `clause_path` 的 `__root__`）、页面检索版本三种模式与 docIds/version 过滤（SQL 层）、rebuild 幂等（含清理 stale 行）、admin token fail-closed、上传钩子与失败只记日志、`SchemaIntegrationTest` 的 `kb_page` 表/列/索引/唯一约束/级联。
 - 未改：`eval/qa.jsonl`、`eval.ps1` 的匹配函数、`POST /api/v1/search` 的响应契约与排序、Phase 7 拒答阈值。
+
+## 8. 验收复核：口径不对称，"更差"的结论需要修正
+
+复核人（非实现者）独立复跑，复现了本文档的三行数字（chunk 0.8286/0.9429/0.9714/0.8819；page strict 0.7429/0.9143/0.9714/0.8367；page loose 0.8857/0.9714/1.0/0.9343），但发现 **page strict 与 chunk 基线用的不是同一条规则**：
+
+- `GoldMatcher`（产品口径）对「结果没有 `clauseId`」的情况会**回退到页码相交**——固定窗口 chunk 和部分 heading chunk 正是靠这条命中（见 `GoldMatcher` 注释第 3 条）；
+- page strict 在 gold 有 `clauseId` 时**不允许任何回退**，于是 `leafClauseId` 为空的 root/hub 页必然 miss。
+
+对两条路线分别按两种规则重算（同一 40 题、同一批响应、同一 asOf）：
+
+| 匹配规则 | chunk | page |
+|---|---|---|
+| 允许无 clauseId 回退（= 产品 `GoldMatcher` 口径） | 0.8286 / 0.9429 / 0.9714 / 0.8819 | **0.8286 / 0.9429 / 0.9714 / 0.8867** |
+| 不允许任何回退（文档原 strict） | 0.8286 / 0.9429 / 0.9714 / 0.8819 | **0.7429 / 0.9143 / 0.9714 / 0.8367** |
+
+结论修正：
+
+1. **在产品自身的匹配口径下，页面与 chunk 没有可测差异**（hit@1/3/5 完全相同，MRR +0.0048 属于 35 题的噪声）。页面粒度**不更好，也不更差**。
+2. 「更差 8.6pp」只在无回退口径下出现，原因是页面层的**设计缺陷**而非粒度效应：4 个 root/hub 页（2024「测试用摘编」、2025 `__root__`、2026 首页）没有 `clauseId` 却能进 top5，无回退时必然 miss。chunk 侧两种口径数字完全相同，说明这条规则只伤页面。
+3. §7.2 的归因（标题前缀、长叶小节稀释）仍然成立，但它们造成的是**排序抖动**，不是 8.6pp 的命中损失。
+
+后续建议（比原文更明确）：页面层不作为主检索；若要保留，先修 root 页（排除出检索，或给 root 页一个合成 `clauseId`），再按同一口径重跑 A/B。否则任何关于「页面更好/更差」的结论都不可信。
+
+复核命令：`scripts/eval-pages.ps1`（复现三行数字）+ 对 `/api/v1/search` 与 `/api/v1/pages/search` 分别施加上述两种规则重算。
