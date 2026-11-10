@@ -64,7 +64,7 @@ class PageIngestionServiceTest {
 
         assertThatCode(() -> service.ingestAfterUpload(document.id()))
                 .doesNotThrowAnyException();
-        verify(pageRepository, never()).deleteByDocumentId(any());
+        verify(pageRepository, never()).deleteByDocumentId(any(), any());
         verify(pageRepository, never()).insertPages(any());
     }
 

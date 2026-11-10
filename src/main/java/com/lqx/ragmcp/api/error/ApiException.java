@@ -77,6 +77,17 @@ public class ApiException extends RuntimeException {
         return new ApiException(ErrorCode.EMBEDDING_TIMEOUT, message);
     }
 
+    /** The LLM feature is explicitly disabled because no API key is configured. */
+    public static ApiException llmNotConfigured() {
+        return new ApiException(ErrorCode.LLM_NOT_CONFIGURED,
+                "LLM API key 未配置（DEEPSEEK_API_KEY），wiki 编译已拒绝");
+    }
+
+    /** The LLM API could not be reached or returned no usable answer. */
+    public static ApiException llmUnavailable(String message) {
+        return new ApiException(ErrorCode.LLM_UNAVAILABLE, message);
+    }
+
     public static ApiException dbUnavailable() {
         return new ApiException(ErrorCode.DB_UNAVAILABLE, "数据库暂时不可用，请稍后重试");
     }

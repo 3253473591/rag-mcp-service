@@ -9,6 +9,9 @@ import java.util.List;
  * page route is vector-only, so {@code strategy} / {@code chunkStrategy} / {@code detectConflicts}
  * do not apply. Validation and defaults are delegated to {@code SearchRequestValidator}, so the
  * error codes are the same as POST /api/v1/search.
+ *
+ * <p>{@code kind} is optional ({@code aggregate} by default, or {@code wiki}); Phase 11 adds it so
+ * the two page flavours can be queried independently. It is applied as a SQL predicate.</p>
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record PageSearchRequest(
@@ -17,5 +20,6 @@ public record PageSearchRequest(
         List<String> docIds,
         String version,
         String asOf,
-        Boolean includeSuperseded) {
+        Boolean includeSuperseded,
+        String kind) {
 }

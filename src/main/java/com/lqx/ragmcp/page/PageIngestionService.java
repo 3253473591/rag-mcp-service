@@ -91,7 +91,7 @@ public class PageIngestionService {
 
         List<PageRepository.PageInsert> inserts = embedPages(documentId, drafts);
         transactionTemplate.executeWithoutResult(status -> {
-            pageRepository.deleteByDocumentId(documentId);
+            pageRepository.deleteByDocumentId(documentId, PageRepository.KIND_AGGREGATE);
             pageRepository.insertPages(inserts);
         });
         long totalTokens = drafts.stream().mapToLong(PageDraft::tokenCount).sum();
@@ -169,7 +169,8 @@ public class PageIngestionService {
                         + embeddingService.dimension());
             }
             inserts.add(new PageRepository.PageInsert(
-                    UUID.randomUUID(), documentId, drafts.get(i), vector));
+                    UUID.randomUUID(), documentId, PageRepository.KIND_AGGREGATE, null,
+                    drafts.get(i), vector));
         }
         return inserts;
     }

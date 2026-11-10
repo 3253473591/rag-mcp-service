@@ -33,6 +33,12 @@ import java.util.UUID;
 @Repository
 public class PageRepository {
 
+    /** Deterministic pages produced by {@link PageAggregator} (Phase 10). */
+    public static final String KIND_AGGREGATE = "aggregate";
+
+    /** LLM-compiled pages produced by {@code WikiCompiler} (Phase 11). */
+    public static final String KIND_WIKI = "wiki";
+
     private static final Logger log = LoggerFactory.getLogger(PageRepository.class);
 
     private static final String PAGE_COLUMNS = """
@@ -89,8 +95,9 @@ public class PageRepository {
         return jdbc.queryForList("SELECT id FROM kb_document ORDER BY created_at, id", UUID.class);
     }
 
-    public int deleteByDocumentId(UUID documentId) {
-        return jdbc.update("DELETE FROM kb_page WHERE document_id = ?::uuid", documentId.toString());
+    public int deleteByDocumentId(UUID documentId, String kind) {
+        return jdbc.update("DELETE FROM kb_page WHERE document_id = ?::uuid AND kind = ?",
+                documentId.toString(), kind);
     }
 
     public void insertPages(List<PageInsert> pages) {
@@ -99,11 +106,12 @@ public class PageRepository {
         }
         String sql = """
                 INSERT INTO kb_page
-                  (id, document_id, page_key, clause_path, leaf_clause_id, clause_ids, title,
-                   page_index, part, body, token_count, page_no, page_end, source_chunk_ids,
-                   embedding)
+                  (id, document_id, kind, llm_model, page_key, clause_path, leaf_clause_id,
+                   clause_ids, title, page_index, part, body, token_count, page_no, page_end,
+                   source_chunk_ids, embedding)
                 VALUES
-                  (?::uuid, ?::uuid, ?, ?, ?, ?::text[], ?, ?, ?, ?, ?, ?, ?, ?::uuid[], ?::vector)
+                  (?::uuid, ?::uuid, ?, ?, ?, ?, ?, ?::text[], ?, ?, ?, ?, ?, ?, ?, ?::uuid[],
+                   ?::vector)
                 """;
         List<Object[]> batch = new ArrayList<>(pages.size());
         for (PageInsert page : pages) {
@@ -111,6 +119,8 @@ public class PageRepository {
             batch.add(new Object[]{
                     page.id().toString(),
                     page.documentId().toString(),
+                    page.kind(),
+                    page.llmModel(),
                     draft.pageKey(),
                     draft.clausePath(),
                     draft.leafClauseId(),
@@ -137,10 +147,12 @@ public class PageRepository {
     }
 
     /**
-     * Vector route over pages. Filters (status/effective interval/version/docIds) select the
-     * eligible documents in SQL before the HNSW candidate limit is applied.
+     * Vector route over pages of one {@code kind}. Filters (status/effective interval/version/
+     * docIds) select the eligible documents in SQL before the HNSW candidate limit is applied;
+     * {@code kind} is also a SQL predicate, never a post-fetch filter.
      */
-    public List<PageCandidate> vectorSearch(SearchQuery query, float[] embedding, int limit) {
+    public List<PageCandidate> vectorSearch(SearchQuery query, float[] embedding, int limit,
+                                            String kind) {
         String vectorLiteral = toVectorLiteral(embedding);
         List<PageCandidate> rows = transactionTemplate.execute(status -> {
             List<UUID> docIds = eligibleDocumentIds(query);
@@ -157,8 +169,9 @@ public class PageRepository {
             StringBuilder sql = new StringBuilder("SELECT ")
                     .append(PAGE_COLUMNS)
                     .append(", 1 - (p.embedding <=> ?::vector) AS route_score")
-                    .append(" FROM kb_page p WHERE p.document_id IN (");
+                    .append(" FROM kb_page p WHERE p.kind = ? AND p.document_id IN (");
             args.add(vectorLiteral);
+            args.add(kind);
             DocumentFilterSql.appendUuidPlaceholders(sql, args, docIds);
             sql.append(") ORDER BY p.embedding <=> ?::vector, p.document_id, p.page_index, p.part LIMIT ?");
             args.add(vectorLiteral);
@@ -170,8 +183,8 @@ public class PageRepository {
         if (rows == null) {
             throw ApiException.dbUnavailable();
         }
-        log.debug("page vector search candidates={} limit={} mode={}",
-                rows.size(), limit, query.versionMode());
+        log.debug("page vector search candidates={} limit={} kind={} mode={}",
+                rows.size(), limit, kind, query.versionMode());
         return rows;
     }
 
@@ -188,7 +201,7 @@ public class PageRepository {
                                COALESCE(avg(p.token_count), 0) AS avg_tokens,
                                COALESCE(max(p.token_count), 0) AS max_tokens
                         FROM kb_document d
-                        LEFT JOIN kb_page p ON p.document_id = d.id
+                        LEFT JOIN kb_page p ON p.document_id = d.id AND p.kind = 'aggregate'
                         GROUP BY d.id, d.doc_key, d.title, d.version, d.status, d.created_at
                         ORDER BY d.created_at, d.id
                         """,
@@ -327,7 +340,8 @@ public class PageRepository {
         return builder.toString();
     }
 
-    public record PageInsert(UUID id, UUID documentId, PageDraft draft, float[] embedding) {
+    public record PageInsert(UUID id, UUID documentId, String kind, String llmModel,
+                             PageDraft draft, float[] embedding) {
     }
 
     public record DocumentPageStats(
