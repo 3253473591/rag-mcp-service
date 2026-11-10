@@ -1,5 +1,6 @@
 package com.lqx.ragmcp.eval;
 
+import com.lqx.ragmcp.api.dto.AbstainDiagnostics;
 import com.lqx.ragmcp.api.dto.SearchRequest;
 import com.lqx.ragmcp.api.dto.SearchResponse;
 import com.lqx.ragmcp.api.dto.SearchResultItem;
@@ -85,9 +86,46 @@ class EvalServiceTest {
         assertThat(captor.getAllValues().get(1).asOf()).isEqualTo("2026-11-09");
     }
 
+    @Test
+    void abstainedUnanswerableCountsAsCorrectWithoutChangingGoldOrMatching() {
+        EvalQaItem answerable = new EvalQaItem("Q1", "诊室血压标准", true,
+                new EvalGold("hypertension-guideline", "2025", "4.2.1", List.of(4, 4)),
+                null, null);
+        EvalQaItem noAnswer = new EvalQaItem("N1", "公司年假有多少天？", false, null, null, null);
+        EvalDataset dataset = EvalDataset.of(List.of(answerable, noAnswer));
+
+        when(searchService.search(any(SearchRequest.class))).thenAnswer(invocation -> {
+            SearchRequest request = invocation.getArgument(0);
+            if (request.query().startsWith("公司")) {
+                return response(request, List.of(), true, "NO_MATCH",
+                        com.lqx.ragmcp.search.AnswerFallback.NO_MATCH_MESSAGE);
+            }
+            return response(request, List.of(result("hypertension-guideline", "4.2.1", 4)));
+        });
+
+        EvalSummary summary = new EvalService(searchService)
+                .run(dataset, ChunkStrategy.HEADING, LocalDate.of(2026, 11, 9), 5).summary();
+
+        // The unanswerable question is recorded by its returned result count (0), so abstention is
+        // naturally correct. The gold set and matching rules are untouched.
+        assertThat(summary.falsePositiveRate()).isZero();
+        assertThat(summary.noAnswerAccuracy()).isEqualTo(1.0);
+        assertThat(summary.hitAt5()).isEqualTo(1.0);
+    }
+
     private static SearchResponse response(SearchRequest request, List<SearchResultItem> results) {
+        return response(request, results, false, null, null);
+    }
+
+    private static SearchResponse response(SearchRequest request, List<SearchResultItem> results,
+                                           boolean abstained, String abstainReason, String message) {
+        AbstainDiagnostics diagnostics = new AbstainDiagnostics(
+                0.0d, 0.0d, 0.0d, results.size(), 0,
+                0.55d, 0.63d, 8, 0.02d, true,
+                abstained ? abstainReason : "NONE", List.of());
         return new SearchResponse(request.query(), LocalDate.parse(request.asOf()),
-                request.chunkStrategy(), request.strategy(), 1L, results, List.of());
+                request.chunkStrategy(), request.strategy(), 1L, results, List.of(),
+                abstained, abstainReason, message, diagnostics);
     }
 
     private static SearchResultItem result(String docKey, String clauseId, Integer pageNo) {

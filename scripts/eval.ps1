@@ -168,6 +168,10 @@ foreach ($strategy in $ChunkStrategies) {
     $mrrSum = 0.0
     $unanswerableAnswered = 0
     $falsePositive = 0
+    $abstainedAnswerable = 0
+    $abstainedUnanswerable = 0
+    $noMatch = 0
+    $tooNoisy = 0
     $details = @()
 
     foreach ($row in $qaRows) {
@@ -209,6 +213,18 @@ foreach ($strategy in $ChunkStrategies) {
                 $serverMs = [double]$response.tookMs
                 $serverLatencies.Add($serverMs)
             }
+            $abstained = [bool]$response.abstained
+            $abstainReason = ''
+            if ($null -ne $response.abstainReason) { $abstainReason = [string]$response.abstainReason }
+            $topScore = $null
+            if ($null -ne $response.diagnostics -and $null -ne $response.diagnostics.topScore) {
+                $topScore = [double]$response.diagnostics.topScore
+            }
+            if ($abstained) {
+                if ($row.answerable -eq $true) { $abstainedAnswerable++ } else { $abstainedUnanswerable++ }
+                if ($abstainReason -eq 'NO_MATCH') { $noMatch++ }
+                elseif ($abstainReason -eq 'TOO_NOISY') { $tooNoisy++ }
+            }
             if ($row.answerable -eq $true) {
                 $answered++
                 $rank = Find-Rank -Results $results -Gold $row.gold
@@ -218,6 +234,7 @@ foreach ($strategy in $ChunkStrategies) {
                 if ($rank -ge 1) { $mrrSum += 1.0 / $rank }
                 $details += [pscustomobject]@{ id = $row.id; answerable = $true;
                     rank = $rank; results = $results.Count; error = $false; errorMessage = '';
+                    abstained = $abstained; abstainReason = $abstainReason; topScore = $topScore;
                     latencyMs = $latencyMs; serverMs = $serverMs; asOf = $effectiveAsOf;
                     includeSuperseded = $effectiveInclude; topCitation = $topCitation;
                     topResults = $top }
@@ -226,6 +243,7 @@ foreach ($strategy in $ChunkStrategies) {
                 if ($results.Count -gt 0) { $falsePositive++ }
                 $details += [pscustomobject]@{ id = $row.id; answerable = $false;
                     rank = 0; results = $results.Count; error = $false; errorMessage = '';
+                    abstained = $abstained; abstainReason = $abstainReason; topScore = $topScore;
                     latencyMs = $latencyMs; serverMs = $serverMs; asOf = $effectiveAsOf;
                     includeSuperseded = $effectiveInclude; topCitation = $topCitation;
                     topResults = $top }
@@ -236,6 +254,7 @@ foreach ($strategy in $ChunkStrategies) {
             if ($row.answerable -eq $true) { $answerableErrors++ } else { $unanswerableErrors++ }
             $details += [pscustomobject]@{ id = $row.id; answerable = [bool]($row.answerable -eq $true);
                 rank = 0; results = 0; error = $true; errorMessage = $_.Exception.Message;
+                abstained = $false; abstainReason = ''; topScore = $null;
                 latencyMs = [Math]::Round($sw.Elapsed.TotalMilliseconds, 2); serverMs = $null;
                 asOf = $effectiveAsOf; includeSuperseded = $effectiveInclude;
                 topCitation = ''; topResults = @() }
@@ -273,6 +292,10 @@ foreach ($strategy in $ChunkStrategies) {
         unansweredCount = $unanswerableQuestions.Count
         falsePositiveRate = $falsePositiveRate
         noAnswerAccuracy = $noAnswerAccuracy
+        abstainedAnswerable = $abstainedAnswerable
+        abstainedUnanswerable = $abstainedUnanswerable
+        noMatch = $noMatch
+        tooNoisy = $tooNoisy
         hit5ThresholdMet = if ($answered -gt 0) { ($hit5 / [double]$answered) -ge 0.85 } else { $false }
         mrrThresholdMet = if ($answered -gt 0) { ($mrrSum / [double]$answered) -ge 0.65 } else { $false }
     }
@@ -282,6 +305,7 @@ foreach ($strategy in $ChunkStrategies) {
             answerable = $d.answerable; rank = $d.rank; results = $d.results;
             error = $d.error; errorMessage = $d.errorMessage; latencyMs = $d.latencyMs;
             serverMs = $d.serverMs; asOf = $d.asOf; includeSuperseded = $d.includeSuperseded;
+            abstained = $d.abstained; abstainReason = $d.abstainReason; topScore = $d.topScore;
             topCitation = $d.topCitation; topResults = $d.topResults }
     }
     Write-Host ("{0}: hit@1={1} hit@3={2} hit@5={3} MRR={4} p50={5}ms p95={6}ms clientP95={7}ms errors={8}" -f
@@ -336,12 +360,13 @@ $lines += @(
     '',
     'Unanswerable (reported separately, not mixed into hit@k):',
     '',
-    '| chunkStrategy | falsePositiveRate | noAnswerAccuracy | errors |',
-    '|---|---:|---:|---:|'
+    '| chunkStrategy | falsePositiveRate | noAnswerAccuracy | abstained (NO_MATCH / TOO_NOISY) | answerableAbstained | errors |',
+    '|---|---:|---:|---|---:|---:|'
 )
 foreach ($r in $strategyReports) {
-    $lines += ('| {0} | {1} | {2} | {3} |' -f
-        $r.chunkStrategy, $r.falsePositiveRate, $r.noAnswerAccuracy, $r.unanswerableErrors)
+    $lines += ('| {0} | {1} | {2} | {3} / {4} | {5} | {6} |' -f
+        $r.chunkStrategy, $r.falsePositiveRate, $r.noAnswerAccuracy,
+        $r.noMatch, $r.tooNoisy, $r.abstainedAnswerable, $r.unanswerableErrors)
 }
 $lines += @(
     '',
@@ -352,6 +377,10 @@ $lines += @(
     'p50/p95 are the app-reported server-side retrieval time (`tookMs`, includes query',
     'embedding + SQL + RRF). Client wall-clock p50/p95 (including PowerShell/HTTP) is in',
     '`report.json` as `clientP50Ms`/`clientP95Ms`.',
+    '',
+    'Gate: this script exits 1 on any retrieval error, and exits 2 when any answerable',
+    'question was abstained (`answerableAbstained > 0`). False abstention is a regression;',
+    'see docs/acceptance/phase7-abstain.md before changing `app.search.abstain.*`.',
     ''
 )
 $failed = @($allDetails | Where-Object { $_.error -eq $true })
@@ -369,12 +398,13 @@ if ($failed.Count -gt 0) {
 $lines += @(
     '## Per-question detail',
     '',
-    '| strategy | id | answerable | rank | results | server(ms) | client(ms) | error | asOf | top citation |',
-    '|---|---|---|---:|---:|---:|---:|---|---|---|'
+    '| strategy | id | answerable | rank | results | abstained | reason | topScore | server(ms) | client(ms) | error | asOf | top citation |',
+    '|---|---|---|---:|---:|---|---|---:|---:|---:|---|---|---|'
 )
 foreach ($d in $allDetails) {
-    $lines += ('| {0} | {1} | {2} | {3} | {4} | {5} | {6} | {7} | {8} | {9} |' -f
-        $d.chunkStrategy, $d.id, $d.answerable, $d.rank, $d.results, $d.serverMs,
+    $lines += ('| {0} | {1} | {2} | {3} | {4} | {5} | {6} | {7} | {8} | {9} | {10} | {11} | {12} |' -f
+        $d.chunkStrategy, $d.id, $d.answerable, $d.rank, $d.results, $d.abstained,
+        (ConvertTo-MdCell $d.abstainReason), (ConvertTo-MdCell $d.topScore), $d.serverMs,
         $d.latencyMs, $d.error, $d.asOf, (ConvertTo-MdCell $d.topCitation))
 }
 $lines += @(
@@ -392,4 +422,16 @@ Write-Host "json:   $ReportJson"
 $httpClient.Dispose()
 $totalErrors = ($strategyReports | Measure-Object -Property errors -Sum).Sum
 if ($totalErrors -gt 0) { exit 1 }
+
+# Phase 7 gate: abstaining on an answerable question is a regression, not a tuning knob.
+# docs/05-non-functional.md 2.5 requires answerableAbstained == 0; the abstain thresholds
+# (app.search.abstain.*) are calibrated against the current corpus + embedding, so a corpus
+# change that pushes real answers below min-top-score would otherwise pass silently.
+$totalAbstainedAnswerable = ($strategyReports | Measure-Object -Property abstainedAnswerable -Sum).Sum
+if ($totalAbstainedAnswerable -gt 0) {
+    Write-Host ("FAIL: {0} answerable question(s) were abstained (false abstention)." -f $totalAbstainedAnswerable)
+    Write-Host "Abstain thresholds are corpus/embedding specific; re-calibrate with scripts/calibrate-abstain.ps1"
+    Write-Host "and see docs/acceptance/phase7-abstain.md before changing app.search.abstain.*."
+    exit 2
+}
 exit 0

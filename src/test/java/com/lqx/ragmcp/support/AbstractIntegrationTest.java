@@ -46,6 +46,11 @@ public abstract class AbstractIntegrationTest {
         registry.add("spring.datasource.username", POSTGRES::getUsername);
         registry.add("spring.datasource.password", POSTGRES::getPassword);
         registry.add("spring.ai.ollama.base-url", () -> "http://127.0.0.1:1");
+        // The fake embedding is a deterministic random unit vector with no semantic relationship
+        // to the text, so cosine thresholds are meaningless here. Score-based abstention is covered
+        // by AbstainGuardTest/SearchServiceTest; integration tests exercise the unchanged
+        // non-abstained path.
+        registry.add("app.search.abstain.enabled", () -> "false");
         // Tests assert delegate call behavior through FakeEmbeddingService.FAIL_NEXT; a shared
         // query cache could satisfy a repeated query without calling the delegate. Batching stays
         // on so the production query path is exercised.

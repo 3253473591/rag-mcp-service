@@ -2,6 +2,7 @@ package com.lqx.ragmcp.mcp;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lqx.ragmcp.api.dto.AbstainDiagnostics;
 import com.lqx.ragmcp.api.dto.SearchRequest;
 import com.lqx.ragmcp.api.dto.SearchResponse;
 import com.lqx.ragmcp.api.dto.SearchResultItem;
@@ -14,6 +15,8 @@ import com.lqx.ragmcp.document.DocumentService;
 import com.lqx.ragmcp.governance.MandatePolicy;
 import com.lqx.ragmcp.governance.MandateRecord;
 import com.lqx.ragmcp.governance.WorkItemRepository;
+import com.lqx.ragmcp.search.AbstainReason;
+import com.lqx.ragmcp.search.AnswerFallback;
 import com.lqx.ragmcp.search.SearchRequestValidator;
 import com.lqx.ragmcp.search.SearchService;
 import io.modelcontextprotocol.spec.McpError;
@@ -70,17 +73,20 @@ public class McpToolService {
     private final DocumentService documentService;
     private final McpAuditService auditService;
     private final ObjectMapper objectMapper;
+    private final AnswerFallback answerFallback;
 
     public McpToolService(WorkItemRepository workItemRepository,
                           SearchService searchService,
                           DocumentService documentService,
                           McpAuditService auditService,
-                          ObjectMapper objectMapper) {
+                          ObjectMapper objectMapper,
+                          AnswerFallback answerFallback) {
         this.workItemRepository = workItemRepository;
         this.searchService = searchService;
         this.documentService = documentService;
         this.auditService = auditService;
         this.objectMapper = objectMapper;
+        this.answerFallback = answerFallback;
     }
 
     public McpSchema.CallToolResult searchKnowledge(Map<String, Object> arguments) {
@@ -138,9 +144,12 @@ public class McpToolService {
                         () -> invalidParams("chunkStrategy 只允许 fixed / heading"));
 
         // allowedDocIds == [] means "no document": do not call retrieval at all. Returning an
-        // empty result is the least surprising shape and cannot leak any document.
+        // empty result is the least surprising shape and cannot leak any document. It also
+        // satisfies the Phase 7 contract: empty results always carry an honest message.
         if (mandate.allowedDocIds() != null && mandate.allowedDocIds().isEmpty()) {
-            return successResult(Map.of("results", List.of(), "conflicts", List.of()));
+            return successResult(searchBody(List.of(), true, AbstainReason.NO_MATCH.name(),
+                    answerFallback.fallback(null, AbstainReason.NO_MATCH),
+                    AbstainDiagnostics.emptyNoMatch()));
         }
 
         SearchRequest request = new SearchRequest(
@@ -155,16 +164,52 @@ public class McpToolService {
                 detectConflicts);
 
         SearchResponse response = searchService.search(request);
-        List<SearchResultItem> results = response.results();
+        List<SearchResultItem> results = response.results() == null
+                ? List.of()
+                : response.results();
         if (results.size() > MAX_MCP_RESULTS) {
             results = results.subList(0, MAX_MCP_RESULTS);
         }
 
+        AbstainReason reason = response.abstainReason() == null
+                ? AbstainReason.NONE
+                : AbstainReason.valueOf(response.abstainReason());
+        if (results.isEmpty() && reason == AbstainReason.NONE) {
+            // Defensive: an upstream empty result must still be presented as NO_MATCH rather than
+            // as "empty results + empty message".
+            reason = AbstainReason.NO_MATCH;
+        }
+        boolean abstained = reason.abstained();
+        // This is the current system fallback call point. When a generation layer is added, its
+        // text should be passed as the first argument; a blank model answer then becomes the
+        // deterministic abstain message instead of an empty reply. No LLM is wired in Phase 7.
+        String message = abstained ? answerFallback.fallback(response.message(), reason) : null;
+        AbstainDiagnostics diagnostics = response.diagnostics() == null
+                ? AbstainDiagnostics.emptyNoMatch()
+                : response.diagnostics();
+        if (!reason.name().equals(diagnostics.reason())) {
+            diagnostics = diagnostics.withReason(reason.name());
+        }
+
+        return successResult(searchBody(results, abstained, abstained ? reason.name() : null,
+                message, diagnostics));
+    }
+
+    private Map<String, Object> searchBody(List<SearchResultItem> results,
+                                           boolean abstained,
+                                           String abstainReason,
+                                           String message,
+                                           AbstainDiagnostics diagnostics) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("results", results);
         // P0 ignores detectConflicts (docs/02-api-contract.md 3.2); always return an empty array.
         body.put("conflicts", List.of());
-        return successResult(body);
+        // Phase 7 additive fields. They are present on both abstained and normal responses.
+        body.put("abstained", abstained);
+        body.put("abstainReason", abstainReason);
+        body.put("message", message);
+        body.put("diagnostics", diagnostics);
+        return body;
     }
 
     // ---------------------------------------------------------------------------------------

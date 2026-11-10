@@ -152,6 +152,54 @@ rank_i 从 1 开始
 
 > 之前 API 示例写的 `score: 0.83` 是错的；已改为 RRF 原始分量级。
 
+### 3.4 可拒答的检索守卫（Phase 7）
+
+`score` 是 RRF 名次分（top-1 恒为 `1/61`），不能用于相关性阈值。守卫改用 `SearchCandidate.routeScore()`：
+它在向量路是余弦相似度 `1 - (c.embedding <=> ?)`，在 keyword 路是 trigram 相似度。
+**判定只使用向量路的余弦值**；`strategy=keyword` 时没有余弦，守卫保持中性（空结果仍走系统文案兜底）。
+
+判定是服务端的确定性函数，输入候选余弦列表，输出 `NONE / NO_MATCH / TOO_NOISY`，不经过模型或 prompt：
+
+```text
+top1   = 最大余弦（无候选时为 0）
+top2   = 第二大余弦（不足两个候选时为 0）
+dense  = 余弦 >= minTopScore 的候选数
+
+NO_MATCH  : 候选为空，或 top1 < minTopScore
+TOO_NOISY : top1 >= minTopScore 且 top1 < highConfidenceTopScore
+            且 dense >= minDenseCandidates 且 (top1 - top2) < minScoreGap
+NONE      : 其余情况
+```
+
+两条原因不是同一个分支：
+
+- `NO_MATCH` 回答“知识库里没有足够相关的资料”（绝对下限）；
+- `TOO_NOISY` 回答“高分候选很多且彼此差距很小，排序无法判断”（相对区分度/噪声）。
+
+配置（`app.search.abstain.*`，默认值来自 `eval/qa.jsonl` 标定）：
+
+| 配置 | 默认 | 说明 |
+|---|---:|---|
+| `enabled` | `true` | 关闭后不按分数拒答；空结果仍必须有系统文案 |
+| `min-top-score` | `0.55` | top-1 余弦绝对下限 |
+| `high-confidence-top-score` | `0.63` | 灰色区上界；达到即视为 top-1 足够自信 |
+| `min-dense-candidates` | `8` | 触发 `TOO_NOISY` 所需的高分候选数 |
+| `min-score-gap` | `0.02` | 触发 `TOO_NOISY` 的 top1-top2 最大差距 |
+
+约定：
+
+- 拒答时 `results` 必须为空数组，不把低质量候选当结果返回；
+- 响应必须带 `abstained: true`、`abstainReason`、非空 `message` 和可审计 `diagnostics`
+  （至少 `topScore`、`candidateCount`、`reason`，另含 `secondScore`、`scoreGap`、`denseCount`、
+  阈值快照与降序 `candidateScores`）；
+- `message` 是系统常量，不允许模型改写；
+- 拒答默认开启，不新增请求参数来触发/关闭；调用方无法通过 prompt 或 tool description 影响判定；
+- 任何响应都不允许出现 `results` 为空且 `message` 为空；`enabled=false` 时也同样兜底。
+
+标定与验收：阈值扫描、两条原因的实测 JSON、前后指标和剩余误报见
+[docs/acceptance/phase7-abstain.md](acceptance/phase7-abstain.md)。标定脚本：
+`scripts/calibrate-abstain.ps1`（需先以 `ABSTAIN_ENABLED=false` 启动应用采集原始余弦）。
+
 ---
 
 ## 4. 评测集
@@ -201,6 +249,12 @@ MRR   = 第一条命中结果的 1/rank 的均值；未命中计 0
 falsePositiveRate = 返回结果数 > 0 的比例
 noAnswerAccuracy  = 结果为空的比例
 ```
+
+Phase 7 起，拒答响应的 `results` 为空，因此不可回答题被拒答会自然计入“正确”，不需要改
+`EvalService`/`EvalScorer` 的判定口径，也不能改 gold 或匹配规则来“制造”这个结果。对可回答题，
+被拒答按 miss（rank 0）计入 hit@k/MRR；标定要求 answerable 的 hit@5 不低于 0.8857、MRR 下降不超过
+0.01，达不到时优先牺牲拒答率，不能牺牲可回答题召回。当前实测见
+[docs/acceptance/phase7-abstain.md](acceptance/phase7-abstain.md)。
 
 失败/超时：
 

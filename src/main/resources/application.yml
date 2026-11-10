@@ -104,6 +104,19 @@ app:
     keyword-max-chars: 200
     # pgvector >= 0.8: mitigate HNSW under-return when metadata filters are present.
     hnsw-iterative-scan: true
+    # Phase 7 score-based abstention (docs/11-retrieval-and-eval-spec.md 3.4).
+    # Defaults are calibrated on eval/qa.jsonl; see docs/acceptance/phase7-abstain.md.
+    # enabled=false disables the score thresholds, but an empty result still gets a message.
+    abstain:
+      enabled: ${ABSTAIN_ENABLED:true}
+      # Absolute floor for the top-1 cosine (bge-m3).
+      min-top-score: ${ABSTAIN_MIN_TOP_SCORE:0.55}
+      # Gray zone upper bound: at/above this the top-1 is treated as confident.
+      high-confidence-top-score: ${ABSTAIN_HIGH_CONFIDENCE_TOP_SCORE:0.63}
+      # TOO_NOISY requires this many candidates at/above min-top-score.
+      min-dense-candidates: ${ABSTAIN_MIN_DENSE_CANDIDATES:8}
+      # TOO_NOISY requires top-1 minus top-2 below this gap.
+      min-score-gap: ${ABSTAIN_MIN_SCORE_GAP:0.02}
 
 logging:
   level:
