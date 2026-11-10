@@ -97,6 +97,14 @@ app:
     query-queue-capacity: ${QUERY_EMBEDDING_QUEUE_CAPACITY:200}
     query-max-concurrent-batches: ${QUERY_EMBEDDING_MAX_CONCURRENT_BATCHES:3}
     query-wait-timeout-ms: ${QUERY_EMBEDDING_WAIT_TIMEOUT_MS:130000}
+  pages:
+    # Phase 10: deterministic chunk -> page aggregation (no LLM). A leaf section whose body
+    # exceeds max-tokens is split at chunk boundaries into part=1..n; each part is embedded.
+    max-tokens: ${PAGES_MAX_TOKENS:1200}
+    max-content-chars: ${PAGES_MAX_CONTENT_CHARS:2000}
+    # Best effort after upload: page failures are logged, never fail the upload. Rebuild endpoint
+    # POST /api/v1/admin/pages/rebuild is the repair path.
+    ingest-on-upload: ${PAGES_INGEST_ON_UPLOAD:true}
   search:
     # Both routes return top 30 before RRF (docs/11-retrieval-and-eval-spec.md 3.3).
     candidate-limit: 30

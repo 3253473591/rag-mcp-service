@@ -8,6 +8,7 @@ import com.lqx.ragmcp.chunk.ChunkingService;
 import com.lqx.ragmcp.chunk.PreparedChunk;
 import com.lqx.ragmcp.config.UploadProperties;
 import com.lqx.ragmcp.embedding.EmbeddingService;
+import com.lqx.ragmcp.page.PageIngestionService;
 import com.lqx.ragmcp.parse.Block;
 import com.lqx.ragmcp.parse.DocumentParserRegistry;
 import com.lqx.ragmcp.parse.SourceType;
@@ -48,6 +49,7 @@ public class DocumentService {
     private final DocumentParserRegistry parserRegistry;
     private final ChunkingService chunkingService;
     private final EmbeddingService embeddingService;
+    private final PageIngestionService pageIngestionService;
     private final UploadProperties uploadProperties;
     private final TransactionTemplate transactionTemplate;
     private final ObjectMapper objectMapper;
@@ -56,6 +58,7 @@ public class DocumentService {
                            DocumentParserRegistry parserRegistry,
                            ChunkingService chunkingService,
                            EmbeddingService embeddingService,
+                           PageIngestionService pageIngestionService,
                            UploadProperties uploadProperties,
                            TransactionTemplate transactionTemplate,
                            ObjectMapper objectMapper) {
@@ -63,6 +66,7 @@ public class DocumentService {
         this.parserRegistry = parserRegistry;
         this.chunkingService = chunkingService;
         this.embeddingService = embeddingService;
+        this.pageIngestionService = pageIngestionService;
         this.uploadProperties = uploadProperties;
         this.transactionTemplate = transactionTemplate;
         this.objectMapper = objectMapper;
@@ -128,6 +132,11 @@ public class DocumentService {
             log.info("document ingested docId={} docKey={} strategies={} chunks={} tookMs={}",
                     result.docId(), result.document().docKey(),
                     result.strategies(), result.totalChunks(), result.tookMs());
+            // Phase 10: page aggregation runs after the document transaction committed. It is
+            // best effort by contract (PageIngestionService logs and swallows failures); the
+            // repair path is POST /api/v1/admin/pages/rebuild. Duplicate uploads deliberately do
+            // not rebuild: they are a no-op by contract and the checksum is the identity.
+            pageIngestionService.ingestAfterUpload(result.docId());
             return result;
         } catch (DuplicateKeyException ex) {
             Optional<DocumentRecord> concurrent = repository.findByChecksum(checksum);

@@ -4,11 +4,9 @@ import com.lqx.ragmcp.api.dto.AbstainDiagnostics;
 import com.lqx.ragmcp.api.dto.SearchRequest;
 import com.lqx.ragmcp.api.dto.SearchResponse;
 import com.lqx.ragmcp.api.dto.SearchResultItem;
-import com.lqx.ragmcp.api.error.ApiException;
 import com.lqx.ragmcp.config.AbstainProperties;
 import com.lqx.ragmcp.config.RerankProperties;
 import com.lqx.ragmcp.config.SearchProperties;
-import com.lqx.ragmcp.embedding.QueryEmbeddingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -30,18 +28,18 @@ public class SearchService {
     private static final Logger log = LoggerFactory.getLogger(SearchService.class);
     private static final int MAX_CONTENT_CHARS = 2000;
 
-    private final QueryEmbeddingService queryEmbeddingService;
+    private final QueryVectorProvider queryVectorProvider;
     private final SearchRepository searchRepository;
     private final SearchProperties properties;
     private final AbstainGuard abstainGuard;
     private final AnswerFallback answerFallback;
 
-    public SearchService(QueryEmbeddingService queryEmbeddingService,
+    public SearchService(QueryVectorProvider queryVectorProvider,
                          SearchRepository searchRepository,
                          SearchProperties properties,
                          AbstainGuard abstainGuard,
                          AnswerFallback answerFallback) {
-        this.queryEmbeddingService = queryEmbeddingService;
+        this.queryVectorProvider = queryVectorProvider;
         this.searchRepository = searchRepository;
         this.properties = properties;
         this.abstainGuard = abstainGuard;
@@ -159,30 +157,7 @@ public class SearchService {
     }
 
     private float[] embedQuery(String query) {
-        final float[] vector;
-        try {
-            vector = queryEmbeddingService.embedQuery(query);
-        } catch (ApiException ex) {
-            throw ex;
-        } catch (RuntimeException ex) {
-            log.warn("query embedding failed type={}", ex.getClass().getSimpleName());
-            throw ApiException.embeddingUnavailable("embedding 服务不可用，请确认 Ollama 与 bge-m3 已就绪");
-        }
-        if (vector == null || vector.length != queryEmbeddingService.dimension()) {
-            throw ApiException.embeddingUnavailable(
-                    "embedding 维度不是 " + queryEmbeddingService.dimension() + "，请检查模型配置");
-        }
-        boolean nonZero = false;
-        for (float value : vector) {
-            if (value != 0.0f) {
-                nonZero = true;
-                break;
-            }
-        }
-        if (!nonZero) {
-            throw ApiException.embeddingUnavailable("embedding 返回零向量，拒绝检索");
-        }
-        return vector;
+        return queryVectorProvider.embedQuery(query);
     }
 
     /**
