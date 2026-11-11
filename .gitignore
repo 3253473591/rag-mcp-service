@@ -22,8 +22,11 @@ logs/
 pgdata/
 data/
 
-# Sample corpus (do not commit PDFs)
+# Sample corpus: official guidelines are fetched by scripts/fetch-samples.ps1 (SHA-256 verified);
+# the project-generated 2024 test excerpt and 2026 typeset copy are committed and reproducible.
 docs/samples/*.pdf
+!docs/samples/hypertension-2024.pdf
+!docs/samples/enterprise-policy-2026.pdf
 
 # Generated acceptance output
 docs/acceptance/phase1-last-run.md
