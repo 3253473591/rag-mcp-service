@@ -62,8 +62,11 @@ jobs:
 
       - name: install ollama
         run: |
-          curl -fsSL https://ollama.com/download/ollama-linux-amd64.tgz -o /tmp/ollama.tgz
-          sudo tar -C /usr -xzf /tmp/ollama.tgz
+          # ollama.com serves .tar.zst now (the old .tgz URL is 404); follow the latest release.
+          sudo apt-get update -qq
+          sudo apt-get install -y zstd
+          curl -fsSL https://github.com/ollama/ollama/releases/latest/download/ollama-linux-amd64.tar.zst -o /tmp/ollama.tar.zst
+          zstd -d -c /tmp/ollama.tar.zst | sudo tar -C /usr -xf -
           ollama --version
 
       - name: start ollama and pull bge-m3
