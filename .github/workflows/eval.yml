@@ -98,7 +98,7 @@ jobs:
           tail -n 200 /tmp/app.log
           exit 1
 
-      - name: fetch official sample (not redistributed)
+      - name: verify sample corpus checksums
         run: pwsh -NoProfile -File scripts/fetch-samples.ps1
 
       - name: seed sample corpus
