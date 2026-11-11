@@ -22,11 +22,10 @@ logs/
 pgdata/
 data/
 
-# Sample corpus: official guidelines are fetched by scripts/fetch-samples.ps1 (SHA-256 verified);
-# the project-generated 2024 test excerpt and 2026 typeset copy are committed and reproducible.
-docs/samples/*.pdf
-!docs/samples/hypertension-2024.pdf
-!docs/samples/enterprise-policy-2026.pdf
+# Sample corpus: the three eval documents (2024/2025/2026) are committed so the eval gate is
+# reproducible and offline; scripts/fetch-samples.ps1 can re-download the official 2025 guideline
+# (SHA-256 verified) if it is missing. hypertension-2020.pdf is an optional reference, not used.
+docs/samples/hypertension-2020.pdf
 
 # Generated acceptance output
 docs/acceptance/phase1-last-run.md
