@@ -98,6 +98,9 @@ jobs:
           tail -n 200 /tmp/app.log
           exit 1
 
+      - name: fetch official sample (not redistributed)
+        run: pwsh -NoProfile -File scripts/fetch-samples.ps1
+
       - name: seed sample corpus
         run: pwsh -NoProfile -File scripts/seed-samples.ps1 -BaseUrl http://127.0.0.1:8080
 

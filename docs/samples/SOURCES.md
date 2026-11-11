@@ -2,7 +2,9 @@
 
 - 日期：2026-11-08
 - 作用：记录 `docs/samples/*.pdf` 的公开来源、校验值和测试锚点，保证语料可复现。
-- 约定：PDF 不提交（`.gitignore` 已忽略 `docs/samples/*.pdf`），本文件提交。
+- 约定（2026-11-11 起）：
+  - **官方指南 PDF 不提交**（`.gitignore` 忽略 `docs/samples/*.pdf`），由 [`scripts/fetch-samples.ps1`](../../scripts/fetch-samples.ps1) 按本文件的 SHA-256 校验后下载；
+  - **项目自生成的两份**（`hypertension-2024.pdf` 测试摘编、`enterprise-policy-2026.pdf` 排版件）无法从外部获取，已随仓库提交，保证评测可复现。
 
 ## 1. 清单
 
